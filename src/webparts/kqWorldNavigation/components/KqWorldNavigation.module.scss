@@ -1,0 +1,451 @@
+.navigationRoot {
+  width: 100%;
+  position: relative;
+  z-index: 1000;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* =========================
+   TOP RED HEADER
+========================= */
+
+.topBar {
+  position: relative;
+  overflow: hidden;
+  background: #d71920;
+  color: #ffffff;
+}
+
+.bgLeft,
+.bgRight {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 28%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.bgLeft {
+  left: 0;
+  object-position: left center;
+}
+
+.bgRight {
+  right: 0;
+  object-position: right center;
+}
+
+.topBarInner {
+  min-height: 74px;
+  padding: 0 4.5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 2;
+}
+
+.brandArea {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.logo {
+  width: 145px;
+  height: auto;
+}
+
+.internalLabel {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.dateText {
+  font-size: 12px;
+}
+
+.utilityLinks {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  font-size: 12px;
+}
+
+.utilityLinks a {
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.systemStatus {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.statusDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #16b364;
+}
+
+
+/* =========================
+   DESKTOP NAVIGATION
+========================= */
+
+.desktopNav {
+  position: relative;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+}
+
+.desktopNavInner {
+  min-height: 80px;
+  padding: 0 4.5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  justify-content: space-between;
+  max-width: 980px;
+}
+
+.navButton {
+  border: 0;
+  background: transparent;
+  color: #222222;
+  font-size: 16px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 28px 8px;
+
+  transition: color 0.2s ease;
+}
+
+.navButton:hover,
+.activeNavButton {
+  color: #d71920;
+}
+
+.chevron {
+  font-size: 14px;
+}
+
+.desktopActions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.searchBox,
+.mobileSearch {
+  background: #eeeeee;
+  border-radius: 999px;
+
+  display: flex;
+  align-items: center;
+
+  height: 42px;
+}
+
+.searchBox {
+  width: 375px;
+  padding: 0 18px;
+}
+
+.searchBox input,
+.mobileSearch input {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  width: 100%;
+  min-width: 0;
+  font-size: 14px;
+}
+
+.searchIcon {
+  margin-right: 10px;
+  font-size: 20px;
+}
+
+.iconButton {
+  width: 42px;
+  height: 42px;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: #000000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.iconButton img {
+  width: 22px;
+  height: 22px;
+}
+
+
+/* =========================
+   DROPDOWN
+========================= */
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+
+  background: #ffffff;
+
+  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.12);
+
+  z-index: 100;
+}
+
+.dropdownInner {
+  padding: 28px 5%;
+
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px 30px;
+}
+
+.dropdownItem {
+  color: #222222;
+  text-decoration: none;
+
+  padding: 12px 16px;
+  border-radius: 8px;
+
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+.dropdownItem:hover {
+  color: #d71920;
+  background: #f5f5f5;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+.mobileHeader,
+.mobileMenu {
+  display: none;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 1100px) {
+
+  .desktopNav {
+    display: none;
+  }
+
+  .utilityLinks {
+    display: none;
+  }
+
+  .topBarInner {
+    min-height: 92px;
+    padding: 0 28px;
+  }
+
+  .brandArea {
+    gap: 14px;
+  }
+
+  .logo {
+    width: 165px;
+  }
+
+  .dateText {
+    display: block;
+  }
+
+  .mobileHeader {
+    min-height: 84px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 0 28px;
+
+    background: #ffffff;
+
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.10);
+  }
+
+  .mobileMenuButton {
+    border: 0;
+    background: transparent;
+
+    font-size: 32px;
+    line-height: 1;
+
+    width: 48px;
+    flex-shrink: 0;
+  }
+
+  .mobileSearch {
+    flex: 1;
+    height: 48px;
+    padding: 0 18px;
+  }
+
+  .iconButton {
+    width: 48px;
+    height: 48px;
+  }
+
+  .mobileMenu {
+    display: block;
+
+    background: #ffffff;
+
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.10);
+  }
+
+  .mobileMenuItem > button {
+    width: 100%;
+
+    border: 0;
+    background: #ffffff;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 24px 40px;
+
+    font-size: 23px;
+
+    text-align: left;
+  }
+
+  .mobileSubmenu {
+    background: #fafafa;
+  }
+
+  .mobileSubmenu a {
+    display: block;
+
+    padding: 16px 55px;
+
+    color: #222222;
+    text-decoration: none;
+
+    font-size: 16px;
+  }
+
+  .mobileSubmenu a:hover {
+    background: #eeeeee;
+    color: #d71920;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .topBarInner {
+    padding: 0 16px;
+    min-height: 112px;
+  }
+
+  .brandArea {
+    display: grid;
+
+    grid-template-columns: auto auto;
+    grid-template-areas:
+      "logo internal"
+      "logo date";
+
+    gap: 2px 14px;
+  }
+
+  .logo {
+    grid-area: logo;
+    width: 190px;
+  }
+
+  .internalLabel {
+    grid-area: internal;
+
+    align-self: end;
+
+    font-size: 15px;
+  }
+
+  .dateText {
+    grid-area: date;
+
+    align-self: start;
+
+    font-size: 12px;
+
+    white-space: nowrap;
+  }
+
+  .mobileHeader {
+    min-height: 82px;
+
+    padding: 0 16px;
+
+    gap: 10px;
+  }
+
+  .mobileMenuButton {
+    width: 40px;
+    font-size: 30px;
+  }
+
+  .mobileSearch {
+    height: 48px;
+    padding: 0 14px;
+  }
+
+  .mobileSearch input {
+    font-size: 15px;
+  }
+
+  .iconButton {
+    width: 46px;
+    height: 46px;
+  }
+
+  .mobileMenuItem > button {
+    padding: 22px 28px;
+    font-size: 21px;
+  }
+
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "kq-world-navigation-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/kqWorldNavigation/KqWorldNavigationWebPart.js",
+          "manifest": "./src/webparts/kqWorldNavigation/KqWorldNavigationWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "KqWorldNavigationWebPartStrings": "lib/webparts/kqWorldNavigation/loc/{locale}.js"
+  }
+}
