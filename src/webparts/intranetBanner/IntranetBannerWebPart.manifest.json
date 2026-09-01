@@ -1,0 +1,24 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "60885402-b96b-4e68-8397-608fb8bbb575",
+  "alias": "IntranetBannerWebPart",
+  "componentType": "WebPart",
+
+  "version": "*",
+  "manifestVersion": 2,
+
+  
+  "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp", "TeamsTab", "SharePointFullPage"],
+  "supportsThemeVariants": true,
+
+  "preconfiguredEntries": [{
+    "groupId": "5c03119e-3074-46fd-976b-c60198311f70", 
+    "group": { "default": "Advanced" },
+    "title": { "default": "IntranetBanner" },
+    "description": { "default": "IntranetBanner description" },
+    "officeFabricIconFontName": "Page",
+    "properties": {
+      "description": "IntranetBanner"
+    }
+  }]
+}
