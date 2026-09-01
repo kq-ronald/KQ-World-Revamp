@@ -41,6 +41,14 @@
           "manifest": "./src/webparts/kqquickactions/KqquickactionsWebPart.manifest.json"
         }
       ]
+    },
+    "kq-online-processes-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/kqOnlineProcesses/KqOnlineProcessesWebPart.js",
+          "manifest": "./src/webparts/kqOnlineProcesses/KqOnlineProcessesWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -49,6 +57,7 @@
     "IntranetBannerWebPartStrings": "lib/webparts/intranetBanner/loc/{locale}.js",
     "KqCalendarWebPartStrings": "lib/webparts/kqCalendar/loc/{locale}.js",
     "UpcomingeventsWebPartStrings": "lib/webparts/upcomingevents/loc/{locale}.js",
-    "KqquickactionsWebPartStrings": "lib/webparts/kqquickactions/loc/{locale}.js"
+    "KqquickactionsWebPartStrings": "lib/webparts/kqquickactions/loc/{locale}.js",
+    "KqOnlineProcessesWebPartStrings": "lib/webparts/kqOnlineProcesses/loc/{locale}.js"
   }
 }
