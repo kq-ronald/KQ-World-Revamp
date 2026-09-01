@@ -1,3 +1,20 @@
+:global(.CanvasZone),
+:global(.CanvasZoneContainer) {
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: none !important;
+}
+
+:global(.CanvasSection) {
+  padding: 0 !important;
+  max-width: none !important;
+}
+
+:global([data-sp-feature-tag="Column"]) {
+  padding: 0 !important;
+  max-width: none !important;
+}
+
 .navigationRoot {
   width: 100%;
   position: relative;
