@@ -10,6 +10,22 @@
         }
       ]
     },
+    "intranet-banner-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/intranetBanner/IntranetBannerWebPart.js",
+          "manifest": "./src/webparts/intranetBanner/IntranetBannerWebPart.manifest.json"
+        }
+      ]
+    },
+    "kq-calendar-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/kqCalendar/KqCalendarWebPart.js",
+          "manifest": "./src/webparts/kqCalendar/KqCalendarWebPart.manifest.json"
+        }
+      ]
+    },
     "upcomingevents-web-part": {
       "components": [
         {
@@ -17,11 +33,22 @@
           "manifest": "./src/webparts/upcomingevents/UpcomingeventsWebPart.manifest.json"
         }
       ]
+    },
+    "kqquickactions-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/kqquickactions/KqquickactionsWebPart.js",
+          "manifest": "./src/webparts/kqquickactions/KqquickactionsWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
   "localizedResources": {
     "KqWorldNavigationWebPartStrings": "lib/webparts/kqWorldNavigation/loc/{locale}.js",
-    "UpcomingeventsWebPartStrings": "lib/webparts/upcomingevents/loc/{locale}.js"
+    "IntranetBannerWebPartStrings": "lib/webparts/intranetBanner/loc/{locale}.js",
+    "KqCalendarWebPartStrings": "lib/webparts/kqCalendar/loc/{locale}.js",
+    "UpcomingeventsWebPartStrings": "lib/webparts/upcomingevents/loc/{locale}.js",
+    "KqquickactionsWebPartStrings": "lib/webparts/kqquickactions/loc/{locale}.js"
   }
 }
