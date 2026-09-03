@@ -7,16 +7,24 @@ import {
 
 import KqCalendar from './components/KqCalendar';
 
-export interface IKqCalendarWebPartProps {
-  // No configurable properties yet
-}
+import {
+  IKqCalendarProps
+} from './components/IKqCalendarProps';
+
+export interface IKqCalendarWebPartProps {}
 
 export default class KqCalendarWebPart
   extends BaseClientSideWebPart<IKqCalendarWebPartProps> {
 
   public render(): void {
-    const element: React.ReactElement =
-      React.createElement(KqCalendar);
+    const element:
+      React.ReactElement<IKqCalendarProps> =
+      React.createElement(
+        KqCalendar,
+        {
+          context: this.context
+        }
+      );
 
     ReactDom.render(
       element,
