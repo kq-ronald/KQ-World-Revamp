@@ -1,227 +1,461 @@
 import * as React from 'react';
+
 import {
-  upcomingEvents,
-  IUpcomingEvent,
-  UpcomingEventCategory
-} from '../data/upcomingeventsData';
+  Calendar24Regular,
+  Location24Regular
+} from '@fluentui/react-icons';
 
-const FILTERS: UpcomingEventCategory[] = [
-  'All',
-  'Ops',
-  'People',
-  'Tech'
-];
+import {
+  IUpcomingeventsProps
+} from './IUpcomingeventsProps';
 
-const Upcomingevents: React.FC = () => {
-  const [activeFilter, setActiveFilter] =
-    React.useState<UpcomingEventCategory>('All');
+import {
+  IKqEvent
+} from '../../../shared/models/IKqEvent';
 
-  const filteredEvents: IUpcomingEvent[] = React.useMemo(() => {
-    if (activeFilter === 'All') {
-      return upcomingEvents;
-    }
+import KqEventsService
+  from '../../../shared/services/KqEventsService';
 
-    return upcomingEvents.filter(
-      event => event.category === activeFilter
-    );
-  }, [activeFilter]);
+interface IUpcomingeventsState {
+  events: IKqEvent[];
+  loading: boolean;
+  error: string;
+}
 
-  const formatDateParts = (dateString: string): {
-    month: string;
-    day: string;
-  } => {
-    const date = new Date(`${dateString}T00:00:00`);
+export default class Upcomingevents
+  extends React.Component<
+    IUpcomingeventsProps,
+    IUpcomingeventsState
+  > {
 
-    return {
-      month: date
-        .toLocaleString('en-US', { month: 'short' })
-        .toUpperCase(),
-     day: ('0' + date.getDate()).slice(-2)
+  private readonly eventsService:
+    KqEventsService;
+
+  public constructor(
+    props: IUpcomingeventsProps
+  ) {
+    super(props);
+
+    this.eventsService =
+      new KqEventsService(
+        props.context
+      );
+
+    this.state = {
+      events: [],
+      loading: true,
+      error: ''
     };
-  };
+  }
 
-  return (
-    <section
-      style={{
-        width: '100%',
-        boxSizing: 'border-box',
-        backgroundColor: '#ffffff',
-        border: '1px solid #dedede',
-        borderRadius: '12px',
-        padding: '26px 18px 24px 18px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-        fontFamily:
-          '"Segoe UI", Arial, Helvetica, sans-serif'
-      }}
-    >
-      <div
+  public componentDidMount(): void {
+    this.loadEvents().catch(
+      (error: Error) => {
+        console.error(
+          'Upcoming Events initialization failed:',
+          error
+        );
+      }
+    );
+  }
+
+  private async loadEvents():
+    Promise<void> {
+    try {
+      const events =
+        await this.eventsService
+          .getEvents();
+
+      const today =
+        new Date();
+
+      today.setHours(
+        0,
+        0,
+        0,
+        0
+      );
+
+      const upcoming =
+        events
+          .filter(
+            (
+              event: IKqEvent
+            ): boolean => {
+              const eventDate =
+                new Date(
+                  event.date
+                );
+
+              eventDate.setHours(
+                0,
+                0,
+                0,
+                0
+              );
+
+              return (
+                eventDate.getTime() >=
+                today.getTime()
+              );
+            }
+          )
+          .sort(
+            (
+              first: IKqEvent,
+              second: IKqEvent
+            ): number =>
+              first.date.getTime() -
+              second.date.getTime()
+          )
+          .slice(0, 5);
+
+      this.setState({
+        events: upcoming,
+        loading: false,
+        error: ''
+      });
+    } catch (error) {
+      console.error(
+        'Failed loading Upcoming Events:',
+        error
+      );
+
+      this.setState({
+        loading: false,
+        error:
+          'Unable to load upcoming events.'
+      });
+    }
+  }
+
+  private getMonth(
+    date: Date
+  ): string {
+    return date
+      .toLocaleDateString(
+        'en-GB',
+        {
+          month: 'short'
+        }
+      )
+      .toUpperCase();
+  }
+
+  private getDay(
+    date: Date
+  ): string {
+    return (
+      '0' + date.getDate()
+    ).slice(-2);
+  }
+
+  public render():
+    React.ReactElement<
+      IUpcomingeventsProps
+    > {
+
+    const {
+      events,
+      loading,
+      error
+    } = this.state;
+
+    return (
+      <section
         style={{
-          marginBottom: '18px'
+          width: '100%',
+          boxSizing: 'border-box',
+          fontFamily:
+            "'Segoe UI', Arial, sans-serif"
         }}
       >
         <div
           style={{
-            fontSize: '11px',
-            fontWeight: 600,
-            letterSpacing: '0.14em',
-            color: '#8b8b8b',
-            textTransform: 'uppercase',
-            marginBottom: '6px'
+            width: '100%',
+            boxSizing:
+              'border-box',
+            background:
+              '#ffffff',
+            border:
+              '1px solid #dddddd',
+            borderRadius:
+              '12px',
+            padding:
+              '24px',
+            boxShadow:
+              '0 3px 12px rgba(0,0,0,0.08)'
           }}
         >
-          Coming up
-        </div>
-
-        <div
-          style={{
-            fontSize: '14px',
-            color: '#4d4d4d'
-          }}
-        >
-          Next 30 days · {upcomingEvents.length} events
-        </div>
-      </div>
-
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          marginBottom: '22px',
-          flexWrap: 'wrap'
-        }}
-      >
-        {FILTERS.map(filter => {
-          const isActive = activeFilter === filter;
-
-          return (
-            <button
-              key={filter}
-              type="button"
-              onClick={() => setActiveFilter(filter)}
-              style={{
-                border: isActive
-                  ? '1px solid #111111'
-                  : '1px solid #d8d8d8',
-                backgroundColor: isActive
-                  ? '#111111'
-                  : '#ffffff',
-                color: isActive
-                  ? '#ffffff'
-                  : '#444444',
-                borderRadius: '999px',
-                padding: '7px 14px',
-                fontSize: '12px',
-                fontWeight: 500,
-                cursor: 'pointer',
-                lineHeight: 1
-              }}
-            >
-              {filter}
-            </button>
-          );
-        })}
-      </div>
-
-      <div>
-        {filteredEvents.length === 0 ? (
           <div
             style={{
-              padding: '24px 0',
-              textAlign: 'center',
-              color: '#8a8a8a',
-              fontSize: '13px'
+              marginBottom:
+                '20px'
             }}
           >
-            No upcoming events in this category.
-          </div>
-        ) : (
-          filteredEvents.map((event, index) => {
-            const dateParts = formatDateParts(event.date);
+            <div
+              style={{
+                color:
+                  '#777777',
+                fontSize:
+                  '10px',
+                letterSpacing:
+                  '0.04em',
+                marginBottom:
+                  '6px'
+              }}
+            >
+              WHAT'S HAPPENING
+            </div>
 
-            return (
+            <h2
+              style={{
+                margin: 0,
+                color:
+                  '#111111',
+                fontSize:
+                  '20px',
+                fontWeight:
+                  600
+              }}
+            >
+              Upcoming Events
+            </h2>
+          </div>
+
+          {loading && (
+            <div
+              style={{
+                padding:
+                  '20px 0',
+                color:
+                  '#777777',
+                fontSize:
+                  '12px'
+              }}
+            >
+              Loading events...
+            </div>
+          )}
+
+          {!loading &&
+            error && (
               <div
-                key={event.id}
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: '62px 1fr',
-                  gap: '16px',
-                  alignItems: 'center',
-                  padding: '16px 0',
-                  borderBottom:
-                    index !== filteredEvents.length - 1
-                      ? '1px solid #eeeeee'
-                      : 'none'
+                  padding:
+                    '20px 0',
+                  color:
+                    '#d71920',
+                  fontSize:
+                    '12px'
                 }}
               >
-                <div
-                  style={{
-                    textAlign: 'center',
-                    borderRight: '1px solid #eeeeee',
-                    paddingRight: '12px'
-                  }}
-                >
-                  <div
-                    style={{
-                      color: '#d71920',
-                      fontSize: '11px',
-                      fontWeight: 700,
-                      letterSpacing: '0.08em',
-                      lineHeight: 1.2
-                    }}
-                  >
-                    {dateParts.month}
-                  </div>
-
-                  <div
-                    style={{
-                      fontSize: '30px',
-                      fontWeight: 300,
-                      color: '#777777',
-                      lineHeight: 1.1,
-                      marginTop: '4px'
-                    }}
-                  >
-                    {dateParts.day}
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    minWidth: 0
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      color: '#202020',
-                      lineHeight: 1.35,
-                      marginBottom: '5px'
-                    }}
-                  >
-                    {event.title}
-                  </div>
-
-                  <div
-                    style={{
-                      fontSize: '12px',
-                      color: '#8a8a8a',
-                      lineHeight: 1.4
-                    }}
-                  >
-                    {event.time}
-                    {' · '}
-                    {event.location}
-                  </div>
-                </div>
+                {error}
               </div>
-            );
-          })
-        )}
-      </div>
-    </section>
-  );
-};
+            )}
 
-export default Upcomingevents;
+          {!loading &&
+            !error &&
+            events.length ===
+              0 && (
+              <div
+                style={{
+                  padding:
+                    '20px 0',
+                  color:
+                    '#777777',
+                  fontSize:
+                    '12px'
+                }}
+              >
+                No upcoming events.
+              </div>
+            )}
+
+          {!loading &&
+            !error &&
+            events.map(
+              (
+                event:
+                  IKqEvent
+              ) => (
+                <div
+                  key={event.id}
+                  style={{
+                    display:
+                      'flex',
+                    gap: '15px',
+                    alignItems:
+                      'center',
+                    padding:
+                      '14px 0',
+                    borderBottom:
+                      '1px solid #eeeeee'
+                  }}
+                >
+                  <div
+                    style={{
+                      width:
+                        '48px',
+                      minWidth:
+                        '48px',
+                      textAlign:
+                        'center'
+                    }}
+                  >
+                    <div
+                      style={{
+                        color:
+                          '#d71920',
+                        fontSize:
+                          '10px',
+                        fontWeight:
+                          700
+                      }}
+                    >
+                      {this.getMonth(
+                        event.date
+                      )}
+                    </div>
+
+                    <div
+                      style={{
+                        color:
+                          '#111111',
+                        fontSize:
+                          '20px',
+                        fontWeight:
+                          600,
+                        lineHeight:
+                          1.1
+                      }}
+                    >
+                      {this.getDay(
+                        event.date
+                      )}
+                    </div>
+                  </div>
+
+                  {event.imageUrl && (
+                    <img
+                      src={
+                        event.imageUrl
+                      }
+                      alt=""
+                      style={{
+                        width:
+                          '58px',
+                        height:
+                          '58px',
+                        flexShrink:
+                          0,
+                        objectFit:
+                          'cover',
+                        borderRadius:
+                          '8px'
+                      }}
+                    />
+                  )}
+
+                  <div
+                    style={{
+                      minWidth: 0,
+                      flex: 1
+                    }}
+                  >
+                    <div
+                      style={{
+                        color:
+                          '#111111',
+                        fontSize:
+                          '13px',
+                        fontWeight:
+                          600,
+                        marginBottom:
+                          '6px'
+                      }}
+                    >
+                      {event.title}
+                    </div>
+
+                    <div
+                      style={{
+                        display:
+                          'flex',
+                        flexWrap:
+                          'wrap',
+                        gap:
+                          '10px',
+                        color:
+                          '#777777',
+                        fontSize:
+                          '11px'
+                      }}
+                    >
+                      <span
+                        style={{
+                          display:
+                            'flex',
+                          alignItems:
+                            'center',
+                          gap: '4px'
+                        }}
+                      >
+                        <Calendar24Regular
+                          style={{
+                            width:
+                              '14px',
+                            height:
+                              '14px'
+                          }}
+                        />
+
+                        {event.date
+                          .toLocaleDateString(
+                            'en-GB',
+                            {
+                              day:
+                                'numeric',
+                              month:
+                                'short',
+                              year:
+                                'numeric'
+                            }
+                          )}
+                      </span>
+
+                      {event.location && (
+                        <span
+                          style={{
+                            display:
+                              'flex',
+                            alignItems:
+                              'center',
+                            gap:
+                              '4px'
+                          }}
+                        >
+                          <Location24Regular
+                            style={{
+                              width:
+                                '14px',
+                              height:
+                                '14px'
+                            }}
+                          />
+
+                          {
+                            event.location
+                          }
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )
+            )}
+        </div>
+      </section>
+    );
+  }
+}
