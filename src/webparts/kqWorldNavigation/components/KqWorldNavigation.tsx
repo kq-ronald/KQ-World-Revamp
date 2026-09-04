@@ -1,5 +1,5 @@
 import * as React from 'react';
-
+import { kqSearchItems } from '../data/searchData';
 import styles from './KqWorldNavigation.module.scss';
 import type { IKqWorldNavigationProps } from './IKqWorldNavigationProps';
 
@@ -8,8 +8,6 @@ import { navigationItems } from '../data/navigationData';
 import kqLogo from '../assets/kqwhitelogo.svg';
 import navBgLeft from '../assets/kqworldbgleft.svg';
 import navBgRight from '../assets/kqworldbgright.svg';
-import notificationIcon from '../assets/kqworldnotification.svg';
-import darkModeIcon from '../assets/kqworlddarkmode.svg';
 import kqWorldSmallLogo from '../assets/kqworldsmalllogo.svg';
 
 import {
@@ -39,7 +37,9 @@ import {
   Box24Regular,
   Wrench24Regular,
   Lightbulb24Regular,
-  Airplane24Regular
+  Airplane24Regular,
+  WeatherSunny24Regular,
+  WeatherMoon24Regular
 } from '@fluentui/react-icons';
 
 /* =========================================================
@@ -135,13 +135,21 @@ const MENU_ITEM_ICONS: Record<string, React.ElementType> = {
 ========================================================= */
 
 const MENU_DESCRIPTIONS: Record<string, string> = {
-  Home: 'Everything you need to start your day.',
+  Home: 'Your dashboard, at a glance.',
   'Staff Notices': 'Stay informed on what matters.',
   'Brand Portal': 'Stay informed on what matters.',
-  Departments: 'Connect with teams across KQ.',
-  'Corporate News': 'The latest stories from across KQ.',
-  'Knowledge Hub': 'Knowledge at your fingertips.'
+  Departments: 'Every team, one directory.',
+  'Corporate News': 'Latest stories from across KQ.',
+  'Knowledge Hub': 'Essential Guides & Resources'
 };
+const inspirationItems = [
+  'How to request annual leave',
+  'New travel policy updates',
+  'Employee benefits guide',
+  'Office locations',
+  'Upcoming staff events'
+];
+
 
 /* =========================================================
    COMPONENT
@@ -153,9 +161,132 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
   const [mobileExpanded, setMobileExpanded] =
     React.useState<string | null>(null);
 
+  // DARK MODE
+  const [isDarkMode, setIsDarkMode] = React.useState<boolean>(() => {
+    return localStorage.getItem('kqworld-theme') === 'dark';
+  });
+  // SEARCH
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [searchOpen, setSearchOpen] = React.useState(false);
+  const [selectedSearchIndex, setSelectedSearchIndex] = React.useState(-1);
+  const desktopSearchRef = React.useRef<HTMLDivElement>(null);
+  const mobileSearchRef = React.useRef<HTMLDivElement>(null);
+  const handleClickOutside = (event: MouseEvent): void => {
+    const target = event.target as Node;
+
+    const clickedDesktopSearch =
+      desktopSearchRef.current?.contains(target);
+
+    const clickedMobileSearch =
+      mobileSearchRef.current?.contains(target);
+
+    if (!clickedDesktopSearch && !clickedMobileSearch) {
+      setSearchOpen(false);
+      setSelectedSearchIndex(-1);
+    }
+  };
+
+  const searchRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const theme = isDarkMode ? 'dark' : 'light';
+
+    document.documentElement.setAttribute('data-kq-theme', theme);
+    localStorage.setItem('kqworld-theme', theme);
+
+    window.dispatchEvent(
+      new CustomEvent('kqworld-theme-change', {
+        detail: { theme }
+      })
+    );
+  }, [isDarkMode]);
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent): void => {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
+        setSearchOpen(false);
+        setSelectedSearchIndex(-1);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') {
+        setSearchOpen(false);
+        setSelectedSearchIndex(-1);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  // SEARCH RESULTS
+  const searchResults = React.useMemo(() => {
+    const query = searchQuery
+      .trim()
+      .toLowerCase();
+
+    if (!query) {
+      return [];
+    }
+
+    return kqSearchItems
+      .map((item) => {
+        const title = item.title.toLowerCase();
+
+        const keywords = item.keywords
+          .join(' ')
+          .toLowerCase();
+
+        const aliases = (item.aliases || [])
+          .join(' ')
+          .toLowerCase();
+
+        let score = 0;
+
+        if (title === query) {
+          score += 100;
+        }
+
+        if (title.startsWith(query)) {
+          score += 80;
+        }
+
+        if (title.includes(query)) {
+          score += 60;
+        }
+
+        if (aliases.includes(query)) {
+          score += 50;
+        }
+
+        if (keywords.includes(query)) {
+          score += 40;
+        }
+
+        return {
+          ...item,
+          score
+        };
+      })
+      .filter((item) => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6);
+  }, [searchQuery]);
+
   const activeItem = navigationItems.find(
     (item) => item.title === activeMenu
   );
+
+
+
 
   /* ---------------------------------------------------------
      Resolve icon for a child menu item
@@ -177,7 +308,7 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
 
   return (
     <header
-      className={styles.navigationRoot}
+      className={`${styles.navigationRoot} ${isDarkMode ? styles.darkMode : ''}`}
       style={{
         width: '100%',
         maxWidth: 'none',
@@ -292,11 +423,10 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
               <button
                 key={item.title}
                 type="button"
-                className={`${styles.navButton} ${
-                  activeMenu === item.title
-                    ? styles.activeNavButton
-                    : ''
-                }`}
+                className={`${styles.navButton} ${activeMenu === item.title
+                  ? styles.activeNavButton
+                  : ''
+                  }`}
                 style={{
                   flexShrink: 1
                 }}
@@ -324,9 +454,10 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
                 </span>
 
                 {item.children?.length ? (
-                  <span className={styles.chevron}>
-                    {activeMenu === item.title ? '⌃' : '⌄'}
-                  </span>
+                  <span
+                    className={`${styles.chevron} ${activeMenu === item.title ? styles.chevronUp : ''
+                      }`}
+                  />
                 ) : null}
               </button>
             ))}
@@ -346,14 +477,14 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
             }}
           >
             {/* SEARCH */}
-
             <div
+              ref={searchRef}
               className={styles.searchBox}
               style={{
-                width: 'clamp(220px, 27vw, 420px)',
-                minWidth: '180px',
-                maxWidth: '420px',
-                flexShrink: 1
+                width: '240px',
+                minWidth: '200px',
+                maxWidth: '240px',
+                flexShrink: 0
               }}
             >
               <span className={styles.searchIcon}>
@@ -363,39 +494,128 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
               <input
                 type="text"
                 placeholder="Search KQ World"
+                value={searchQuery}
+                onFocus={() => {
+                  setSearchOpen(true);
+                }}
+                onChange={(e) => {
+                  const value = e.target.value;
+
+                  setSearchQuery(value);
+                  setSelectedSearchIndex(-1);
+
+                  if (value.trim()) {
+                    setSearchOpen(true);
+                  } else {
+                    setSearchOpen(false);
+                  }
+                }}
+
               />
+              {searchOpen && (
+                <div className={styles.searchDropdown}>
+
+                  {!searchQuery.trim() ? (
+                    <>
+                      <div className={styles.searchDropdownTitle}>
+                        Need inspiration? Try searching for...
+                      </div>
+
+                      <div className={styles.searchSuggestionList}>
+                        {inspirationItems.map((item) => (
+                          <button
+                            key={item}
+                            type="button"
+                            className={styles.searchSuggestion}
+                            onClick={() => {
+                              setSearchQuery(item);
+                            }}
+                          >
+                            <span className={styles.searchSuggestionIcon}>
+                              ⌕
+                            </span>
+
+                            <span className={styles.searchSuggestionText}>
+                              {item}
+                            </span>
+
+                            <span className={styles.searchSuggestionArrow}>
+                              →
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className={styles.searchDropdownTitle}>
+                        Suggested results
+                      </div>
+
+                      <div className={styles.searchSuggestionList}>
+                        {searchResults.length > 0 ? (
+                          searchResults.map((item, index) => (
+                            <button
+                              key={item.id}
+                              type="button"
+                              className={`${styles.searchSuggestion} ${selectedSearchIndex === index
+                                ? styles.searchSuggestionActive
+                                : ''
+                                }`}
+                              onClick={() => {
+                                window.location.href = item.url;
+                              }}
+                            >
+                              <span className={styles.searchSuggestionIcon}>
+                                ⌕
+                              </span>
+
+                              <span className={styles.searchSuggestionText}>
+                                {item.title}
+                              </span>
+
+                              <span className={styles.searchSuggestionArrow}>
+                                →
+                              </span>
+                            </button>
+                          ))
+                        ) : (
+                          <div className={styles.noSearchResults}>
+                            No results found
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+
+                </div>
+              )}
             </div>
 
-            {/* NOTIFICATIONS */}
-
+            {/* Notifications */}
             <button
               type="button"
               className={styles.iconButton}
               aria-label="Notifications"
-              style={{
-                flex: '0 0 auto'
-              }}
+              title="Notifications"
             >
-              <img
-                src={notificationIcon}
-                alt=""
-              />
+              <Alert24Regular className={styles.actionIcon} />
             </button>
 
-            {/* DARK MODE */}
-
+            {/* Theme */}
             <button
               type="button"
               className={styles.iconButton}
-              aria-label="Dark mode"
-              style={{
-                flex: '0 0 auto'
-              }}
+              aria-label={isDarkMode ? 'Light mode' : 'Dark mode'}
+              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-pressed={isDarkMode}
+              onClick={() => setIsDarkMode((current) => !current)}
             >
-              <img
-                src={darkModeIcon}
-                alt=""
-              />
+              {isDarkMode ? (
+                <WeatherSunny24Regular className={styles.actionIcon} />
+              ) : (
+                <WeatherMoon24Regular className={styles.actionIcon} />
+              )}
             </button>
           </div>
         </div>
@@ -407,9 +627,7 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
         {activeItem?.children?.length ? (
           <div
             className={styles.dropdown}
-            onMouseEnter={() =>
-              setActiveMenu(activeItem.title)
-            }
+            onMouseEnter={() => setActiveMenu(activeItem.title)}
             style={{
               width: '100%',
               minHeight: 0,
@@ -421,145 +639,109 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
               className={styles.dropdownInner}
               style={{
                 display: 'grid',
-
-                gridTemplateColumns:
-                  '250px minmax(0, 1fr)',
-
+                gridTemplateColumns: '250px minmax(0, 1fr)',
                 columnGap: '40px',
-
                 alignItems: 'center',
-
                 width: '100%',
                 maxWidth: 'none',
-
                 minHeight: 0,
-
                 paddingTop: '26px',
                 paddingBottom: '28px',
                 paddingLeft: '60px',
                 paddingRight: '60px',
-
                 boxSizing: 'border-box'
               }}
             >
-              {/* =============================================
-                  LEFT INTRO
-              ============================================== */}
-
+              {/* Menu intro */}
               <div
                 style={{
                   display: 'grid',
-
-                  gridTemplateColumns:
-                    '4px minmax(0, 1fr)',
-
+                  gridTemplateColumns: '4px minmax(0, 1fr)',
                   columnGap: '18px',
-
                   alignItems: 'stretch',
-
                   minWidth: 0
                 }}
               >
-                {/* RED VERTICAL DIVIDER */}
-
                 <div
                   style={{
                     width: '4px',
                     height: '150px',
                     minHeight: '150px',
-
                     borderRadius: '10px',
-
                     background: '#d71920'
                   }}
                 />
-
-                {/* INTRO CONTENT */}
 
                 <div
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
-
                     minWidth: 0
                   }}
                 >
-                  {/* SECTION HEADING */}
-
                   <div
                     style={{
-                      fontSize: '12px',
-                      lineHeight: '1.2',
-
-                      fontWeight: 700,
-
-                      letterSpacing: '1px',
-
-                      color: '#d71920',
-
-                      textTransform: 'uppercase',
-
-                      marginBottom: '8px'
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      marginBottom: '12px',
+                      whiteSpace: 'nowrap'
                     }}
                   >
-                    {activeItem.heading ||
-                      activeItem.title}
+                    <div
+                      style={{
+                        fontSize: '12px',
+                        lineHeight: '1.2',
+                        fontWeight: 700,
+                        letterSpacing: '1px',
+                        color: '#d71920',
+                        textTransform: 'uppercase'
+                      }}
+                    >
+                      {activeItem.heading || activeItem.title}
+                    </div>
+
+                    <img
+                      src={kqWorldSmallLogo}
+                      alt="KQ World"
+                      style={{
+                        display: 'block',
+                        width: '82px',
+                        height: 'auto',
+                        flexShrink: 0,
+                        filter: isDarkMode
+                          ? 'brightness(0) invert(1)'
+                          : 'none'
+                      }}
+                    />
                   </div>
-
-                  {/* KQ WORLD LOGO */}
-
-                  <img
-                    src={kqWorldSmallLogo}
-                    alt="KQ World"
-                    style={{
-                      display: 'block',
-
-                      width: '105px',
-                      maxWidth: '100%',
-
-                      height: 'auto',
-
-                      marginBottom: '12px'
-                    }}
-                  />
-
-                  {/* DESCRIPTION */}
 
                   <div
                     style={{
-                      fontSize: '21px',
-                      lineHeight: '1.08',
-
-                      fontWeight: 700,
+                      fontFamily:
+                        '"Lucida Sans", "Lucida Grande", sans-serif',
+                      fontWeight: 600,
                       fontStyle: 'italic',
-
-                      color: '#171717',
-
-                      maxWidth: '210px',
-
+                      fontSize: '24px',
+                      lineHeight: '100%',
+                      letterSpacing: '0',
+                      color: isDarkMode ? '#ffffff' : '#171717',
+                      maxWidth: '230px',
                       marginBottom: '16px'
                     }}
                   >
-                    {activeItem.description ||
-                      MENU_DESCRIPTIONS[
-                        activeItem.title
-                      ]}
+                    {MENU_DESCRIPTIONS[activeItem.title] ||
+                      activeItem.description}
                   </div>
-
-                  {/* EXPLORE ALL */}
 
                   <a
                     href={activeItem.url || '#'}
                     style={{
                       display: 'inline-block',
-
                       width: 'fit-content',
-
                       color: '#d71920',
-
                       textDecoration: 'none',
-
                       fontSize: '12px',
                       fontWeight: 700
                     }}
@@ -569,31 +751,20 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
                 </div>
               </div>
 
-              {/* =============================================
-                  RIGHT MENU GRID
-              ============================================== */}
-
+              {/* Menu links */}
               <div
                 style={{
                   display: 'grid',
-
-                  gridTemplateColumns:
-                    'repeat(3, minmax(0, 1fr))',
-
-                  columnGap:
-                    'clamp(24px, 3vw, 60px)',
-
+                  gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                  columnGap: 'clamp(24px, 3vw, 60px)',
                   rowGap: '22px',
-
                   alignItems: 'center',
-
                   width: '100%',
                   minWidth: 0
                 }}
               >
                 {activeItem.children.map((child) => {
-                  const ChildIcon =
-                    getChildIcon(child);
+                  const ChildIcon = getChildIcon(child);
 
                   return (
                     <a
@@ -601,43 +772,32 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
                       href={child.url || '#'}
                       style={{
                         display: 'flex',
-
                         alignItems: 'center',
-
                         gap: '12px',
-
                         minWidth: 0,
-
-                        color: '#242424',
-
+                        color: isDarkMode ? '#ffffff' : '#242424',
                         textDecoration: 'none',
-
                         fontSize: '14px',
                         lineHeight: '1.25',
-
                         fontWeight: 500
                       }}
                     >
-                      {/* ICON CIRCLE */}
-
                       <span
                         style={{
                           width: '34px',
                           height: '34px',
                           minWidth: '34px',
-
                           flex: '0 0 34px',
-
                           borderRadius: '50%',
-
-                          background: '#eeeeee',
-
+                          background: isDarkMode
+                            ? '#171B21'
+                            : '#eeeeee',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-
-                          color: '#333333',
-
+                          color: isDarkMode
+                            ? '#ffffff'
+                            : '#333333',
                           boxSizing: 'border-box'
                         }}
                       >
@@ -646,21 +806,18 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
                             style={{
                               width: '18px',
                               height: '18px',
-
-                              color: '#333333',
-
+                              color: isDarkMode
+                                ? '#ffffff'
+                                : '#333333',
                               display: 'block'
                             }}
                           />
                         ) : null}
                       </span>
 
-                      {/* TEXT */}
-
                       <span
                         style={{
                           minWidth: 0,
-
                           overflowWrap: 'break-word'
                         }}
                       >
@@ -693,7 +850,10 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
           {mobileOpen ? '×' : '☰'}
         </button>
 
-        <div className={styles.mobileSearch}>
+        <div
+          ref={mobileSearchRef}
+          className={styles.mobileSearch}
+        >
           <span className={styles.searchIcon}>
             ⌕
           </span>
@@ -701,139 +861,152 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
           <input
             type="text"
             placeholder="Search KQ World"
+            value={searchQuery}
+            onFocus={() => {
+              setSearchOpen(true);
+            }}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setSearchOpen(true);
+              setSelectedSearchIndex(-1);
+            }}
           />
         </div>
 
+        {/* Theme */}
+        <button
+          type="button"
+          className={styles.iconButton}
+          aria-label={isDarkMode ? 'Light mode' : 'Dark mode'}
+          title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+          aria-pressed={isDarkMode}
+          onClick={() => setIsDarkMode((current) => !current)}
+        >
+          {isDarkMode ? (
+            <WeatherSunny24Regular className={styles.actionIcon} />
+          ) : (
+            <WeatherMoon24Regular className={styles.actionIcon} />
+          )}
+        </button>
+
+        {/* Notifications */}
         <button
           type="button"
           className={styles.iconButton}
           aria-label="Notifications"
+          title="Notifications"
         >
-          <img
-            src={notificationIcon}
-            alt=""
-          />
+          <Alert24Regular className={styles.actionIcon} />
         </button>
 
-        <button
-          type="button"
-          className={styles.iconButton}
-          aria-label="Dark mode"
-        >
-          <img
-            src={darkModeIcon}
-            alt=""
-          />
-        </button>
-      </div>
-
-      {/* =====================================================
+        {/* =====================================================
           MOBILE MENU
       ====================================================== */}
 
-      {mobileOpen ? (
-        <div className={styles.mobileMenu}>
-          {navigationItems.map((item) => (
-            <div
-              key={item.title}
-              className={styles.mobileMenuItem}
-            >
-              <button
-                type="button"
-                onClick={() => {
-                  if (item.children?.length) {
-                    setMobileExpanded(
-                      mobileExpanded === item.title
-                        ? null
-                        : item.title
-                    );
-                  } else if (item.url) {
-                    window.location.href =
-                      item.url;
-                  }
-                }}
+        {mobileOpen ? (
+          <div className={styles.mobileMenu}>
+            {navigationItems.map((item) => (
+              <div
+                key={item.title}
+                className={styles.mobileMenuItem}
               >
-                <span>
-                  {item.title}
-                </span>
-
-                {item.children?.length ? (
-                  <span>
-                    {mobileExpanded === item.title
-                      ? '⌃'
-                      : '⌄'}
-                  </span>
-                ) : null}
-              </button>
-
-              {/* MOBILE SUBMENU */}
-
-              {mobileExpanded === item.title &&
-              item.children?.length ? (
-                <div
-                  className={
-                    styles.mobileSubmenu
-                  }
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (item.children?.length) {
+                      setMobileExpanded(
+                        mobileExpanded === item.title
+                          ? null
+                          : item.title
+                      );
+                    } else if (item.url) {
+                      window.location.href =
+                        item.url;
+                    }
+                  }}
                 >
-                  {item.children.map((child) => {
-                    const ChildIcon =
-                      getChildIcon(child);
+                  <span>
+                    {item.title}
+                  </span>
 
-                    return (
-                      <a
-                        key={child.title}
-                        href={child.url || '#'}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
+                  {item.children?.length ? (
+                    <span>
+                      {mobileExpanded === item.title
+                        ? '⌃'
+                        : '⌄'}
+                    </span>
+                  ) : null}
+                </button>
 
-                          gap: '10px'
-                        }}
-                      >
-                        <span
+                {/* MOBILE SUBMENU */}
+
+                {mobileExpanded === item.title &&
+                  item.children?.length ? (
+                  <div
+                    className={
+                      styles.mobileSubmenu
+                    }
+                  >
+                    {item.children.map((child) => {
+                      const ChildIcon =
+                        getChildIcon(child);
+
+                      return (
+                        <a
+                          key={child.title}
+                          href={child.url || '#'}
                           style={{
-                            width: '30px',
-                            height: '30px',
-                            minWidth: '30px',
-
-                            flex: '0 0 30px',
-
-                            borderRadius: '50%',
-
-                            background: '#eeeeee',
-
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent:
-                              'center'
+
+                            gap: '10px'
                           }}
                         >
-                          {ChildIcon ? (
-                            <ChildIcon
-                              style={{
-                                width: '17px',
-                                height: '17px',
+                          <span
+                            style={{
+                              width: '30px',
+                              height: '30px',
+                              minWidth: '30px',
 
-                                color: '#333333',
+                              flex: '0 0 30px',
 
-                                display: 'block'
-                              }}
-                            />
-                          ) : null}
-                        </span>
+                              borderRadius: '50%',
 
-                        <span>
-                          {child.title}
-                        </span>
-                      </a>
-                    );
-                  })}
-                </div>
-              ) : null}
-            </div>
-          ))}
-        </div>
-      ) : null}
+                              background: '#eeeeee',
+
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent:
+                                'center'
+                            }}
+                          >
+                            {ChildIcon ? (
+                              <ChildIcon
+                                style={{
+                                  width: '17px',
+                                  height: '17px',
+
+                                  color: '#333333',
+
+                                  display: 'block'
+                                }}
+                              />
+                            ) : null}
+                          </span>
+
+                          <span>
+                            {child.title}
+                          </span>
+                        </a>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </div>
     </header>
   );
 };
