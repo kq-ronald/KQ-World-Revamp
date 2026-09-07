@@ -27,6 +27,7 @@ interface IKqCalendarState {
   drawerOpen: boolean;
   loading: boolean;
   error: string;
+  isDarkMode: boolean;
 }
 
 interface ICalendarDay {
@@ -50,6 +51,11 @@ export default class KqCalendar
 
     const today = new Date();
 
+    const isDarkMode =
+      document.documentElement.getAttribute(
+        'data-kq-theme'
+      ) === 'dark';
+
     this.eventsService =
       new KqEventsService(
         props.context
@@ -65,11 +71,17 @@ export default class KqCalendar
       selectedEvents: [],
       drawerOpen: false,
       loading: true,
-      error: ''
+      error: '',
+      isDarkMode
     };
   }
 
   public componentDidMount(): void {
+    window.addEventListener(
+      'kqworld-theme-change',
+      this.handleThemeChange
+    );
+
     this.loadEvents().catch(
       (error: Error) => {
         console.error(
@@ -79,6 +91,27 @@ export default class KqCalendar
       }
     );
   }
+
+  public componentWillUnmount(): void {
+    window.removeEventListener(
+      'kqworld-theme-change',
+      this.handleThemeChange
+    );
+  }
+
+  private handleThemeChange = (
+    event: Event
+  ): void => {
+    const customEvent =
+      event as CustomEvent<{
+        theme: 'light' | 'dark';
+      }>;
+
+    this.setState({
+      isDarkMode:
+        customEvent.detail.theme === 'dark'
+    });
+  };
 
   private async loadEvents():
     Promise<void> {
@@ -158,16 +191,8 @@ export default class KqCalendar
     const firstDay =
       new Date(year, month, 1);
 
-    /*
-     * JavaScript:
-     * Sunday = 0
-     * Monday = 1
-     *
-     * Our calendar is Monday-first.
-     */
     const startOffset =
-      (firstDay.getDay() + 6) %
-      7;
+      (firstDay.getDay() + 6) % 7;
 
     const gridStart =
       new Date(
@@ -194,8 +219,7 @@ export default class KqCalendar
       days.push({
         date,
         currentMonth:
-          date.getMonth() ===
-          month
+          date.getMonth() === month
       });
     }
 
@@ -292,21 +316,21 @@ export default class KqCalendar
       selectedEvents,
       drawerOpen,
       loading,
-      error
+      error,
+      isDarkMode
     } = this.state;
 
     const calendarDays =
       this.buildCalendarDays();
 
     const monthTitle =
-      currentDate
-        .toLocaleDateString(
-          'en-GB',
-          {
-            month: 'long',
-            year: 'numeric'
-          }
-        );
+      currentDate.toLocaleDateString(
+        'en-GB',
+        {
+          month: 'long',
+          year: 'numeric'
+        }
+      );
 
     const weekdays = [
       'MON',
@@ -317,6 +341,36 @@ export default class KqCalendar
       'SAT',
       'SUN'
     ];
+
+    const cardBackground =
+      isDarkMode
+        ? '#262F3D'
+        : '#ffffff';
+
+    const primaryText =
+      isDarkMode
+        ? '#ffffff'
+        : '#111111';
+
+    const secondaryText =
+      isDarkMode
+        ? '#c7ccd4'
+        : '#777777';
+
+    const mutedText =
+      isDarkMode
+        ? '#8f98a5'
+        : '#bbbbbb';
+
+    const eventTileBackground =
+      isDarkMode
+        ? '#313B4B'
+        : '#f7f7f7';
+
+    const borderColor =
+      isDarkMode
+        ? '#3A4555'
+        : '#dddddd';
 
     return (
       <section
@@ -330,14 +384,21 @@ export default class KqCalendar
         <div
           style={{
             width: '100%',
+            height:
+              'clamp(280px, 21vw, 315px)',
             boxSizing: 'border-box',
-            background: '#ffffff',
+            background: cardBackground,
             border:
-              '1px solid #dddddd',
+              `1px solid ${borderColor}`,
             borderRadius: '12px',
-            padding: '24px',
+            padding: '18px 20px',
             boxShadow:
-              '0 3px 12px rgba(0,0,0,0.08)'
+              isDarkMode
+                ? 'none'
+                : '0 3px 12px rgba(0,0,0,0.08)',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column'
           }}
         >
           <div
@@ -346,17 +407,19 @@ export default class KqCalendar
               justifyContent:
                 'space-between',
               alignItems: 'center',
-              marginBottom: '22px'
+              marginBottom: '12px',
+              flexShrink: 0
             }}
           >
             <div>
               <div
                 style={{
-                  color: '#777777',
+                  color: '#d71920',
                   fontSize: '10px',
+                  fontWeight: 600,
                   letterSpacing:
-                    '0.04em',
-                  marginBottom: '6px'
+                    '0.05em',
+                  marginBottom: '4px'
                 }}
               >
                 COMPANY CALENDAR
@@ -365,9 +428,9 @@ export default class KqCalendar
               <h2
                 style={{
                   margin: 0,
-                  fontSize: '20px',
+                  fontSize: '18px',
                   fontWeight: 600,
-                  color: '#111111'
+                  color: primaryText
                 }}
               >
                 {monthTitle}
@@ -386,9 +449,23 @@ export default class KqCalendar
                   this.previousMonth
                 }
                 aria-label="Previous month"
-                style={
-                  this.navigationButtonStyle
-                }
+                style={{
+                  width: '30px',
+                  height: '30px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border:
+                    `1px solid ${borderColor}`,
+                  borderRadius: '50%',
+                  background:
+                    isDarkMode
+                      ? '#313B4B'
+                      : '#ffffff',
+                  color: primaryText,
+                  cursor: 'pointer',
+                  padding: 0
+                }}
               >
                 <ChevronLeft24Regular />
               </button>
@@ -399,9 +476,23 @@ export default class KqCalendar
                   this.nextMonth
                 }
                 aria-label="Next month"
-                style={
-                  this.navigationButtonStyle
-                }
+                style={{
+                  width: '30px',
+                  height: '30px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border:
+                    `1px solid ${borderColor}`,
+                  borderRadius: '50%',
+                  background:
+                    isDarkMode
+                      ? '#313B4B'
+                      : '#ffffff',
+                  color: primaryText,
+                  cursor: 'pointer',
+                  padding: 0
+                }}
               >
                 <ChevronRight24Regular />
               </button>
@@ -411,8 +502,8 @@ export default class KqCalendar
           {loading && (
             <div
               style={{
-                padding: '30px 0',
-                color: '#777777',
+                padding: '20px 0',
+                color: secondaryText,
                 fontSize: '12px'
               }}
             >
@@ -423,7 +514,7 @@ export default class KqCalendar
           {!loading && error && (
             <div
               style={{
-                padding: '30px 0',
+                padding: '20px 0',
                 color: '#d71920',
                 fontSize: '12px'
               }}
@@ -434,13 +525,21 @@ export default class KqCalendar
 
           {!loading &&
             !error && (
-              <>
+              <div
+                style={{
+                  flex: 1,
+                  minHeight: 0,
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}
+              >
                 <div
                   style={{
                     display: 'grid',
                     gridTemplateColumns:
                       'repeat(7, minmax(0, 1fr))',
-                    marginBottom: '8px'
+                    marginBottom: '4px',
+                    flexShrink: 0
                   }}
                 >
                   {weekdays.map(
@@ -453,13 +552,13 @@ export default class KqCalendar
                           textAlign:
                             'center',
                           fontSize:
-                            '10px',
+                            '9px',
                           fontWeight:
                             600,
                           color:
-                            '#8a8a8a',
+                            secondaryText,
                           padding:
-                            '5px 2px'
+                            '3px 1px'
                         }}
                       >
                         {weekday}
@@ -473,7 +572,11 @@ export default class KqCalendar
                     display: 'grid',
                     gridTemplateColumns:
                       'repeat(7, minmax(0, 1fr))',
-                    gap: '4px'
+                    gridTemplateRows:
+                      'repeat(6, minmax(0, 1fr))',
+                    gap: '3px',
+                    flex: 1,
+                    minHeight: 0
                   }}
                 >
                   {calendarDays.map(
@@ -488,8 +591,7 @@ export default class KqCalendar
                           );
 
                       const hasEvent =
-                        dayEvents.length >
-                        0;
+                        dayEvents.length > 0;
 
                       const isToday =
                         this.formatDateKey(
@@ -533,22 +635,22 @@ export default class KqCalendar
                           style={{
                             position:
                               'relative',
-                            minHeight:
-                              '52px',
+                            minWidth: 0,
+                            minHeight: 0,
                             border:
                               isToday
                                 ? '1px solid #d71920'
                                 : '1px solid transparent',
                             borderRadius:
-                              '8px',
+                              '6px',
                             background:
                               hasEvent
-                                ? '#f7f7f7'
+                                ? eventTileBackground
                                 : 'transparent',
                             color:
                               day.currentMonth
-                                ? '#222222'
-                                : '#bbbbbb',
+                                ? primaryText
+                                : mutedText,
                             cursor:
                               hasEvent
                                 ? 'pointer'
@@ -556,7 +658,8 @@ export default class KqCalendar
                             fontFamily:
                               'inherit',
                             fontSize:
-                              '12px'
+                              '11px',
+                            padding: 0
                           }}
                         >
                           <span>
@@ -570,14 +673,14 @@ export default class KqCalendar
                                 position:
                                   'absolute',
                                 bottom:
-                                  '7px',
+                                  '4px',
                                 left: '50%',
                                 transform:
                                   'translateX(-50%)',
                                 width:
-                                  '5px',
+                                  '4px',
                                 height:
-                                  '5px',
+                                  '4px',
                                 borderRadius:
                                   '50%',
                                 background:
@@ -590,7 +693,7 @@ export default class KqCalendar
                     }
                   )}
                 </div>
-              </>
+              </div>
             )}
         </div>
 
@@ -604,7 +707,7 @@ export default class KqCalendar
                 position: 'fixed',
                 inset: 0,
                 background:
-                  'rgba(0,0,0,0.32)',
+                  'rgba(0,0,0,0.45)',
                 zIndex: 9998
               }}
             />
@@ -618,10 +721,12 @@ export default class KqCalendar
                 width:
                   'min(420px, 92vw)',
                 background:
-                  '#ffffff',
+                  cardBackground,
+                color:
+                  primaryText,
                 zIndex: 9999,
                 boxShadow:
-                  '-8px 0 30px rgba(0,0,0,0.16)',
+                  '-8px 0 30px rgba(0,0,0,0.22)',
                 padding:
                   '28px 24px',
                 boxSizing:
@@ -644,11 +749,12 @@ export default class KqCalendar
                   <div
                     style={{
                       color:
-                        '#777777',
+                        '#d71920',
                       fontSize:
                         '10px',
                       marginBottom:
-                        '7px'
+                        '7px',
+                      fontWeight: 600
                     }}
                   >
                     EVENTS
@@ -659,7 +765,9 @@ export default class KqCalendar
                       style={{
                         margin: 0,
                         fontSize:
-                          '19px'
+                          '19px',
+                        color:
+                          primaryText
                       }}
                     >
                       {this
@@ -680,6 +788,8 @@ export default class KqCalendar
                     border: 'none',
                     background:
                       'transparent',
+                    color:
+                      primaryText,
                     cursor:
                       'pointer',
                     padding: '4px'
@@ -699,7 +809,7 @@ export default class KqCalendar
                       padding:
                         '18px 0',
                       borderBottom:
-                        '1px solid #eeeeee'
+                        `1px solid ${borderColor}`
                     }}
                   >
                     {event.imageUrl && (
@@ -730,7 +840,9 @@ export default class KqCalendar
                           'flex',
                         gap: '8px',
                         alignItems:
-                          'flex-start'
+                          'flex-start',
+                        color:
+                          primaryText
                       }}
                     >
                       <Calendar24Regular />
@@ -751,7 +863,7 @@ export default class KqCalendar
                           marginTop:
                             '10px',
                           color:
-                            '#777777',
+                            secondaryText,
                           fontSize:
                             '12px'
                         }}
@@ -774,18 +886,4 @@ export default class KqCalendar
       </section>
     );
   }
-
-  private readonly navigationButtonStyle:
-    React.CSSProperties = {
-      width: '32px',
-      height: '32px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      border:
-        '1px solid #dddddd',
-      borderRadius: '50%',
-      background: '#ffffff',
-      cursor: 'pointer'
-    };
 }
