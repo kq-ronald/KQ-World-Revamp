@@ -6,6 +6,7 @@ import {
 } from '@microsoft/sp-webpart-base';
 
 import IntranetBanner from './components/IntranetBanner';
+import { IIntranetBannerProps } from './components/IIntranetBannerProps';
 
 export interface IIntranetBannerWebPartProps {
   // No configurable properties yet
@@ -15,8 +16,13 @@ export default class IntranetBannerWebPart
   extends BaseClientSideWebPart<IIntranetBannerWebPartProps> {
 
   public render(): void {
-    const element: React.ReactElement =
-      React.createElement(IntranetBanner);
+    const element: React.ReactElement<IIntranetBannerProps> =
+      React.createElement(
+        IntranetBanner,
+        {
+          context: this.context
+        }
+      );
 
     ReactDom.render(
       element,

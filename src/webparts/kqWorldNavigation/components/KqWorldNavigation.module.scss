@@ -879,20 +879,17 @@
 }
 
 /* Dark mode */
-
 .darkMode {
   background: #171B21;
   color: #ffffff;
 
-  .topBar,
-  .desktopNav,
-  .desktopNavInner,
-  .mobileHeader {
+  /* Top utility/header area */
+  .topBar {
     background: #171B21;
     color: #ffffff;
   }
 
-  // Hide the red header artwork
+  /* Hide red decorative header artwork */
   .bgLeft,
   .bgRight {
     display: none;
@@ -916,6 +913,13 @@
     }
   }
 
+  /* Main navigation surface */
+  .desktopNav,
+  .desktopNavInner {
+    background: #262F3D;
+    color: #ffffff;
+  }
+
   .navLinks,
   .navButton {
     color: #ffffff;
@@ -934,7 +938,7 @@
     border-color: #ffffff;
   }
 
-  // Search stays light
+  /* Search remains white */
   .searchBox,
   .mobileSearch {
     background: #ffffff;
@@ -954,26 +958,21 @@
     color: #171B21;
   }
 
+  /* Notification and theme buttons remain white */
   .iconButton {
     background: #ffffff;
     color: #171B21;
+
     .actionIcon {
-    color: #171B21;
-  }
+      color: #171B21;
+    }
 
     img {
       filter: brightness(0);
     }
   }
 
-  // Mega menu
-  .dropdown,
-  .dropdownInner {
-    background: #262F3D;
-    color: #ffffff;
-  }
-  .darkMode {
-
+  /* Search suggestions */
   .searchDropdown {
     background: #262F3D;
   }
@@ -988,7 +987,7 @@
 
   .searchSuggestion:hover,
   .searchSuggestionActive {
-    background: #313b4b;
+    background: #313B4B;
   }
 
   .searchSuggestionText {
@@ -1003,11 +1002,34 @@
   .noSearchResults {
     color: #cccccc;
   }
-}
 
-  // Mobile menu
-  .mobileMenu,
-  .mobileSubmenu {
+  /* Mega menu */
+  .dropdown,
+  .dropdownInner {
+    background: #262F3D;
+    color: #ffffff;
+  }
+
+  .dropdownItem {
+    color: #ffffff;
+  }
+
+  .dropdownItem:hover {
+    color: #ffffff;
+    background: #313B4B;
+  }
+
+  .megaMenuTagline {
+    color: #ffffff;
+  }
+
+  /* Mobile navigation */
+  .mobileHeader {
+    background: #262F3D;
+    color: #ffffff;
+  }
+
+  .mobileMenu {
     background: #262F3D;
     color: #ffffff;
   }
@@ -1015,27 +1037,68 @@
   .mobileMenuItem {
     color: #ffffff;
 
-    button,
-    a {
-      color: #ffffff;
-    }
-
-    >button {
+    > button {
       background: #262F3D;
+      color: #ffffff;
     }
   }
 
   .mobileSubmenu {
+    background: #262F3D;
+
     a {
       color: #ffffff;
     }
 
     a:hover {
       background: #171B21;
+      color: #ffffff;
     }
   }
 
   .mobileMenuButton {
     color: #ffffff;
   }
+}
+
+
+/* GLOBAL PAGE DARK BACKGROUND */
+
+:global(html[data-kq-theme='dark']),
+:global(html[data-kq-theme='dark'] body) {
+  background-color: #171B21 !important;
+}
+
+:global(html[data-kq-theme='dark'] #spPageCanvasContent),
+:global(html[data-kq-theme='dark'] .SPCanvas),
+:global(html[data-kq-theme='dark'] .SPCanvas-canvas),
+:global(html[data-kq-theme='dark'] .CanvasZone),
+:global(html[data-kq-theme='dark'] .CanvasZoneContainer),
+:global(html[data-kq-theme='dark'] .CanvasSection),
+:global(html[data-kq-theme='dark'] .ControlZone),
+:global(html[data-kq-theme='dark'] [data-automation-id='CanvasZone']),
+:global(html[data-kq-theme='dark'] [data-automation-id='CanvasSection']),
+:global(html[data-kq-theme='dark'] [data-automation-id='CanvasControl']) {
+  background-color: #171B21 !important;
+}
+
+
+/* GLOBAL PAGE LIGHT BACKGROUND */
+
+:global(html[data-kq-theme='light']),
+:global(html[data-kq-theme='light'] body) {
+  background-color: #ffffff !important;
+}
+
+:global(html[data-kq-theme='light'] #spPageCanvasContent),
+:global(html[data-kq-theme='light'] .SPCanvas),
+:global(html[data-kq-theme='light'] .SPCanvas-canvas),
+:global(html[data-kq-theme='light'] .CanvasZone),
+:global(html[data-kq-theme='light'] .CanvasZoneContainer),
+:global(html[data-kq-theme='light'] .CanvasSection),
+:global(html[data-kq-theme='light'] .ControlZone),
+:global(html[data-kq-theme='light'] [data-automation-id='CanvasZone']),
+:global(html[data-kq-theme='light'] [data-automation-id='CanvasSection']),
+:global(html[data-kq-theme='light'] [data-automation-id='CanvasControl']) {
+  background-color: #ffffff !important;
 }
