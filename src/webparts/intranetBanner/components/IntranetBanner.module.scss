@@ -1,0 +1,42 @@
+.intranetBanner {
+  width: calc(100% + 70px);
+  margin-left: -60px;
+  margin-right: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.lightMode {
+  background: transparent;
+  color: #171717;
+}
+
+.darkMode {
+  background: #171b21;
+  color: #ffffff;
+}
+
+:global(.CanvasZone),
+:global(.CanvasZoneContainer) {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+:global([data-sp-feature-tag="Column"]) {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+@media (max-width: 1100px) {
+  .intranetBanner {
+    width: calc(100% + 16px);
+    margin-left: -16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .intranetBanner {
+    width: 100%;
+    margin-left: 0;
+  }
+}
