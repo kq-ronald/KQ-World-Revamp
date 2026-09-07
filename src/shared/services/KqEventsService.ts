@@ -3,22 +3,24 @@ import {
   SPHttpClientResponse
 } from '@microsoft/sp-http';
 
-import { WebPartContext } from '@microsoft/sp-webpart-base';
+import {
+  WebPartContext
+} from '@microsoft/sp-webpart-base';
 
-import { IKqEvent } from '../models/IKqEvent';
+import {
+  IKqEvent
+} from '../models/IKqEvent';
 
 interface ISharePointEventItem {
   Id: number;
   Title?: string;
-  CardTitle?: string;
-  CardDate?: string;
-  CardLocation?: string;
-  CardImage?:
-    | string
-    | {
-        Url?: string;
-        Description?: string;
-      };
+  Location?: string;
+  EventDate?: string;
+  EndDate?: string;
+  Description?: string;
+  Category?: string;
+  fAllDayEvent?: boolean;
+  fRecurrence?: boolean;
 }
 
 interface ISharePointEventsResponse {
@@ -26,38 +28,60 @@ interface ISharePointEventsResponse {
 }
 
 export default class KqEventsService {
-  private readonly context: WebPartContext;
 
-  public constructor(context: WebPartContext) {
+  private readonly context:
+    WebPartContext;
+
+  public constructor(
+    context: WebPartContext
+  ) {
     this.context = context;
   }
 
-  public async getEvents(): Promise<IKqEvent[]> {
-    const webUrl = `${window.location.origin}/homepage`;
+  public async getEvents():
+    Promise<IKqEvent[]> {
+
+    const webUrl =
+      this.context
+        .pageContext
+        .web
+        .absoluteUrl;
 
     const requestUrl =
       `${webUrl}` +
-      `/_api/web/lists/getbytitle('Upcoming Events')/items` +
-      `?$select=Id,Title,CardImage,CardDate,CardTitle,CardLocation` +
-      `&$orderby=CardDate asc`;
+      `/_api/web/lists/getbytitle('Events')/items` +
+      `?$select=` +
+      `Id,` +
+      `Title,` +
+      `Location,` +
+      `EventDate,` +
+      `EndDate,` +
+      `Description,` +
+      `Category,` +
+      `fAllDayEvent,` +
+      `fRecurrence` +
+      `&$orderby=EventDate asc`;
 
-    const response: SPHttpClientResponse =
+    const response:
+      SPHttpClientResponse =
       await this.context.spHttpClient.get(
         requestUrl,
         SPHttpClient.configurations.v1,
         {
           headers: {
-            Accept: 'application/json;odata=nometadata'
+            Accept:
+              'application/json;odata=nometadata'
           }
         }
       );
 
     if (!response.ok) {
-      const responseText: string =
+
+      const responseText =
         await response.text();
 
       console.error(
-        'Upcoming Events REST error:',
+        'Events REST error:',
         response.status,
         response.statusText,
         responseText
@@ -68,70 +92,58 @@ export default class KqEventsService {
       );
     }
 
-    const data: ISharePointEventsResponse =
+    const data:
+      ISharePointEventsResponse =
       await response.json();
 
-    const events: IKqEvent[] =
+    const events:
+      IKqEvent[] =
       (data.value || [])
         .map(
           (
-            item: ISharePointEventItem
-          ): IKqEvent | undefined => {
+            item:
+              ISharePointEventItem
+          ):
+            IKqEvent | undefined => {
+
             const date =
               this.parseEventDate(
-                item.CardDate
+                item.EventDate
               );
 
             if (!date) {
+
               console.warn(
-                'Skipping event with invalid CardDate:',
+                'Skipping event with invalid EventDate:',
                 item
               );
 
               return undefined;
             }
 
-            let imageUrl = '';
-
-            if (
-              typeof item.CardImage ===
-              'string'
-            ) {
-              imageUrl = item.CardImage;
-            } else if (
-              item.CardImage &&
-              typeof item.CardImage ===
-                'object'
-            ) {
-              imageUrl =
-                item.CardImage.Url || '';
-            }
-
             return {
               id: item.Id,
 
               title:
-                item.CardTitle ||
                 item.Title ||
                 'Untitled Event',
 
               date,
 
               dateText:
-                item.CardDate || '',
+                item.EventDate || '',
 
               location:
-                item.CardLocation || '',
+                item.Location || '',
 
-              imageUrl
+              imageUrl: ''
             };
           }
         )
         .filter(
           (
             event:
-              | IKqEvent
-              | undefined
+              IKqEvent | undefined
           ): event is IKqEvent =>
             event !== undefined
         );
@@ -151,59 +163,22 @@ export default class KqEventsService {
   private parseEventDate(
     value?: string
   ): Date | undefined {
+
     if (!value) {
       return undefined;
     }
 
-    /*
-     * First try the standard SharePoint /
-     * JavaScript date format.
-     */
-    const standardDate =
+    const date =
       new Date(value);
 
     if (
-      !isNaN(
-        standardDate.getTime()
+      isNaN(
+        date.getTime()
       )
     ) {
-      return standardDate;
+      return undefined;
     }
 
-    /*
-     * The legacy KQ World stored CardDate
-     * as display text in some cases.
-     *
-     * Support dd/mm/yyyy as a fallback.
-     */
-    const parts =
-      value
-        .trim()
-        .split(/[\/\-]/);
-
-    if (parts.length === 3) {
-      const day =
-        parseInt(parts[0], 10);
-
-      const month =
-        parseInt(parts[1], 10);
-
-      const year =
-        parseInt(parts[2], 10);
-
-      if (
-        !isNaN(day) &&
-        !isNaN(month) &&
-        !isNaN(year)
-      ) {
-        return new Date(
-          year,
-          month - 1,
-          day
-        );
-      }
-    }
-
-    return undefined;
+    return date;
   }
 }

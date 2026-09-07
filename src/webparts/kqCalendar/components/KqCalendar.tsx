@@ -385,7 +385,7 @@ export default class KqCalendar
           style={{
             width: '100%',
             height:
-              'clamp(280px, 21vw, 315px)',
+              'clamp(270px, 20vw, 300px)',
             boxSizing: 'border-box',
             background: cardBackground,
             border:
@@ -414,22 +414,30 @@ export default class KqCalendar
             <div>
               <div
                 style={{
-                  color: '#d71920',
-                  fontSize: '10px',
-                  fontWeight: 600,
-                  letterSpacing:
-                    '0.05em',
-                  marginBottom: '4px'
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontWeight: 80,
+                  fontStyle: 'normal',
+                  fontSize: '14px',
+                  lineHeight: '12px',
+                  letterSpacing: '0',
+                  color: isDarkMode
+                    ? '#ffffff'
+                    : '#d71920',
+                  marginBottom: '8px'
                 }}
               >
-                COMPANY CALENDAR
+                CALENDAR
               </div>
 
               <h2
                 style={{
                   margin: 0,
-                  fontSize: '18px',
-                  fontWeight: 600,
+                  fontFamily: "'Montserrat', sans-serif",
+                  fontWeight: 200,
+                  fontStyle: 'normal',
+                  fontSize: '20px',
+                  lineHeight: '100%',
+                  letterSpacing: '0',
                   color: primaryText
                 }}
               >
@@ -620,16 +628,16 @@ export default class KqCalendar
                           title={
                             hasEvent
                               ? dayEvents
-                                  .map(
-                                    (
-                                      event:
-                                        IKqEvent
-                                    ) =>
-                                      event.title
-                                  )
-                                  .join(
-                                    ', '
-                                  )
+                                .map(
+                                  (
+                                    event:
+                                      IKqEvent
+                                  ) =>
+                                    event.title
+                                )
+                                .join(
+                                  ', '
+                                )
                               : undefined
                           }
                           style={{
