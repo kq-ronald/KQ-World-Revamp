@@ -1,29 +1,510 @@
 .kqSocials {
-  overflow: hidden;
-  padding: 1em;
-  color: "[theme:bodyText, default: #323130]";
-  color: var(--bodyText);
-}
-
-.welcome {
-  text-align: center;
-}
-
-.welcomeImage {
   width: 100%;
-  max-width: 420px;
+  max-width: 100%;
+
+  min-height: 100%;
+
+  margin: 0;
+
+  padding: 16px;
+
+  overflow: hidden;
+
+  box-sizing: border-box;
+
+  font-family:
+    'Montserrat',
+    'Segoe UI',
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  color: #171717;
+
+  background: #ffffff;
+
+  border: 1px solid #d9dde4;
+  border-radius: 14px;
+
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.06);
 }
 
-.links {
-  a {
-    text-decoration: none;
-    color: "[theme:link, default:#03787c]";
-    color: var(--link); // note: CSS Custom Properties support is limited to modern browsers only
 
-    &:hover {
-      text-decoration: underline;
-      color: "[theme:linkHovered, default: #014446]";
-      color: var(--linkHovered); // note: CSS Custom Properties support is limited to modern browsers only
-    }
+/* ============================================================
+   HEADER
+============================================================ */
+
+.header {
+  width: 100%;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  margin-bottom: 16px;
+
+  box-sizing: border-box;
+}
+
+
+.eyebrow {
+  margin-bottom: 5px;
+
+  color: #d71920;
+
+  font-size: 9px;
+  line-height: 1;
+
+  font-weight: 500;
+
+  letter-spacing: 0.16em;
+}
+
+
+.title {
+  color: #171717;
+
+  font-size: 14px;
+  line-height: 1.2;
+
+  font-weight: 400;
+}
+
+
+/* ============================================================
+   TABS
+============================================================ */
+
+.tabBar {
+  width: 240px;
+
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  padding: 3px;
+
+  box-sizing: border-box;
+
+  background: #ffffff;
+
+  border: 1px solid #d9dde4;
+  border-radius: 999px;
+
+  box-shadow:
+    0 2px 7px rgba(0, 0, 0, 0.07);
+}
+
+
+.tab {
+  border: none;
+
+  border-radius: 999px;
+
+  padding: 8px 14px;
+
+  background: transparent;
+
+  color: #171717;
+
+  cursor: pointer;
+
+  font-family: inherit;
+
+  font-size: 9px;
+  line-height: 1;
+
+  font-weight: 500;
+
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+
+.tab:hover {
+  background: #f0f0f0;
+}
+
+
+.tabActive {
+  background: #ff1616;
+
+  color: #ffffff;
+}
+
+
+.tabActive:hover {
+  background: #ff1616;
+
+  color: #ffffff;
+}
+
+
+/* ============================================================
+   LINKS LIST
+============================================================ */
+
+.linksList {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+
+.externalList {
+  gap: 0;
+}
+
+
+/* ============================================================
+   INTERNAL LINK
+============================================================ */
+
+.internalItem {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  padding:
+    8px 9px;
+
+  box-sizing: border-box;
+
+  border:
+    1px solid #dfe3e8;
+  border-radius: 14px;
+
+  background: #ffffff;
+
+  cursor: pointer;
+
+  text-align: left;
+
+  font-family: inherit;
+
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+
+.internalItem:hover {
+  background: #f7f7f7;
+
+  transform:
+    translateY(-1px);
+}
+
+
+/* ============================================================
+   EXTERNAL LINK
+============================================================ */
+
+.externalItem {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  padding:
+    10px 6px;
+
+  box-sizing: border-box;
+
+  border: none;
+
+  border-bottom:
+    1px solid #e4e7eb;
+
+  background: #ffffff;
+
+  cursor: pointer;
+
+  text-align: left;
+
+  font-family: inherit;
+
+  transition:
+    background-color 160ms ease;
+}
+
+
+.externalItem:last-child {
+  border-bottom: none;
+}
+
+
+.externalItem:hover {
+  background: #f7f7f7;
+}
+
+
+/* ============================================================
+   ICON
+============================================================ */
+
+.socialIcon {
+  width: 30px;
+  height: 30px;
+
+  min-width: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background:
+    var(--icon-bg);
+
+  color: #ffffff;
+
+  font-size:
+    var(--icon-size);
+
+  line-height: 1;
+
+  font-weight: 600;
+}
+
+
+/* ============================================================
+   ITEM CONTENT
+============================================================ */
+
+.itemContent {
+  min-width: 0;
+
+  flex: 1;
+}
+
+
+.itemTitle {
+  color: #171717;
+
+  font-size: 10px;
+  line-height: 1.2;
+
+  font-weight: 600;
+}
+
+
+.itemSubtitle {
+  margin-top: 2px;
+
+  color: #8a93a3;
+
+  font-size: 8.5px;
+  line-height: 1.2;
+
+  font-weight: 400;
+}
+
+
+.itemArrow {
+  padding-right: 2px;
+
+  color: #7b8494;
+
+  font-size: 11px;
+  line-height: 1;
+}
+
+
+/* ============================================================
+   DARK MODE
+============================================================ */
+
+.darkMode {
+  background: #262F3D;
+
+  border-color:
+    rgba(255, 255, 255, 0.42);
+
+  color: #ffffff;
+
+  box-shadow: none;
+}
+
+
+.darkMode .eyebrow {
+  color: #ffffff;
+}
+
+
+.darkMode .title {
+  color: #ffffff;
+}
+
+
+/*
+ * Tab bar remains white.
+ * Active tab is black in the Figma.
+ */
+
+.darkMode .tabBar {
+  background: #ffffff;
+
+  border-color: #ffffff;
+}
+
+
+.darkMode .tab {
+  color: #171B21;
+}
+
+
+.darkMode .tab:hover {
+  background: #eeeeee;
+}
+
+
+.darkMode .tabActive {
+  background: #000000;
+
+  color: #ffffff;
+}
+
+
+.darkMode .tabActive:hover {
+  background: #000000;
+
+  color: #ffffff;
+}
+
+
+/*
+ * Internal cards stay on the same dark surface
+ * with light borders, matching the reference.
+ */
+
+.darkMode .internalItem {
+  background: #262F3D;
+
+  border-color:
+    rgba(255, 255, 255, 0.65);
+}
+
+
+.darkMode .internalItem:hover {
+  background: #303a49;
+}
+
+
+.darkMode .externalItem {
+  background: #262F3D;
+
+  border-bottom-color:
+    rgba(255, 255, 255, 0.22);
+}
+
+
+.darkMode .externalItem:hover {
+  background: #303a49;
+}
+
+
+/*
+ * Figma uses white circular icon surfaces
+ * in dark mode.
+ */
+
+.darkMode .socialIcon {
+  background: #ffffff;
+
+  color: #171B21;
+}
+
+
+.darkMode .itemTitle {
+  color: #ffffff;
+}
+
+
+.darkMode .itemSubtitle {
+  color:
+    rgba(255, 255, 255, 0.68);
+}
+
+
+.darkMode .itemArrow {
+  color: #ffffff;
+}
+
+
+/* ============================================================
+   TABLET
+============================================================ */
+
+@media screen and (max-width: 1100px) {
+
+  .kqSocials {
+    padding: 15px;
   }
+
+
+  .header {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+
+  .tabBar {
+    width: 100%;
+  }
+
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media screen and (max-width: 600px) {
+
+  .kqSocials {
+    width: 100%;
+
+    margin: 0;
+
+    padding: 14px;
+
+    border-radius: 12px;
+  }
+
+
+  .header {
+    margin-bottom: 14px;
+  }
+
+
+  .title {
+    font-size: 13px;
+  }
+
+
+  .tab {
+    padding:
+      8px 10px;
+  }
+
+
+  .internalItem {
+    padding:
+      9px;
+  }
+
 }

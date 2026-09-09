@@ -1,29 +1,803 @@
 .kqVideoHub {
-  overflow: hidden;
-  padding: 1em;
-  color: "[theme:bodyText, default: #323130]";
-  color: var(--bodyText);
+  width: calc(100% + 50px);
+  max-width: none;
+
+  margin-left: -50px;
+  margin-right: 0;
+
+  padding: 30px 0 40px;
+
+  box-sizing: border-box;
+
+  font-family:
+    'Montserrat',
+    'Segoe UI',
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  color: #171717;
 }
 
-.welcome {
-  text-align: center;
-}
 
-.welcomeImage {
+/* ============================================================
+   HEADER
+============================================================ */
+
+.header {
   width: 100%;
-  max-width: 420px;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 24px;
+
+  margin-bottom: 24px;
+
+  box-sizing: border-box;
 }
 
-.links {
-  a {
-    text-decoration: none;
-    color: "[theme:link, default:#03787c]";
-    color: var(--link); // note: CSS Custom Properties support is limited to modern browsers only
 
-    &:hover {
-      text-decoration: underline;
-      color: "[theme:linkHovered, default: #014446]";
-      color: var(--linkHovered); // note: CSS Custom Properties support is limited to modern browsers only
-    }
+.eyebrow {
+  margin: 0 0 9px;
+
+  color: #171717;
+
+  font-size: 11px;
+  line-height: 1;
+
+  font-weight: 500;
+
+  letter-spacing: 0.02em;
+}
+
+
+.sectionTitle {
+  margin: 0;
+
+  color: #ff1616;
+
+  font-size: 21px;
+  line-height: 1.15;
+
+  font-weight: 500;
+
+  font-style: italic;
+}
+
+
+/* ============================================================
+   FULL LIBRARY BUTTON
+============================================================ */
+
+.libraryLink {
+  min-width: 192px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 14px;
+
+  padding: 10px 20px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #ff1616;
+  border-radius: 999px;
+
+  background: #ffffff;
+
+  color: #ff1616;
+
+  text-decoration: none;
+
+  font-size: 10px;
+  line-height: 1;
+
+  font-weight: 500;
+
+  white-space: nowrap;
+
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+
+.libraryLink:hover {
+  background: #ff1616;
+
+  color: #ffffff;
+
+  text-decoration: none;
+}
+
+
+/* ============================================================
+   MAIN VIDEO HUB CARD
+============================================================ */
+
+.videoHubCard {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 64%)
+    minmax(0, 36%);
+
+  box-sizing: border-box;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1px solid #d9d9d9;
+  border-radius: 14px;
+
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+
+.playerColumn {
+  min-width: 0;
+}
+
+
+.playlistColumn {
+  min-width: 0;
+
+  padding: 16px 18px;
+
+  box-sizing: border-box;
+
+  background: #ffffff;
+}
+
+
+/* ============================================================
+   PLAYER
+============================================================ */
+
+.player,
+.playerEmpty {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  min-height: 325px;
+
+  box-sizing: border-box;
+
+  overflow: hidden;
+
+  background: #111111;
+}
+
+
+.playerEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #ffffff;
+
+  font-size: 11px;
+}
+
+
+.playerFrame {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  min-height: 325px;
+
+  border: none;
+}
+
+
+.playerOverlay {
+  position: absolute;
+
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  padding:
+    65px 18px 17px;
+
+  box-sizing: border-box;
+
+  pointer-events: none;
+
+  color: #ffffff;
+
+  background:
+    linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.86),
+      rgba(0, 0, 0, 0)
+    );
+}
+
+
+.nowPlaying {
+  margin-bottom: 6px;
+
+  font-size: 8px;
+  line-height: 1;
+
+  font-weight: 500;
+
+  letter-spacing: 0.18em;
+
+  opacity: 0.82;
+}
+
+
+.playerTitle {
+  font-size: 16px;
+  line-height: 1.25;
+
+  font-weight: 400;
+}
+
+
+/* ============================================================
+   CATEGORY TABS
+============================================================ */
+
+.tabBar {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 3px;
+
+  padding: 4px;
+
+  margin-bottom: 16px;
+
+  box-sizing: border-box;
+
+  background: #ffffff;
+
+  border: 1px solid #d9d9d9;
+  border-radius: 999px;
+
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+
+.tab {
+  flex: 1;
+
+  min-width: 0;
+
+  padding: 8px 10px;
+
+  box-sizing: border-box;
+
+  overflow: hidden;
+
+  border: none;
+  border-radius: 999px;
+
+  background: transparent;
+
+  color: #171717;
+
+  cursor: pointer;
+
+  font-family: inherit;
+
+  font-size: 9.5px;
+  line-height: 1;
+
+  font-weight: 500;
+
+  white-space: nowrap;
+
+  text-overflow: ellipsis;
+
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+
+.tab:hover {
+  background: #f1f1f1;
+}
+
+
+.tabActive {
+  background: #ff1616;
+
+  color: #ffffff;
+}
+
+
+.tabActive:hover {
+  background: #ff1616;
+
+  color: #ffffff;
+}
+
+
+/* ============================================================
+   VIDEO LIST
+============================================================ */
+
+.videoList {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+
+  max-height: 260px;
+
+  overflow-y: auto;
+
+  padding-right: 2px;
+}
+
+
+.videoItem {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 7px;
+
+  box-sizing: border-box;
+
+  border: none;
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  cursor: pointer;
+
+  text-align: left;
+
+  font-family: inherit;
+
+  transition:
+    background-color 160ms ease;
+}
+
+
+.videoItem:hover {
+  background: #f4f5f7;
+}
+
+
+.videoItemSelected {
+  background: #f0f1f4;
+}
+
+
+.videoThumbnail {
+  position: relative;
+
+  width: 96px;
+  min-width: 96px;
+  height: 58px;
+
+  overflow: hidden;
+
+  border-radius: 10px;
+
+  background: #e6e6e6;
+}
+
+
+.thumbnailImage {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+
+.thumbnailFallback {
+  width: 100%;
+  height: 100%;
+
+  background:
+    linear-gradient(
+      135deg,
+      #8a8a8a,
+      #d1d1d1
+    );
+}
+
+
+.thumbnailPlayOverlay {
+  position: absolute;
+
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.thumbnailPlayButton {
+  width: 24px;
+  height: 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #ffffff;
+
+  color: #ed1c24;
+
+  font-size: 9px;
+
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+
+.videoItemContent {
+  min-width: 0;
+
+  flex: 1;
+}
+
+
+.videoItemTitle {
+  margin-bottom: 5px;
+
+  overflow: hidden;
+
+  display: -webkit-box;
+
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+
+  color: #17213a;
+
+  font-size: 10.5px;
+  line-height: 1.3;
+
+  font-weight: 500;
+}
+
+
+.videoItemTitleSelected {
+  color: #ed1c24;
+}
+
+
+.videoItemMeta {
+  color: #8b909b;
+
+  font-size: 9px;
+  line-height: 1.2;
+
+  font-weight: 400;
+}
+
+
+/* ============================================================
+   MESSAGE / ERROR
+============================================================ */
+
+.message {
+  padding: 40px;
+
+  text-align: center;
+
+  color: #777777;
+
+  font-size: 10px;
+}
+
+
+.error {
+  padding: 14px;
+
+  color: #b42318;
+
+  background: #fef3f2;
+
+  border: 1px solid #f04438;
+  border-radius: 10px;
+
+  font-size: 10px;
+}
+
+
+/* ============================================================
+   DARK MODE
+============================================================ */
+
+.darkMode {
+  color: #ffffff;
+}
+
+
+.darkMode .eyebrow {
+  color: #ffffff;
+}
+
+
+.darkMode .sectionTitle {
+  color: #ffffff;
+}
+
+
+/* Library button */
+
+.darkMode .libraryLink {
+  background: #262F3D;
+
+  border-color:
+    rgba(255, 255, 255, 0.55);
+
+  color: #ffffff;
+}
+
+
+.darkMode .libraryLink:hover {
+  background: #ffffff;
+
+  color: #171B21;
+}
+
+
+/*
+ * Main video hub remains white.
+ * This matches the Figma.
+ */
+
+.darkMode .videoHubCard,
+.darkMode .playlistColumn {
+  background: #ffffff;
+}
+
+
+.darkMode .tabBar {
+  background: #ffffff;
+
+  border-color: #d9d9d9;
+}
+
+
+.darkMode .tab {
+  color: #171717;
+}
+
+
+.darkMode .tabActive {
+  background: #171B21;
+
+  color: #ffffff;
+}
+
+
+.darkMode .tabActive:hover {
+  background: #171B21;
+
+  color: #ffffff;
+}
+
+
+.darkMode .videoItem {
+  background: #ffffff;
+}
+
+
+.darkMode .videoItem:hover {
+  background: #f4f5f7;
+}
+
+
+.darkMode .videoItemSelected {
+  background: #f0f1f4;
+}
+
+
+.darkMode .videoItemTitle {
+  color: #17213a;
+}
+
+
+.darkMode .videoItemTitleSelected {
+  color: #ed1c24;
+}
+
+
+.darkMode .videoItemMeta {
+  color: #8b909b;
+}
+
+
+.darkMode .message {
+  color:
+    rgba(255, 255, 255, 0.78);
+}
+
+
+.darkMode .error {
+  background: #262F3D;
+
+  color: #ffffff;
+
+  border-color:
+    rgba(255, 255, 255, 0.2);
+}
+
+
+/* ============================================================
+   TABLET
+============================================================ */
+
+@media screen and (max-width: 1100px) {
+
+  .kqVideoHub {
+    width: calc(100% + 16px);
+
+    margin-left: -16px;
+
+    padding:
+      26px 0 36px;
   }
+
+
+  .videoHubCard {
+    grid-template-columns:
+      minmax(0, 60%)
+      minmax(0, 40%);
+  }
+
+
+  .player,
+  .playerEmpty,
+  .playerFrame {
+    min-height: 310px;
+  }
+
+
+  .videoThumbnail {
+    width: 82px;
+
+    min-width: 82px;
+
+    height: 54px;
+  }
+
+}
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media screen and (max-width: 600px) {
+
+  .kqVideoHub {
+    width: 100%;
+
+    margin: 0;
+
+    padding:
+      22px 0 30px;
+  }
+
+
+  .header {
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    margin-bottom: 20px;
+  }
+
+
+  .eyebrow {
+    font-size: 10px;
+  }
+
+
+  .sectionTitle {
+    font-size: 18px;
+  }
+
+
+  .libraryLink {
+    width: 100%;
+  }
+
+
+  .videoHubCard {
+    grid-template-columns: 1fr;
+  }
+
+
+  .player,
+  .playerEmpty,
+  .playerFrame {
+    min-height: 250px;
+  }
+
+
+  .playerOverlay {
+    padding:
+      55px 15px 15px;
+  }
+
+
+  .playerTitle {
+    font-size: 14px;
+  }
+
+
+  .playlistColumn {
+    padding: 15px;
+  }
+
+
+  .videoList {
+    max-height: none;
+
+    overflow: visible;
+  }
+
+
+  .videoThumbnail {
+    width: 90px;
+
+    min-width: 90px;
+
+    height: 58px;
+  }
+
+}
+
+
+/* ============================================================
+   VERY SMALL MOBILE
+============================================================ */
+
+@media screen and (max-width: 380px) {
+
+  .tab {
+    padding:
+      8px 6px;
+
+    font-size: 8px;
+  }
+
+
+  .videoThumbnail {
+    width: 78px;
+
+    min-width: 78px;
+
+    height: 52px;
+  }
+
 }

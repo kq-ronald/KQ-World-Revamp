@@ -1,28 +1,29 @@
 import * as React from 'react';
 
-import {
-  IKqCompanyNewsProps
-} from './IKqCompanyNewsProps';
+import { IKqCompanyNewsProps } from './IKqCompanyNewsProps';
 
-import KqCompanyNewsService
-  from '../services/KqCompanyNewsService';
+import KqCompanyNewsService from '../services/KqCompanyNewsService';
 
 import {
   IKqCompanyNewsItem,
   KqCompanyNewsType
 } from '../models/IKqCompanyNewsItem';
 
-type ActiveTab =
-  KqCompanyNewsType;
+import styles from './KqCompanyNews.module.scss';
+
+type ActiveTab = KqCompanyNewsType;
 
 interface IKqCompanyNewsState {
   activeTab: ActiveTab;
+
   take3: IKqCompanyNewsItem[];
   blogs: IKqCompanyNewsItem[];
   pride: IKqCompanyNewsItem[];
+
   isLoading: boolean;
   errorMessage: string;
-  windowWidth: number;
+
+  isDarkMode: boolean;
 }
 
 export default class KqCompanyNews
@@ -31,12 +32,9 @@ export default class KqCompanyNews
     IKqCompanyNewsState
   > {
 
-  private readonly _newsService:
-    KqCompanyNewsService;
+  private readonly _newsService: KqCompanyNewsService;
 
-  public constructor(
-    props: IKqCompanyNewsProps
-  ) {
+  public constructor(props: IKqCompanyNewsProps) {
     super(props);
 
     this._newsService =
@@ -44,15 +42,25 @@ export default class KqCompanyNews
         this.props.context
       );
 
+    const currentTheme =
+      typeof document !== 'undefined'
+        ? document.documentElement.getAttribute(
+          'data-kq-theme'
+        )
+        : 'light';
+
     this.state = {
       activeTab: 'take3',
+
       take3: [],
       blogs: [],
       pride: [],
+
       isLoading: true,
       errorMessage: '',
-      windowWidth:
-        window.innerWidth
+
+      isDarkMode:
+        currentTheme === 'dark'
     };
   }
 
@@ -60,9 +68,19 @@ export default class KqCompanyNews
     Promise<void> {
 
     window.addEventListener(
-      'resize',
-      this._handleResize
+      'kqworld-theme-change',
+      this._handleThemeChange as EventListener
     );
+
+    const currentTheme =
+      document.documentElement.getAttribute(
+        'data-kq-theme'
+      );
+
+    this.setState({
+      isDarkMode:
+        currentTheme === 'dark'
+    });
 
     await this._loadNews();
   }
@@ -71,17 +89,21 @@ export default class KqCompanyNews
     void {
 
     window.removeEventListener(
-      'resize',
-      this._handleResize
+      'kqworld-theme-change',
+      this._handleThemeChange as EventListener
     );
   }
 
-  private _handleResize = ():
-    void => {
+  private _handleThemeChange = (
+    event: CustomEvent
+  ): void => {
+
+    const theme =
+      event.detail?.theme;
 
     this.setState({
-      windowWidth:
-        window.innerWidth
+      isDarkMode:
+        theme === 'dark'
     });
   };
 
@@ -99,14 +121,12 @@ export default class KqCompanyNews
           .getAllCompanyNews();
 
       this.setState({
-        take3:
-          result.take3,
-        blogs:
-          result.blogs,
-        pride:
-          result.pride,
+        take3: result.take3,
+        blogs: result.blogs,
+        pride: result.pride,
         isLoading: false
       });
+
     } catch (error) {
 
       console.error(
@@ -116,6 +136,7 @@ export default class KqCompanyNews
 
       this.setState({
         isLoading: false,
+
         errorMessage:
           error instanceof Error
             ? error.message
@@ -136,28 +157,31 @@ export default class KqCompanyNews
   private _getActiveItems():
     IKqCompanyNewsItem[] {
 
-    switch (
-      this.state.activeTab
-    ) {
+    const {
+      activeTab,
+      take3,
+      blogs,
+      pride
+    } = this.state;
+
+    switch (activeTab) {
 
       case 'blog':
-        return this.state.blogs;
+        return blogs.slice(0, 3);
 
       case 'pride':
-        return this.state.pride;
+        return pride.slice(0, 4);
 
       case 'take3':
       default:
-        return this.state.take3;
+        return take3.slice(0, 6);
     }
   }
 
   private _getViewMoreUrl():
     string {
 
-    switch (
-      this.state.activeTab
-    ) {
+    switch (this.state.activeTab) {
 
       case 'blog':
         return (
@@ -177,48 +201,6 @@ export default class KqCompanyNews
     }
   }
 
-  private _getGridColumns():
-    string {
-
-    const {
-      activeTab,
-      windowWidth
-    } = this.state;
-
-    if (
-      windowWidth <= 640
-    ) {
-      return (
-        'repeat(1, ' +
-        'minmax(0, 1fr))'
-      );
-    }
-
-    if (
-      windowWidth <= 1024
-    ) {
-      return (
-        'repeat(2, ' +
-        'minmax(0, 1fr))'
-      );
-    }
-
-    if (
-      activeTab ===
-      'pride'
-    ) {
-      return (
-        'repeat(4, ' +
-        'minmax(0, 1fr))'
-      );
-    }
-
-    return (
-      'repeat(3, ' +
-      'minmax(0, 1fr))'
-    );
-  }
-
   private _formatDate(
     date: Date
   ): string {
@@ -227,47 +209,13 @@ export default class KqCompanyNews
       return '';
     }
 
-    return (
-      date.toLocaleDateString(
-        'en-GB',
-        {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric'
-        }
-      )
+    return date.toLocaleDateString(
+      'en-GB',
+      {
+        day: '2-digit',
+        month: 'short'
+      }
     );
-  }
-
-  private _getTabStyle(
-    isActive: boolean
-  ): React.CSSProperties {
-
-    return {
-      border: 'none',
-      borderRadius: 999,
-      padding:
-        '13px 28px',
-      cursor: 'pointer',
-      fontWeight: 700,
-      fontSize: 16,
-      background:
-        isActive
-          ? '#ff1616'
-          : 'transparent',
-      color:
-        isActive
-          ? '#ffffff'
-          : '#111111',
-      display: 'flex',
-      alignItems:
-        'center',
-      justifyContent:
-        'center',
-      gap: 10,
-      transition:
-        'all 0.2s ease'
-    };
   }
 
   private _renderTake3Card(
@@ -277,125 +225,57 @@ export default class KqCompanyNews
     return (
       <article
         key={`take3-${item.id}`}
-        style={{
-          border:
-            '1px solid #dedede',
-          borderRadius: 14,
-          overflow: 'hidden',
-          background:
-            '#ffffff',
-          minHeight: 355,
-          display: 'flex',
-          flexDirection:
-            'column',
-          boxShadow:
-            '0 4px 14px rgba(16,24,40,0.08)'
-        }}
+        className={styles.newsCard}
       >
-        <div
-          style={{
-            height: 180,
-            overflow: 'hidden',
-            background:
-              'linear-gradient(135deg,#3496d3,#5168c7)'
-          }}
-        >
+
+        <div className={styles.cardImage}>
+
           {item.imageUrl ? (
             <img
               src={item.imageUrl}
               alt=""
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit:
-                  'cover'
-              }}
+              className={
+                styles.cardImageElement
+              }
             />
           ) : (
             <div
-              style={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                alignItems:
-                  'flex-end',
-                padding: 22,
-                boxSizing:
-                  'border-box',
-                color:
-                  '#ffffff',
-                fontSize: 42,
-                fontWeight: 800
-              }}
+              className={
+                styles.imageFallback
+              }
             >
-              Take 3
+              TAKE 3
             </div>
           )}
+
         </div>
 
-        <div
-          style={{
-            padding: 20,
-            flex: 1,
-            display: 'flex',
-            flexDirection:
-              'column'
-          }}
-        >
-          <div
-            style={{
-              color:
-                '#ff1616',
-              fontWeight: 800,
-              fontSize: 12,
-              letterSpacing: 2,
-              marginBottom: 12
-            }}
-          >
+        <div className={styles.cardBody}>
+
+          <div className={styles.cardLabel}>
             TAKE 3
           </div>
 
-          <h3
-            style={{
-              margin: 0,
-              fontSize: 20,
-              lineHeight: 1.3,
-              fontWeight: 800,
-              color: '#111827'
-            }}
-          >
+          <h3 className={styles.cardTitle}>
             {item.title}
           </h3>
 
           {item.description && (
             <p
-              style={{
-                fontSize: 14,
-                lineHeight: 1.5,
-                color: '#667085'
-              }}
+              className={
+                styles.cardDescription
+              }
             >
               {item.description}
             </p>
           )}
 
-          <div
-            style={{
-              marginTop: 'auto',
-              display: 'flex',
-              justifyContent:
-                'space-between',
-              alignItems:
-                'center',
-              paddingTop: 20
-            }}
-          >
+          <div className={styles.cardFooter}>
+
             <span
-              style={{
-                color:
-                  '#667085',
-                fontSize: 13
-              }}
+              className={
+                styles.cardMeta
+              }
             >
               {this._formatDate(
                 item.publishedDate
@@ -404,90 +284,18 @@ export default class KqCompanyNews
 
             <a
               href={item.itemUrl}
-              style={{
-                color:
-                  '#ff1616',
-                fontWeight: 800,
-                textDecoration:
-                  'none'
-              }}
+              target="_blank"
+              rel="noreferrer"
+              className={styles.readLink}
             >
               Read story →
             </a>
+
           </div>
+
         </div>
+
       </article>
-    );
-  }
-
-  private _renderBlogEmptyState():
-    React.ReactElement {
-
-    return (
-      <div
-        style={{
-          gridColumn:
-            '1 / -1',
-          minHeight: 220,
-          border:
-            '1px solid #e5e7eb',
-          borderRadius: 14,
-          display: 'flex',
-          flexDirection:
-            'column',
-          alignItems:
-            'center',
-          justifyContent:
-            'center',
-          padding: 32,
-          textAlign:
-            'center',
-          background:
-            '#ffffff'
-        }}
-      >
-        <div
-          style={{
-            fontSize: 20,
-            fontWeight: 800,
-            marginBottom: 8
-          }}
-        >
-          KQ Blogs
-        </div>
-
-        <div
-          style={{
-            color:
-              '#667085',
-            maxWidth: 500,
-            lineHeight: 1.5,
-            marginBottom: 18
-          }}
-        >
-          Browse the latest
-          Kenya Airways external
-          articles on the corporate
-          website.
-        </div>
-
-        <a
-          href={
-            this._getViewMoreUrl()
-          }
-          target="_blank"
-          rel="noreferrer"
-          style={{
-            color:
-              '#ff1616',
-            fontWeight: 800,
-            textDecoration:
-              'none'
-          }}
-        >
-          View Blogs →
-        </a>
-      </div>
     );
   }
 
@@ -498,87 +306,60 @@ export default class KqCompanyNews
     return (
       <article
         key={`blog-${item.id}`}
-        style={{
-          border:
-            '1px solid #dedede',
-          borderRadius: 14,
-          overflow: 'hidden',
-          background:
-            '#ffffff',
-          boxShadow:
-            '0 4px 14px rgba(16,24,40,0.08)'
-        }}
+        className={styles.newsCard}
       >
-        <div
-          style={{
-            height: 180,
-            overflow: 'hidden',
-            background:
-              'linear-gradient(135deg,#646ff2,#5144d5)'
-          }}
-        >
-          {item.imageUrl && (
+
+        <div className={styles.cardImage}>
+
+          {item.imageUrl ? (
             <img
               src={item.imageUrl}
               alt=""
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit:
-                  'cover'
-              }}
+              className={
+                styles.cardImageElement
+              }
             />
+          ) : (
+            <div
+              className={
+                styles.blogFallback
+              }
+            >
+              BLOG
+            </div>
           )}
+
         </div>
 
-        <div
-          style={{
-            padding: 20
-          }}
-        >
-          <div
-            style={{
-              color:
-                '#ff1616',
-              fontSize: 12,
-              fontWeight: 800,
-              letterSpacing: 2,
-              marginBottom: 12
-            }}
-          >
+        <div className={styles.cardBody}>
+
+          <div className={styles.cardLabel}>
             BLOG
           </div>
 
-          <h3
-            style={{
-              margin: 0,
-              fontSize: 20,
-              lineHeight: 1.3,
-              fontWeight: 800
-            }}
-          >
+          <h3 className={styles.cardTitle}>
             {item.title}
           </h3>
 
-          <div
-            style={{
-              marginTop: 20,
-              display: 'flex',
-              justifyContent:
-                'space-between',
-              alignItems:
-                'center'
-            }}
-          >
+          {item.description && (
+            <p
+              className={
+                styles.cardDescription
+              }
+            >
+              {item.description}
+            </p>
+          )}
+
+          <div className={styles.cardFooter}>
+
             <span
-              style={{
-                color:
-                  '#667085',
-                fontSize: 13
-              }}
+              className={
+                styles.cardMeta
+              }
             >
               {item.readTimeMinutes
-                ? `${item.readTimeMinutes} min`
+                ? `${item.readTimeMinutes} min read`
                 : ''}
             </span>
 
@@ -586,18 +367,17 @@ export default class KqCompanyNews
               href={item.itemUrl}
               target="_blank"
               rel="noreferrer"
-              style={{
-                color:
-                  '#ff1616',
-                fontWeight: 800,
-                textDecoration:
-                  'none'
-              }}
+              className={
+                styles.readLink
+              }
             >
               Read story →
             </a>
+
           </div>
+
         </div>
+
       </article>
     );
   }
@@ -609,50 +389,29 @@ export default class KqCompanyNews
     return (
       <article
         key={`pride-${item.id}`}
-        style={{
-          border:
-            '1px solid #dedede',
-          borderRadius: 14,
-          overflow: 'hidden',
-          background:
-            '#ffffff',
-          boxShadow:
-            '0 4px 14px rgba(16,24,40,0.08)'
-        }}
+        className={
+          styles.prideCard
+        }
       >
+
         <div
-          style={{
-            height: 320,
-            padding: 22,
-            boxSizing:
-              'border-box',
-            color:
-              '#ffffff',
-            background:
-              'linear-gradient(145deg,#f12632,#ad101d)',
-            display: 'flex',
-            flexDirection:
-              'column'
-          }}
+          className={
+            styles.prideArtwork
+          }
         >
+
           <div
-            style={{
-              fontSize: 12,
-              fontWeight: 800,
-              letterSpacing: 3
-            }}
+            className={
+              styles.prideEyebrow
+            }
           >
             QUARTERLY NEWSLETTER
           </div>
 
           <div
-            style={{
-              marginTop:
-                'auto',
-              fontSize: 50,
-              fontWeight: 800,
-              lineHeight: 0.9
-            }}
+            className={
+              styles.prideLogoText
+            }
           >
             The
             <br />
@@ -661,46 +420,88 @@ export default class KqCompanyNews
 
           {item.issueNumber && (
             <div
-              style={{
-                marginTop: 16
-              }}
+              className={
+                styles.issueNumber
+              }
             >
               Issue No.{' '}
               {item.issueNumber}
             </div>
           )}
+
         </div>
 
         <div
-          style={{
-            padding: 20
-          }}
+          className={
+            styles.prideBody
+          }
         >
+
           <h3
-            style={{
-              margin:
-                '0 0 20px',
-              fontSize: 18,
-              fontWeight: 800
-            }}
+            className={
+              styles.prideTitle
+            }
           >
             {item.title}
           </h3>
 
           <a
             href={item.itemUrl}
-            style={{
-              color:
-                '#ff1616',
-              fontWeight: 800,
-              textDecoration:
-                'none'
-            }}
+            target="_blank"
+            rel="noreferrer"
+            className={styles.readLink}
           >
             Read newsletter →
           </a>
+
         </div>
+
       </article>
+    );
+  }
+
+  private _renderBlogEmptyState():
+    React.ReactElement {
+
+    return (
+      <div
+        className={
+          styles.emptyState
+        }
+      >
+
+        <div
+          className={
+            styles.emptyTitle
+          }
+        >
+          KQ Blogs
+        </div>
+
+        <div
+          className={
+            styles.emptyText
+          }
+        >
+          Browse the latest Kenya Airways
+          external articles on the corporate
+          website.
+        </div>
+
+        <a
+          href={
+            this._getViewMoreUrl()
+          }
+          target="_blank"
+          rel="noreferrer"
+          className={
+            styles.readLink
+          }
+        >
+          View Blogs →
+        </a>
+
+      </div>
     );
   }
 
@@ -711,8 +512,7 @@ export default class KqCompanyNews
       this._getActiveItems();
 
     if (
-      this.state.activeTab ===
-        'blog' &&
+      this.state.activeTab === 'blog' &&
       items.length === 0
     ) {
       return (
@@ -726,10 +526,7 @@ export default class KqCompanyNews
           IKqCompanyNewsItem
       ) => {
 
-        if (
-          item.type ===
-          'pride'
-        ) {
+        if (item.type === 'pride') {
           return (
             this._renderPrideCard(
               item
@@ -737,10 +534,7 @@ export default class KqCompanyNews
           );
         }
 
-        if (
-          item.type ===
-          'blog'
-        ) {
+        if (item.type === 'blog') {
           return (
             this._renderBlogCard(
               item
@@ -766,74 +560,52 @@ export default class KqCompanyNews
       activeTab,
       isLoading,
       errorMessage,
-      windowWidth
+      isDarkMode
     } = this.state;
+
+    const gridClass =
+      activeTab === 'pride'
+        ? styles.prideGrid
+        : styles.standardGrid;
 
     return (
       <section
-        style={{
-          width: '100%',
-          boxSizing:
-            'border-box',
-          padding:
-            '24px 0 40px'
-        }}
+        className={[
+          styles.kqCompanyNews,
+          isDarkMode
+            ? styles.darkMode
+            : ''
+        ].join(' ')}
       >
+
         <div
-          style={{
-            fontSize: 14,
-            fontWeight: 700,
-            letterSpacing: 1.5,
-            marginBottom: 16
-          }}
+          className={
+            styles.eyebrow
+          }
         >
           STAY INFORMED
         </div>
 
         <h2
-          style={{
-            margin:
-              '0 0 36px',
-            fontSize:
-              windowWidth <= 640
-                ? 30
-                : 40,
-            fontStyle:
-              'italic',
-            color:
-              '#ff1616'
-          }}
+          className={
+            styles.sectionTitle
+          }
         >
-          Company News &amp;
-          Updates
+          Company News &amp; Updates
         </h2>
 
         <div
-          style={{
-            display: 'flex',
-            justifyContent:
-              'space-between',
-            alignItems:
-              'center',
-            flexWrap: 'wrap',
-            gap: 20,
-            marginBottom: 36
-          }}
+          className={
+            styles.toolbar
+          }
         >
+
           <div
-            style={{
-              display: 'flex',
-              gap: 6,
-              padding: 6,
-              border:
-                '1px solid #d0d5dd',
-              borderRadius: 999,
-              background:
-                '#ffffff',
-              boxShadow:
-                '0 5px 16px rgba(16,24,40,0.09)'
-            }}
+            className={
+              styles.tabBar
+            }
           >
+
             <button
               type="button"
               onClick={() =>
@@ -841,14 +613,13 @@ export default class KqCompanyNews
                   'take3'
                 )
               }
-              style={
-                this._getTabStyle(
-                  activeTab ===
-                    'take3'
-                )
+              className={
+                activeTab === 'take3'
+                  ? styles.tabActive
+                  : styles.tab
               }
             >
-              ▣ Take 3
+              ▣&nbsp;&nbsp;Take 3
             </button>
 
             <button
@@ -858,14 +629,13 @@ export default class KqCompanyNews
                   'blog'
                 )
               }
-              style={
-                this._getTabStyle(
-                  activeTab ===
-                    'blog'
-                )
+              className={
+                activeTab === 'blog'
+                  ? styles.tabActive
+                  : styles.tab
               }
             >
-              ◇ Blogs
+              ◇&nbsp;&nbsp;Blogs
             </button>
 
             <button
@@ -875,15 +645,15 @@ export default class KqCompanyNews
                   'pride'
                 )
               }
-              style={
-                this._getTabStyle(
-                  activeTab ===
-                    'pride'
-                )
+              className={
+                activeTab === 'pride'
+                  ? styles.tabActive
+                  : styles.tab
               }
             >
-              ▤ The Pride
+              ▤&nbsp;&nbsp;The Pride
             </button>
+
           </div>
 
           <a
@@ -892,37 +662,21 @@ export default class KqCompanyNews
             }
             target="_blank"
             rel="noreferrer"
-            style={{
-              minWidth: 250,
-              padding:
-                '15px 28px',
-              border:
-                '1px solid #ff1616',
-              borderRadius: 999,
-              textDecoration:
-                'none',
-              color:
-                '#ff1616',
-              fontSize: 16,
-              fontWeight: 700,
-              textAlign:
-                'center',
-              boxSizing:
-                'border-box'
-            }}
+            className={
+              styles.viewMore
+            }
           >
             View More Stories
-            &nbsp;&nbsp; →
+            <span>→</span>
           </a>
+
         </div>
 
         {isLoading && (
           <div
-            style={{
-              padding: 40,
-              textAlign:
-                'center'
-            }}
+            className={
+              styles.message
+            }
           >
             Loading company news...
           </div>
@@ -931,14 +685,9 @@ export default class KqCompanyNews
         {!isLoading &&
           errorMessage && (
             <div
-              style={{
-                padding: 20,
-                color:
-                  '#b42318',
-                background:
-                  '#fef3f2',
-                borderRadius: 8
-              }}
+              className={
+                styles.error
+              }
             >
               {errorMessage}
             </div>
@@ -947,16 +696,15 @@ export default class KqCompanyNews
         {!isLoading &&
           !errorMessage && (
             <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns:
-                  this._getGridColumns(),
-                gap: 22
-              }}
+              className={[
+                styles.newsGrid,
+                gridClass
+              ].join(' ')}
             >
               {this._renderActiveCards()}
             </div>
           )}
+
       </section>
     );
   }

@@ -1,9 +1,16 @@
 import * as React from 'react';
+
+import {
+  Clock16Regular,
+  Location16Regular
+} from '@fluentui/react-icons';
+
 import {
   upcomingEvents,
   IUpcomingEvent,
   UpcomingEventCategory
 } from '../data/upcomingeventsData';
+
 
 const FILTERS: UpcomingEventCategory[] = [
   'All',
@@ -12,216 +19,511 @@ const FILTERS: UpcomingEventCategory[] = [
   'Tech'
 ];
 
+
 const Upcomingevents: React.FC = () => {
+
   const [activeFilter, setActiveFilter] =
     React.useState<UpcomingEventCategory>('All');
 
-  const filteredEvents: IUpcomingEvent[] = React.useMemo(() => {
-    if (activeFilter === 'All') {
-      return upcomingEvents;
-    }
+  const [isDarkMode, setIsDarkMode] =
+    React.useState<boolean>(() => {
 
-    return upcomingEvents.filter(
-      event => event.category === activeFilter
+      if (typeof document === 'undefined') {
+        return false;
+      }
+
+      return (
+        document.documentElement.getAttribute('data-kq-theme') === 'dark'
+      );
+    });
+
+
+  React.useEffect(() => {
+
+    const handleThemeChange = (event: Event): void => {
+
+      const customEvent = event as CustomEvent<{
+        theme?: string;
+      }>;
+
+      setIsDarkMode(
+        customEvent.detail?.theme === 'dark'
+      );
+    };
+
+
+    const currentTheme =
+      document.documentElement.getAttribute('data-kq-theme');
+
+    setIsDarkMode(
+      currentTheme === 'dark'
     );
-  }, [activeFilter]);
 
-  const formatDateParts = (dateString: string): {
+
+    window.addEventListener(
+      'kqworld-theme-change',
+      handleThemeChange
+    );
+
+
+    return () => {
+
+      window.removeEventListener(
+        'kqworld-theme-change',
+        handleThemeChange
+      );
+
+    };
+
+  }, []);
+
+
+  const filteredEvents: IUpcomingEvent[] =
+    React.useMemo(() => {
+
+      if (activeFilter === 'All') {
+        return upcomingEvents;
+      }
+
+      return upcomingEvents.filter(
+        event => event.category === activeFilter
+      );
+
+    }, [activeFilter]);
+
+
+  const formatDateParts = (
+    dateString: string
+  ): {
     month: string;
     day: string;
   } => {
-    const date = new Date(`${dateString}T00:00:00`);
+
+    const date =
+      new Date(`${dateString}T00:00:00`);
 
     return {
+
       month: date
-        .toLocaleString('en-US', { month: 'short' })
+        .toLocaleString(
+          'en-US',
+          { month: 'short' }
+        )
         .toUpperCase(),
-     day: ('0' + date.getDate()).slice(-2)
+
+      day:
+        ('0' + date.getDate()).slice(-2)
+
     };
+
   };
 
+
+  const cardBackground =
+    isDarkMode
+      ? '#262F3D'
+      : '#ffffff';
+
+  const primaryText =
+    isDarkMode
+      ? '#ffffff'
+      : '#202020';
+
+  const secondaryText =
+    isDarkMode
+      ? '#ffffff'
+      : '#666666';
+
+  const borderColor =
+    isDarkMode
+      ? 'rgba(255,255,255,0.30)'
+      : '#d7d7d7';
+
+
   return (
+
     <section
+      className="kq-upcoming-events"
       style={{
         width: '100%',
         boxSizing: 'border-box',
-        backgroundColor: '#ffffff',
-        border: '1px solid #dedede',
+
+        backgroundColor: cardBackground,
+
+        border: `1px solid ${borderColor}`,
         borderRadius: '12px',
-        padding: '26px 18px 24px 18px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+
+        padding: '20px 20px 18px 20px',
+
+        boxShadow: 'none',
+
         fontFamily:
-          '"Segoe UI", Arial, Helvetica, sans-serif'
+          "'Montserrat', 'Segoe UI', Arial, Helvetica, sans-serif",
+
+        overflow: 'hidden'
       }}
     >
+
+      <style>
+        {`
+          .kq-upcoming-events {
+            height: 500px;
+          }
+
+          @media (max-width: 1100px) {
+            .kq-upcoming-events {
+              height: auto;
+              min-height: 450px;
+            }
+          }
+
+          @media (max-width: 600px) {
+            .kq-upcoming-events {
+              height: auto;
+              min-height: 0;
+              padding: 18px 16px !important;
+            }
+          }
+        `}
+      </style>
+
+
+      {/* Header */}
+
       <div
         style={{
-          marginBottom: '18px'
+          marginBottom: '12px'
         }}
       >
-        <div
-          style={{
-            fontSize: '11px',
-            fontWeight: 600,
-            letterSpacing: '0.14em',
-            color: '#8b8b8b',
-            textTransform: 'uppercase',
-            marginBottom: '6px'
-          }}
-        >
-          Coming up
-        </div>
 
         <div
           style={{
+            color: primaryText,
+
+            fontSize: '10px',
+            lineHeight: 1,
+
+            fontWeight: 500,
+
+            letterSpacing: '0.02em',
+
+            textTransform: 'uppercase',
+
+            marginBottom: '7px'
+          }}
+        >
+          COMING UP
+        </div>
+
+
+        <div
+          style={{
+            color: primaryText,
+
             fontSize: '14px',
-            color: '#4d4d4d'
+            lineHeight: 1.15,
+
+            fontWeight: 400
           }}
         >
           Next 30 days · {upcomingEvents.length} events
         </div>
+
       </div>
+
+
+      {/* Filters */}
 
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '8px',
-          marginBottom: '22px',
-          flexWrap: 'wrap'
+
+          gap: '9px',
+
+          flexWrap: 'wrap',
+
+          marginBottom: '14px'
         }}
       >
+
         {FILTERS.map(filter => {
-          const isActive = activeFilter === filter;
+
+          const isActive =
+            activeFilter === filter;
 
           return (
+
             <button
               key={filter}
+
               type="button"
-              onClick={() => setActiveFilter(filter)}
+
+              onClick={() =>
+                setActiveFilter(filter)
+              }
+
               style={{
-                border: isActive
-                  ? '1px solid #111111'
-                  : '1px solid #d8d8d8',
-                backgroundColor: isActive
-                  ? '#111111'
-                  : '#ffffff',
-                color: isActive
-                  ? '#ffffff'
-                  : '#444444',
+                border: 'none',
+
+                backgroundColor:
+                  isActive
+                    ? '#ffffff'
+                    : 'transparent',
+
+                color:
+                  isActive
+                    ? '#171B21'
+                    : primaryText,
+
                 borderRadius: '999px',
-                padding: '7px 14px',
-                fontSize: '12px',
-                fontWeight: 500,
-                cursor: 'pointer',
-                lineHeight: 1
+
+                padding:
+                  isActive
+                    ? '5px 13px'
+                    : '5px 3px',
+
+                fontFamily:
+                  "'Montserrat', 'Segoe UI', sans-serif",
+
+                fontSize: '10px',
+                lineHeight: 1,
+
+                fontWeight: 400,
+
+                cursor: 'pointer'
               }}
             >
               {filter}
             </button>
+
           );
+
         })}
+
       </div>
 
+
+      {/* Event list */}
+
       <div>
+
         {filteredEvents.length === 0 ? (
+
           <div
             style={{
               padding: '24px 0',
+
               textAlign: 'center',
-              color: '#8a8a8a',
-              fontSize: '13px'
+
+              color: secondaryText,
+
+              fontSize: '10px'
             }}
           >
             No upcoming events in this category.
           </div>
+
         ) : (
-          filteredEvents.map((event, index) => {
-            const dateParts = formatDateParts(event.date);
+
+          filteredEvents.map(event => {
+
+            const dateParts =
+              formatDateParts(event.date);
+
 
             return (
+
               <div
                 key={event.id}
+
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '62px 1fr',
-                  gap: '16px',
+
+                  gridTemplateColumns:
+                    '54px minmax(0, 1fr)',
+
+                  columnGap: '12px',
+
                   alignItems: 'center',
-                  padding: '16px 0',
-                  borderBottom:
-                    index !== filteredEvents.length - 1
-                      ? '1px solid #eeeeee'
-                      : 'none'
+
+                  minHeight: '57px',
+
+                  padding: '3px 0',
+
+                  boxSizing: 'border-box'
                 }}
               >
+
+                {/* Date */}
+
                 <div
                   style={{
                     textAlign: 'center',
-                    borderRight: '1px solid #eeeeee',
-                    paddingRight: '12px'
+
+                    color: primaryText,
+
+                    alignSelf: 'center'
                   }}
                 >
+
                   <div
                     style={{
-                      color: '#d71920',
                       fontSize: '11px',
-                      fontWeight: 700,
-                      letterSpacing: '0.08em',
-                      lineHeight: 1.2
+
+                      lineHeight: 1,
+
+                      fontWeight: 400
                     }}
                   >
                     {dateParts.month}
                   </div>
 
+
                   <div
                     style={{
-                      fontSize: '30px',
+                      marginTop: '1px',
+
+                      fontSize: '25px',
+
+                      lineHeight: 0.95,
+
                       fontWeight: 300,
-                      color: '#777777',
-                      lineHeight: 1.1,
-                      marginTop: '4px'
+
+                      color: primaryText
                     }}
                   >
                     {dateParts.day}
                   </div>
+
                 </div>
+
+
+                {/* Event information */}
 
                 <div
                   style={{
                     minWidth: 0
                   }}
                 >
+
                   <div
                     style={{
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      color: '#202020',
-                      lineHeight: 1.35,
-                      marginBottom: '5px'
+                      color: primaryText,
+
+                      fontSize: '11px',
+
+                      lineHeight: 1.2,
+
+                      fontWeight: 400,
+
+                      marginBottom: '6px',
+
+                      whiteSpace: 'normal'
                     }}
                   >
                     {event.title}
                   </div>
 
+
                   <div
                     style={{
-                      fontSize: '12px',
-                      color: '#8a8a8a',
-                      lineHeight: 1.4
+                      display: 'flex',
+
+                      alignItems: 'center',
+
+                      flexWrap: 'wrap',
+
+                      gap: '5px 13px',
+
+                      color: secondaryText
                     }}
                   >
-                    {event.time}
-                    {' · '}
-                    {event.location}
+
+                    {/* Time */}
+
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+
+                        gap: '5px',
+
+                        fontSize: '9px',
+
+                        lineHeight: 1
+                      }}
+                    >
+
+                      <Clock16Regular
+                        style={{
+                          width: '13px',
+                          height: '13px',
+
+                          color: primaryText,
+
+                          flexShrink: 0
+                        }}
+                      />
+
+                      <span>
+                        {event.time}
+                      </span>
+
+                    </div>
+
+
+                    {/* Location */}
+
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+
+                        gap: '5px',
+
+                        fontSize: '9px',
+
+                        lineHeight: 1
+                      }}
+                    >
+
+                      <Location16Regular
+                        style={{
+                          width: '13px',
+                          height: '13px',
+
+                          color: primaryText,
+
+                          flexShrink: 0
+                        }}
+                      />
+
+                      <span>
+                        {event.location}
+                      </span>
+
+                    </div>
+
                   </div>
+
                 </div>
+
               </div>
+
             );
+
           })
+
         )}
+
       </div>
+
     </section>
+
   );
+
 };
+
 
 export default Upcomingevents;
