@@ -11,8 +11,11 @@ import {
 import KqVivaExchangeService
   from '../services/KqVivaExchangeService';
 
-interface IKqVivaExchangeState {
+import styles
+  from './KqVivaExchange.module.scss';
 
+
+interface IKqVivaExchangeState {
   posts: IKqVivaPost[];
 
   draftText: string;
@@ -23,8 +26,9 @@ interface IKqVivaExchangeState {
 
   errorMessage: string;
 
-  windowWidth: number;
+  isDarkMode: boolean;
 }
+
 
 export default class KqVivaExchange
   extends React.Component<
@@ -34,6 +38,7 @@ export default class KqVivaExchange
 
   private readonly _service:
     KqVivaExchangeService;
+
 
   public constructor(
     props:
@@ -47,8 +52,15 @@ export default class KqVivaExchange
         this.props.context
       );
 
-    this.state = {
+    const currentTheme =
+      typeof document !== 'undefined'
+        ? document.documentElement
+            .getAttribute(
+              'data-kq-theme'
+            )
+        : 'light';
 
+    this.state = {
       posts: [],
 
       draftText: '',
@@ -59,39 +71,58 @@ export default class KqVivaExchange
 
       errorMessage: '',
 
-      windowWidth:
-        window.innerWidth
+      isDarkMode:
+        currentTheme === 'dark'
     };
   }
+
 
   public async componentDidMount():
     Promise<void> {
 
     window.addEventListener(
-      'resize',
-      this._handleResize
+      'kqworld-theme-change',
+      this._handleThemeChange as EventListener
     );
+
+    const currentTheme =
+      document.documentElement
+        .getAttribute(
+          'data-kq-theme'
+        );
+
+    this.setState({
+      isDarkMode:
+        currentTheme === 'dark'
+    });
 
     await this._loadPosts();
   }
+
 
   public componentWillUnmount():
     void {
 
     window.removeEventListener(
-      'resize',
-      this._handleResize
+      'kqworld-theme-change',
+      this._handleThemeChange as EventListener
     );
   }
 
-  private _handleResize = ():
-    void => {
+
+  private _handleThemeChange = (
+    event: CustomEvent
+  ): void => {
+
+    const theme =
+      event.detail?.theme;
 
     this.setState({
-      windowWidth:
-        window.innerWidth
+      isDarkMode:
+        theme === 'dark'
     });
   };
+
 
   private async _loadPosts():
     Promise<void> {
@@ -120,7 +151,6 @@ export default class KqVivaExchange
       );
 
       this.setState({
-
         isLoading: false,
 
         errorMessage:
@@ -130,6 +160,7 @@ export default class KqVivaExchange
       });
     }
   }
+
 
   private async _submitPost():
     Promise<void> {
@@ -176,7 +207,6 @@ export default class KqVivaExchange
       );
 
       this.setState({
-
         isPosting: false,
 
         errorMessage:
@@ -186,6 +216,7 @@ export default class KqVivaExchange
       });
     }
   }
+
 
   private _formatRelativeDate(
     date: Date
@@ -204,15 +235,11 @@ export default class KqVivaExchange
         60000
       );
 
-    if (
-      minutes < 1
-    ) {
+    if (minutes < 1) {
       return 'Just now';
     }
 
-    if (
-      minutes < 60
-    ) {
+    if (minutes < 60) {
       return `${minutes}m ago`;
     }
 
@@ -221,9 +248,7 @@ export default class KqVivaExchange
         minutes / 60
       );
 
-    if (
-      hours < 24
-    ) {
+    if (hours < 24) {
       return `${hours}h ago`;
     }
 
@@ -235,17 +260,39 @@ export default class KqVivaExchange
     return `${days}d ago`;
   }
 
+
   private _getCommunityUrl():
     string {
 
-    /*
-     * Replace with the real KQ
-     * Viva Engage community URL.
-     */
     return (
-      'https://engage.cloud.microsoft/main/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIxODIyNDM1MjQ2MDgifQ/new'
+      'https://engage.cloud.microsoft/main/groups/' +
+      'eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIxODIyNDM1MjQ2MDgifQ/new'
     );
   }
+
+
+  private _getUserInitials():
+    string {
+
+    return (
+      this.props.context
+        .pageContext
+        .user
+        .displayName
+        .split(' ')
+        .map(
+          (
+            item:
+              string
+          ) =>
+            item.charAt(0)
+        )
+        .slice(0, 2)
+        .join('')
+        .toUpperCase()
+    );
+  }
+
 
   private _renderPost(
     post:
@@ -253,144 +300,94 @@ export default class KqVivaExchange
   ): React.ReactElement {
 
     return (
+
       <article
         key={post.id}
-        style={{
-
-          padding:
-            '16px 18px',
-
-          border:
-            '1px solid #e2e6ec',
-
-          borderRadius: 18,
-
-          background:
-            '#ffffff'
-        }}
+        className={
+          styles.postCard
+        }
       >
+
         <div
-          style={{
-            display: 'flex',
-            alignItems:
-              'flex-start',
-            gap: 12
-          }}
+          className={
+            styles.postHeader
+          }
         >
+
           <div
-            style={{
-
-              width: 36,
-              height: 36,
-
-              minWidth: 36,
-
-              borderRadius:
-                '50%',
-
-              display: 'flex',
-
-              alignItems:
-                'center',
-
-              justifyContent:
-                'center',
-
-              background:
-                '#df0011',
-
-              color:
-                '#ffffff',
-
-              fontWeight: 700,
-
-              fontSize: 13
-            }}
+            className={
+              styles.avatar
+            }
           >
             {post.authorInitials}
           </div>
 
+
           <div
-            style={{
-              minWidth: 0,
-              flex: 1
-            }}
+            className={
+              styles.authorArea
+            }
           >
+
             <div
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                alignItems:
-                  'baseline',
-                gap: 4
-              }}
+              className={
+                styles.authorLine
+              }
             >
+
               <span
-                style={{
-                  fontWeight: 700,
-                  fontSize: 14,
-                  color:
-                    '#17213a'
-                }}
+                className={
+                  styles.authorName
+                }
               >
                 {post.authorName}
               </span>
 
               {post.authorRole && (
+
                 <span
-                  style={{
-                    fontSize: 13,
-                    color:
-                      '#687182'
-                  }}
+                  className={
+                    styles.authorRole
+                  }
                 >
                   · {post.authorRole}
                 </span>
+
               )}
+
             </div>
 
+
             <div
-              style={{
-                fontSize: 11,
-                color:
-                  '#989da6',
-                marginTop: 3
-              }}
+              className={
+                styles.postDate
+              }
             >
               {this._formatRelativeDate(
                 post.createdAt
               )}
             </div>
+
           </div>
+
         </div>
 
+
         <p
-          style={{
-            margin:
-              '12px 0 10px',
-
-            color:
-              '#4a5262',
-
-            fontSize: 14,
-
-            lineHeight: 1.5
-          }}
+          className={
+            styles.postBody
+          }
         >
           {post.body}
         </p>
 
+
         <div
-          style={{
-            display: 'flex',
-            alignItems:
-              'center',
-            gap: 16,
-            color:
-              '#687182',
-            fontSize: 12
-          }}
+          className={
+            styles.postActions
+          }
         >
+
           <span>
             ♡ {post.likes}
           </span>
@@ -400,24 +397,28 @@ export default class KqVivaExchange
           </span>
 
           {post.webUrl && (
+
             <a
-              href={post.webUrl}
+              href={
+                post.webUrl
+              }
               target="_blank"
               rel="noreferrer"
-              style={{
-                color:
-                  '#687182',
-                textDecoration:
-                  'none'
-              }}
+              className={
+                styles.shareLink
+              }
             >
               ↗ Share
             </a>
+
           )}
+
         </div>
+
       </article>
     );
   }
+
 
   public render():
     React.ReactElement<
@@ -430,128 +431,63 @@ export default class KqVivaExchange
       isLoading,
       isPosting,
       errorMessage,
-      windowWidth
+      isDarkMode
     } = this.state;
 
-    const mobile =
-      windowWidth <= 640;
-
     return (
+
       <section
-        style={{
-          width: '100%',
-
-          border:
-            '1px solid #d9dde4',
-
-          borderRadius: 16,
-
-          background:
-            '#ffffff',
-
-          boxShadow:
-            '0 5px 18px rgba(0,0,0,.07)',
-
-          overflow:
-            'hidden',
-
-          boxSizing:
-            'border-box'
-        }}
+        className={[
+          styles.kqVivaExchange,
+          isDarkMode
+            ? styles.darkMode
+            : ''
+        ].join(' ')}
       >
+
         <div
-          style={{
-            display: 'flex',
-
-            flexDirection:
-              mobile
-                ? 'column'
-                : 'row',
-
-            alignItems:
-              mobile
-                ? 'stretch'
-                : 'center',
-
-            justifyContent:
-              'space-between',
-
-            gap: 14,
-
-            padding:
-              mobile
-                ? 16
-                : '16px 20px',
-
-            borderBottom:
-              '1px solid #e5e7eb'
-          }}
+          className={
+            styles.header
+          }
         >
+
           <div
-            style={{
-              display: 'flex',
-              alignItems:
-                'center',
-              gap: 12
-            }}
+            className={
+              styles.headerIdentity
+            }
           >
+
             <div
-              style={{
-
-                width: 36,
-                height: 36,
-
-                borderRadius:
-                  '50%',
-
-                background:
-                  '#09162f',
-
-                color:
-                  '#ffffff',
-
-                display: 'flex',
-
-                alignItems:
-                  'center',
-
-                justifyContent:
-                  'center',
-
-                fontSize: 17
-              }}
+              className={
+                styles.vivaIcon
+              }
             >
               ◯
             </div>
 
+
             <div>
+
               <div
-                style={{
-                  color:
-                    '#ed1c24',
-
-                  fontSize: 11,
-
-                  letterSpacing:
-                    2,
-
-                  fontWeight: 700
-                }}
+                className={
+                  styles.eyebrow
+                }
               >
                 VIVA ENGAGE
               </div>
 
               <div
-                style={{
-                  fontSize: 17,
-                  color:
-                    '#17213a'
-                }}
+                className={
+                  styles.title
+                }
               >
                 KQ World Conversations
               </div>
+
             </div>
+
           </div>
+
 
           <a
             href={
@@ -559,97 +495,68 @@ export default class KqVivaExchange
             }
             target="_blank"
             rel="noreferrer"
-            style={{
-
-              padding:
-                '10px 20px',
-
-              border:
-                '1px solid #ed1c24',
-
-              borderRadius:
-                999,
-
-              textDecoration:
-                'none',
-
-              color:
-                '#ed1c24',
-
-              textAlign:
-                'center',
-
-              fontSize: 13,
-
-              fontWeight: 700
-            }}
+            className={
+              styles.communityLink
+            }
           >
-            Open Community&nbsp;&nbsp; →
+            Open Community
+
+            <span>
+              →
+            </span>
           </a>
+
         </div>
 
+
         <div
-          style={{
-            padding:
-              mobile
-                ? 14
-                : 18,
-
-            display: 'flex',
-
-            flexDirection:
-              'column',
-
-            gap: 12
-          }}
+          className={
+            styles.content
+          }
         >
+
           {isLoading && (
+
             <div
-              style={{
-                padding: 35,
-                textAlign:
-                  'center',
-                color:
-                  '#687182'
-              }}
+              className={
+                styles.message
+              }
             >
               Loading conversations...
             </div>
+
           )}
+
 
           {!isLoading &&
             errorMessage && (
-              <div
-                style={{
-                  padding: 14,
-                  color:
-                    '#b42318',
-                  background:
-                    '#fef3f2',
-                  borderRadius: 10
-                }}
-              >
-                {errorMessage}
-              </div>
-            )}
+
+            <div
+              className={
+                styles.error
+              }
+            >
+              {errorMessage}
+            </div>
+
+          )}
+
 
           {!isLoading &&
             !errorMessage &&
             posts.length === 0 && (
-              <div
-                style={{
-                  padding: 30,
-                  textAlign:
-                    'center',
-                  color:
-                    '#687182'
-                }}
-              >
-                Connect the KQ Viva Engage
-                community to display the
-                live feed.
-              </div>
-            )}
+
+            <div
+              className={
+                styles.message
+              }
+            >
+              Connect the KQ Viva Engage
+              community to display the live feed.
+            </div>
+
+          )}
+
 
           {!isLoading &&
             posts.map(
@@ -662,76 +569,30 @@ export default class KqVivaExchange
                 )
             )}
 
+
           <div
-            style={{
-
-              display: 'flex',
-
-              alignItems:
-                'center',
-
-              gap: 12,
-
-              padding:
-                '10px 12px',
-
-              background:
-                '#f6f7f9',
-
-              borderRadius: 18
-            }}
+            className={
+              styles.composer
+            }
           >
+
             <div
-              style={{
-
-                width: 34,
-                height: 34,
-
-                minWidth: 34,
-
-                borderRadius:
-                  '50%',
-
-                display: 'flex',
-
-                alignItems:
-                  'center',
-
-                justifyContent:
-                  'center',
-
-                background:
-                  '#e1ab43',
-
-                color:
-                  '#17213a',
-
-                fontWeight: 700,
-
-                fontSize: 12
-              }}
+              className={
+                styles.currentUserAvatar
+              }
             >
-              {this.props.context
-                .pageContext
-                .user
-                .displayName
-                .split(' ')
-                .map(
-                  (
-                    item:
-                      string
-                  ) =>
-                    item.charAt(0)
-                )
-                .slice(0, 2)
-                .join('')
-                .toUpperCase()}
+              {this._getUserInitials()}
             </div>
+
 
             <input
               type="text"
-              value={draftText}
-              disabled={isPosting}
+              value={
+                draftText
+              }
+              disabled={
+                isPosting
+              }
               placeholder=
                 "Share something with the KQ family..."
               onChange={(
@@ -759,21 +620,20 @@ export default class KqVivaExchange
 
                   event.preventDefault();
 
-                  void this._submitPost();
+                  this._submitPost()
+                    .catch(
+                      error =>
+                        console.error(
+                          error
+                        )
+                    );
                 }
               }}
-              style={{
-                flex: 1,
-                minWidth: 0,
-                border: 'none',
-                outline: 'none',
-                background:
-                  'transparent',
-                fontSize: 13,
-                color:
-                  '#17213a'
-              }}
+              className={
+                styles.composerInput
+              }
             />
+
 
             <button
               type="button"
@@ -782,41 +642,28 @@ export default class KqVivaExchange
                 !draftText.trim()
               }
               onClick={() =>
-                void this._submitPost()
+                this._submitPost()
+                  .catch(
+                    error =>
+                      console.error(
+                        error
+                      )
+                  )
               }
-              style={{
-
-                width: 36,
-                height: 36,
-
-                minWidth: 36,
-
-                border:
-                  'none',
-
-                borderRadius:
-                  '50%',
-
-                background:
-                  !draftText.trim()
-                    ? '#d5d7dc'
-                    : '#ed1c24',
-
-                color:
-                  '#ffffff',
-
-                cursor:
-                  !draftText.trim()
-                    ? 'default'
-                    : 'pointer',
-
-                fontSize: 16
-              }}
+              className={[
+                styles.sendButton,
+                !draftText.trim()
+                  ? styles.sendButtonDisabled
+                  : ''
+              ].join(' ')}
             >
               ➤
             </button>
+
           </div>
+
         </div>
+
       </section>
     );
   }

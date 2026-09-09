@@ -17,7 +17,7 @@
           "manifest": "./src/webparts/intranetBanner/IntranetBannerWebPart.manifest.json"
         }
       ]
-    },
+    }, 
     "kq-calendar-web-part": {
       "components": [
         {
@@ -49,6 +49,46 @@
           "manifest": "./src/webparts/kqOnlineProcesses/KqOnlineProcessesWebPart.manifest.json"
         }
       ]
+    },
+    "kq-company-news-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/kqCompanyNews/KqCompanyNewsWebPart.js",
+          "manifest": "./src/webparts/kqCompanyNews/KqCompanyNewsWebPart.manifest.json"
+        }
+      ]
+    },
+    "kq-video-hub-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/kqVideoHub/KqVideoHubWebPart.js",
+          "manifest": "./src/webparts/kqVideoHub/KqVideoHubWebPart.manifest.json"
+        }
+      ]
+    },
+    "kq-moments-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/kqMoments/KqMomentsWebPart.js",
+          "manifest": "./src/webparts/kqMoments/KqMomentsWebPart.manifest.json"
+        }
+      ]
+    },
+    "kq-viva-exchange-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/kqVivaExchange/KqVivaExchangeWebPart.js",
+          "manifest": "./src/webparts/kqVivaExchange/KqVivaExchangeWebPart.manifest.json"
+        }
+      ]
+    },
+    "kq-socials-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/kqSocials/KqSocialsWebPart.js",
+          "manifest": "./src/webparts/kqSocials/KqSocialsWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
@@ -58,6 +98,11 @@
     "KqCalendarWebPartStrings": "lib/webparts/kqCalendar/loc/{locale}.js",
     "UpcomingeventsWebPartStrings": "lib/webparts/upcomingevents/loc/{locale}.js",
     "KqquickactionsWebPartStrings": "lib/webparts/kqquickactions/loc/{locale}.js",
-    "KqOnlineProcessesWebPartStrings": "lib/webparts/kqOnlineProcesses/loc/{locale}.js"
+    "KqOnlineProcessesWebPartStrings": "lib/webparts/kqOnlineProcesses/loc/{locale}.js",
+    "KqCompanyNewsWebPartStrings": "lib/webparts/kqCompanyNews/loc/{locale}.js",
+    "KqVideoHubWebPartStrings": "lib/webparts/kqVideoHub/loc/{locale}.js",
+    "KqMomentsWebPartStrings": "lib/webparts/kqMoments/loc/{locale}.js",
+    "KqVivaExchangeWebPartStrings": "lib/webparts/kqVivaExchange/loc/{locale}.js",
+    "KqSocialsWebPartStrings": "lib/webparts/kqSocials/loc/{locale}.js"
   }
 }

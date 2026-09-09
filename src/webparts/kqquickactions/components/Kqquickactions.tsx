@@ -21,10 +21,6 @@ import kqLogoBlack from '../assets/kqlogoblack.svg';
 import type { IKqquickactionsProps } from './IKqquickactionsProps';
 
 
-/* ============================================================
-   ICON MAP
-============================================================ */
-
 const QUICK_ACTION_ICONS: Record<QuickActionIcon, React.ElementType> = {
   calendar: CalendarLtr24Regular,
   airplane: Airplane24Regular,
@@ -34,10 +30,6 @@ const QUICK_ACTION_ICONS: Record<QuickActionIcon, React.ElementType> = {
   safety: Shield24Regular
 };
 
-
-/* ============================================================
-   GREETING
-============================================================ */
 
 const getGreeting = (): string => {
   const hour = new Date().getHours();
@@ -55,7 +47,6 @@ const getGreeting = (): string => {
 
 
 const getFirstName = (displayName?: string): string => {
-
   if (!displayName) {
     return 'Amina';
   }
@@ -66,37 +57,23 @@ const getFirstName = (displayName?: string): string => {
     return 'Amina';
   }
 
-  /*
-   * Supports:
-   * Ronald Ekajul
-   * Ekajul, Ronald
-   */
   if (cleanedName.indexOf(',') !== -1) {
-
     const parts = cleanedName.split(',');
 
     if (parts.length > 1 && parts[1].trim()) {
       return parts[1].trim().split(/\s+/)[0];
     }
-
   }
 
   return cleanedName.split(/\s+/)[0];
 };
 
 
-/* ============================================================
-   COMPONENT STATE
-============================================================ */
-
 interface IKqquickactionsState {
   hoveredActionId: number | null;
+  isDarkMode: boolean;
 }
 
-
-/* ============================================================
-   COMPONENT
-============================================================ */
 
 export default class Kqquickactions
   extends React.Component<
@@ -107,36 +84,141 @@ export default class Kqquickactions
   public constructor(props: IKqquickactionsProps) {
     super(props);
 
+    const currentTheme =
+      typeof document !== 'undefined'
+        ? document.documentElement.getAttribute('data-kq-theme')
+        : 'light';
+
     this.state = {
-      hoveredActionId: null
+      hoveredActionId: null,
+      isDarkMode: currentTheme === 'dark'
     };
   }
+
+
+  public componentDidMount(): void {
+    window.addEventListener(
+      'kqworld-theme-change',
+      this.handleThemeChange as EventListener
+    );
+
+    const currentTheme =
+      document.documentElement.getAttribute('data-kq-theme');
+
+    this.setState({
+      isDarkMode: currentTheme === 'dark'
+    });
+  }
+
+
+  public componentWillUnmount(): void {
+    window.removeEventListener(
+      'kqworld-theme-change',
+      this.handleThemeChange as EventListener
+    );
+  }
+
+
+  private handleThemeChange = (event: CustomEvent): void => {
+    const theme = event.detail?.theme;
+
+    this.setState({
+      isDarkMode: theme === 'dark'
+    });
+  };
 
 
   public render(): React.ReactElement<IKqquickactionsProps> {
 
     const { userDisplayName } = this.props;
+    const { isDarkMode } = this.state;
 
     const greeting = getGreeting();
     const firstName = getFirstName(userDisplayName);
+
+    const pageText = isDarkMode ? '#ffffff' : '#1d1d1d';
+    const secondaryText = isDarkMode ? '#c7ccd4' : '#929292';
+
+    const cardBackground = isDarkMode
+      ? '#262F3D'
+      : '#ffffff';
+
+    const cardText = isDarkMode
+      ? '#ffffff'
+      : '#292929';
+
+    const cardBorder = isDarkMode
+      ? '1px solid rgba(255, 255, 255, 0.08)'
+      : '1px solid rgba(0, 0, 0, 0.13)';
 
 
     return (
 
       <section
+        className="kq-quick-actions-root"
         style={{
-          width: '100%',
-          maxWidth: '100%',
           boxSizing: 'border-box',
-          overflow: 'hidden',
+          overflow: 'visible',
           fontFamily: '"Segoe UI", Arial, Helvetica, sans-serif'
         }}
       >
 
+        <style>
+          {`
+            .kq-quick-actions-root {
+              width: calc(100% + 70px);
+              max-width: none;
+              margin-left: -50px;
+              margin-right: 0;
+            }
 
-        {/* ====================================================
-            WELCOME
-        ==================================================== */}
+            .kq-quick-actions-grid {
+              display: grid;
+              grid-template-columns: repeat(6, minmax(0, 1fr));
+              gap: 14px;
+              width: 100%;
+              box-sizing: border-box;
+            }
+
+            .kq-quick-action-card {
+              min-width: 0;
+            }
+
+            @media (max-width: 1100px) {
+              .kq-quick-actions-root {
+                width: calc(100% + 16px);
+                margin-left: -16px;
+              }
+
+              .kq-quick-actions-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+              }
+            }
+
+            @media (max-width: 700px) {
+              .kq-quick-actions-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
+              }
+            }
+
+            @media (max-width: 600px) {
+              .kq-quick-actions-root {
+                width: 100%;
+                margin-left: 0;
+              }
+            }
+
+            @media (max-width: 430px) {
+              .kq-quick-actions-grid {
+                grid-template-columns: 1fr;
+              }
+            }
+          `}
+        </style>
+
+
+        {/* Welcome */}
 
         <div
           style={{
@@ -146,9 +228,6 @@ export default class Kqquickactions
             marginBottom: '22px'
           }}
         >
-
-
-          {/* Small heading + logo */}
 
           <div
             style={{
@@ -161,10 +240,10 @@ export default class Kqquickactions
 
             <span
               style={{
-                color: '#1d1d1d',
-                fontSize: '11px',
+                color: pageText,
+                fontSize: '10px',
                 lineHeight: 1,
-                fontWeight: 700,
+                fontWeight: 600,
                 letterSpacing: '0.03em',
                 whiteSpace: 'nowrap'
               }}
@@ -177,9 +256,12 @@ export default class Kqquickactions
               style={{
                 display: 'block',
                 width: '1px',
-                height: '22px',
+                height: '20px',
                 flexShrink: 0,
-                backgroundColor: '#333333'
+                backgroundColor:
+                  isDarkMode
+                    ? 'rgba(255,255,255,0.65)'
+                    : '#333333'
               }}
             />
 
@@ -189,28 +271,38 @@ export default class Kqquickactions
               alt="KQ World"
               style={{
                 display: 'block',
-                width: '76px',
+                width: '72px',
                 height: 'auto',
-                objectFit: 'contain'
+                objectFit: 'contain',
+
+                /*
+                 * The supplied asset is the black KQ World logo.
+                 * In dark mode this turns it white without changing
+                 * the source asset.
+                 */
+                filter: isDarkMode
+                  ? 'brightness(0) invert(1)'
+                  : 'none'
               }}
             />
 
           </div>
 
 
-          {/* Greeting */}
-
           <h2
             style={{
               margin: 0,
               padding: 0,
 
-              color: '#ed1111',
+              color:
+                isDarkMode
+                  ? '#ffffff'
+                  : '#ed1111',
 
-              fontSize: 'clamp(18px, 1.6vw, 24px)',
+              fontSize: 'clamp(17px, 1.35vw, 21px)',
               lineHeight: 1.2,
 
-              fontWeight: 700,
+              fontWeight: 600,
               fontStyle: 'italic',
 
               letterSpacing: 0
@@ -220,16 +312,14 @@ export default class Kqquickactions
           </h2>
 
 
-          {/* Subtitle */}
-
           <p
             style={{
-              margin: '12px 0 0 0',
+              margin: '10px 0 0 0',
               padding: 0,
 
-              color: '#929292',
+              color: secondaryText,
 
-              fontSize: '13px',
+              fontSize: '12px',
               lineHeight: 1.45,
 
               fontWeight: 400
@@ -241,10 +331,7 @@ export default class Kqquickactions
         </div>
 
 
-
-        {/* ====================================================
-            QUICK ACTIONS HERO
-        ==================================================== */}
+        {/* Quick Actions hero */}
 
         <div
           style={{
@@ -253,7 +340,7 @@ export default class Kqquickactions
             width: '100%',
             maxWidth: '100%',
 
-            minHeight: '315px',
+            minHeight: '300px',
 
             boxSizing: 'border-box',
 
@@ -266,10 +353,9 @@ export default class Kqquickactions
             backgroundPosition: 'center right',
             backgroundRepeat: 'no-repeat',
 
-            padding: '34px 38px 36px 38px'
+            padding: '30px 38px 34px 38px'
           }}
         >
-
 
           <div
             style={{
@@ -283,27 +369,22 @@ export default class Kqquickactions
             }}
           >
 
-
-            {/* QUICK ACTIONS */}
-
             <div
               style={{
-                marginBottom: '9px',
+                marginBottom: '8px',
 
                 color: '#171717',
 
                 fontSize: '10px',
                 lineHeight: 1,
 
-                fontWeight: 700,
-                letterSpacing: '0.07em'
+                fontWeight: 600,
+                letterSpacing: '0.06em'
               }}
             >
               QUICK ACTIONS
             </div>
 
-
-            {/* Heading */}
 
             <h3
               style={{
@@ -312,10 +393,10 @@ export default class Kqquickactions
 
                 color: '#111111',
 
-                fontSize: 'clamp(19px, 1.6vw, 25px)',
+                fontSize: 'clamp(17px, 1.35vw, 21px)',
                 lineHeight: 1.15,
 
-                fontWeight: 700,
+                fontWeight: 600,
                 fontStyle: 'italic'
               }}
             >
@@ -323,29 +404,12 @@ export default class Kqquickactions
             </h3>
 
 
-
-            {/* =================================================
-                ACTION CARDS
-            ================================================= */}
-
             <div
+              className="kq-quick-actions-grid"
               style={{
-                width: '100%',
-                maxWidth: '100%',
-
-                boxSizing: 'border-box',
-
-                display: 'grid',
-
-                gridTemplateColumns:
-                  'repeat(6, minmax(0, 1fr))',
-
-                gap: '14px',
-
-                marginTop: '29px'
+                marginTop: '25px'
               }}
             >
-
 
               {quickActions.map((action) => {
 
@@ -358,6 +422,8 @@ export default class Kqquickactions
                 return (
 
                   <a
+                    className="kq-quick-action-card"
+
                     key={action.id}
 
                     href={action.url}
@@ -403,42 +469,37 @@ export default class Kqquickactions
                     }}
                   >
 
-
-                    {/* CARD */}
-
                     <div
                       style={{
                         width: '100%',
 
                         aspectRatio: '1 / 1.05',
 
-                        minHeight: '145px',
-                        maxHeight: '165px',
+                        minHeight: '140px',
+                        maxHeight: '158px',
 
                         boxSizing: 'border-box',
 
-                        padding: '14px',
+                        padding: '13px',
 
-                        /*
-                         * NORMAL = WHITE
-                         * HOVER = ACTION COLOUR
-                         */
                         backgroundColor:
                           isHovered
                             ? action.accent
-                            : '#ffffff',
+                            : cardBackground,
 
                         border:
                           isHovered
                             ? `1px solid ${action.accent}`
-                            : '1px solid rgba(0, 0, 0, 0.13)',
+                            : cardBorder,
 
                         borderRadius: '13px',
 
                         boxShadow:
                           isHovered
                             ? '0 6px 14px rgba(0,0,0,0.18)'
-                            : '0 3px 8px rgba(0,0,0,0.11)',
+                            : isDarkMode
+                              ? '0 3px 10px rgba(0,0,0,0.18)'
+                              : '0 3px 8px rgba(0,0,0,0.11)',
 
                         display: 'flex',
                         flexDirection: 'column',
@@ -448,9 +509,6 @@ export default class Kqquickactions
 
                         cursor: 'pointer',
 
-                        /*
-                         * Smooth Figma-style transition
-                         */
                         transition:
                           'background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease',
 
@@ -461,44 +519,35 @@ export default class Kqquickactions
                       }}
                     >
 
-
-                      {/* TOP */}
-
                       <div
                         style={{
                           minWidth: 0
                         }}
                       >
 
-
-                        {/* Icon circle */}
+                        {/* Icon */}
 
                         <div
                           style={{
-                            width: '36px',
-                            height: '36px',
+                            width: '34px',
+                            height: '34px',
 
                             flexShrink: 0,
 
                             borderRadius: '50%',
 
-                            /*
-                             * NORMAL:
-                             * coloured circle
-                             *
-                             * HOVER:
-                             * white circle
-                             */
                             backgroundColor:
                               isHovered
                                 ? '#ffffff'
-                                : action.accent,
+                                : isDarkMode
+                                  ? '#ffffff'
+                                  : action.accent,
 
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
 
-                            marginBottom: '14px',
+                            marginBottom: '12px',
 
                             transition:
                               'background-color 180ms ease'
@@ -507,20 +556,15 @@ export default class Kqquickactions
 
                           <Icon
                             style={{
-                              width: '18px',
-                              height: '18px',
+                              width: '17px',
+                              height: '17px',
 
-                              /*
-                               * NORMAL:
-                               * white icon
-                               *
-                               * HOVER:
-                               * coloured icon
-                               */
                               color:
                                 isHovered
                                   ? action.accent
-                                  : '#ffffff',
+                                  : isDarkMode
+                                    ? '#262F3D'
+                                    : '#ffffff',
 
                               transition:
                                 'color 180ms ease'
@@ -530,23 +574,16 @@ export default class Kqquickactions
                         </div>
 
 
-                        {/* Title */}
+                        {/* Card title */}
 
                         <div
                           style={{
-                            /*
-                             * NORMAL:
-                             * dark title
-                             *
-                             * HOVER:
-                             * white title
-                             */
                             color:
                               isHovered
                                 ? '#ffffff'
-                                : '#292929',
+                                : cardText,
 
-                            fontSize: '12px',
+                            fontSize: '11px',
                             lineHeight: 1.2,
 
                             fontWeight: 400,
@@ -564,8 +601,7 @@ export default class Kqquickactions
                       </div>
 
 
-
-                      {/* START */}
+                      {/* Start */}
 
                       <div
                         style={{
@@ -575,15 +611,8 @@ export default class Kqquickactions
                           alignItems: 'center',
                           justifyContent: 'space-between',
 
-                          /*
-                           * NORMAL:
-                           * action colour
-                           *
-                           * HOVER:
-                           * white
-                           */
                           color:
-                            isHovered
+                            isHovered || isDarkMode
                               ? '#ffffff'
                               : action.accent,
 
@@ -594,7 +623,7 @@ export default class Kqquickactions
 
                         <span
                           style={{
-                            fontSize: '11px',
+                            fontSize: '10px',
                             lineHeight: 1,
                             fontWeight: 500
                           }}
@@ -605,14 +634,13 @@ export default class Kqquickactions
 
                         <ArrowUpRight20Regular
                           style={{
-                            width: '17px',
-                            height: '17px',
+                            width: '16px',
+                            height: '16px',
                             flexShrink: 0
                           }}
                         />
 
                       </div>
-
 
                     </div>
 
