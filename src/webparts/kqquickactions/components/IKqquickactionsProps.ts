@@ -1,6 +1,6 @@
+import { WebPartContext } from '@microsoft/sp-webpart-base';
+
 export interface IKqquickactionsProps {
-  description: string;
-  isDarkTheme: boolean;
-  environmentMessage: string;
-  userDisplayName: string;
+  context: WebPartContext;
+  userDisplayName?: string;
 }

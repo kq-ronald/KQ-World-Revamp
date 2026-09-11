@@ -8,86 +8,158 @@ import {
 } from '@microsoft/sp-webpart-base';
 
 import {
-  IKqVideo
+  IKqVideo,
+  KqVideoCategory
 } from '../models/IKqVideo';
 
 interface ISharePointVideoItem {
   Id: number;
-  Title: string;
+  Title?: string;
 
-  VideoLink?:
+  VideoUrl?:
+    | string
     | {
         Url?: string;
-      }
-    | string;
+        Description?: string;
+      };
 
   Thumbnail?:
+    | string
     | {
         Url?: string;
-      }
+      };
+
+  Category?: string;
+
+  IsPublished?:
+    | boolean
+    | number
     | string;
+
+  DisplayOrder?: number;
 }
 
 export default class KqVideoService {
   private readonly _context:
     WebPartContext;
 
-  private readonly _parentWebUrl:
-    string;
+  private readonly _listName =
+    'KQ Videos Dev';
 
   public constructor(
     context: WebPartContext
   ) {
-    this._context = context;
-
-    this._parentWebUrl =
-      `${window.location.origin}/homepage`;
+    this._context =
+      context;
   }
 
   public async getVideos():
     Promise<IKqVideo[]> {
 
+    const webUrl =
+      this._context
+        .pageContext
+        .web
+        .absoluteUrl;
+
     const url =
-      `${this._parentWebUrl}` +
-      `/_api/web/lists/getbytitle('Videos')/items` +
-      `?$select=Id,Title,Thumbnail,VideoLink` +
-      `&$orderby=Created desc` +
-      `&$top=12`;
+      `${webUrl}` +
+      `/_api/web/lists/getbytitle('${this._listName}')/items` +
+      `?$top=100`;
+
+    console.log(
+      'KQ Videos DEV request:',
+      url
+    );
 
     const response:
       SPHttpClientResponse =
-        await this._context.spHttpClient.get(
-          url,
-          SPHttpClient.configurations.v1,
-          {
-            headers: {
-              Accept:
-                'application/json;odata=nometadata'
+        await this._context
+          .spHttpClient
+          .get(
+            url,
+            SPHttpClient
+              .configurations
+              .v1,
+            {
+              headers: {
+                Accept:
+                  'application/json;odata=nometadata'
+              }
             }
-          }
-        );
+          );
 
     if (!response.ok) {
+      const errorText =
+        await response.text();
+
+      console.error(
+        'KQ Videos DEV SharePoint error:',
+        response.status,
+        response.statusText,
+        errorText
+      );
+
       throw new Error(
-        `Unable to load videos. ${response.status} ${response.statusText}`
+        `Unable to load videos. SharePoint returned ${response.status}.`
       );
     }
 
-    const data =
-      await response.json();
+    const data:
+      {
+        value:
+          ISharePointVideoItem[];
+      } =
+        await response.json();
 
-    const items:
-      ISharePointVideoItem[] =
-        data.value || [];
+    const items =
+      data.value || [];
+
+    console.log(
+      'KQ Videos DEV raw items:',
+      items
+    );
+
+    if (
+      items.length > 0
+    ) {
+      console.log(
+        'KQ Videos DEV field names:',
+        Object.keys(
+          items[0]
+        )
+      );
+    }
 
     return items
+      .filter(
+        (
+          item:
+            ISharePointVideoItem
+        ) =>
+          this._isPublished(
+            item.IsPublished
+          )
+      )
+      .sort(
+        (
+          first,
+          second
+        ) =>
+          this._getDisplayOrder(
+            first
+          ) -
+          this._getDisplayOrder(
+            second
+          )
+      )
       .map(
         (
           item:
-            ISharePointVideoItem,
-          index: number
+            ISharePointVideoItem
         ): IKqVideo => ({
-          id: item.Id,
+          id:
+            item.Id,
 
           title:
             item.Title ||
@@ -95,100 +167,85 @@ export default class KqVideoService {
 
           videoUrl:
             this._getUrlValue(
-              item.VideoLink
+              item.VideoUrl
             ),
 
           thumbnailUrl:
-            this._getUrlValue(
+            this._getImageUrl(
               item.Thumbnail
             ),
 
-          /*
-           * The existing Videos list does not
-           * currently expose a confirmed category
-           * field, so we keep all real items usable.
-           *
-           * Replace this with a real SharePoint
-           * category field later if one exists.
-           */
           category:
-            index % 2 === 0
-              ? 'beyond-terminal'
-              : 'corporate-stories'
+            this._mapCategory(
+              item.Category
+            )
         })
       )
       .filter(
         (
-          video: IKqVideo
+          video:
+            IKqVideo
         ) =>
           !!video.videoUrl
       );
   }
 
-  public async getFeaturedVideo():
-    Promise<IKqVideo | undefined> {
+  private _isPublished(
+    value:
+      boolean |
+      number |
+      string |
+      undefined
+  ): boolean {
 
-    const url =
-      `${this._parentWebUrl}` +
-      `/_api/web/lists/getbytitle('Streaming Videos')/items` +
-      `?$select=Id,Title,VideoLink` +
-      `&$orderby=Created desc` +
-      `&$top=1`;
+    return (
+      value === true ||
+      value === 1 ||
+      String(
+        value
+      ).toLowerCase() ===
+        'true'
+    );
+  }
 
-    const response:
-      SPHttpClientResponse =
-        await this._context.spHttpClient.get(
-          url,
-          SPHttpClient.configurations.v1,
-          {
-            headers: {
-              Accept:
-                'application/json;odata=nometadata'
-            }
-          }
-        );
+  private _getDisplayOrder(
+    item:
+      ISharePointVideoItem
+  ): number {
 
-    if (!response.ok) {
-      return undefined;
-    }
+    return (
+      typeof item.DisplayOrder ===
+      'number'
+        ? item.DisplayOrder
+        : 9999
+    );
+  }
 
-    const data =
-      await response.json();
+  private _mapCategory(
+    value?: string
+  ): KqVideoCategory {
 
-    const items:
-      ISharePointVideoItem[] =
-        data.value || [];
+    const category =
+      (
+        value || ''
+      )
+        .trim()
+        .toLowerCase();
 
-    if (items.length === 0) {
-      return undefined;
-    }
-
-    const item =
-      items[0];
-
-    const videoUrl =
-      this._getUrlValue(
-        item.VideoLink
+    if (
+      category ===
+        'corporate stories' ||
+      category ===
+        'corporate-stories'
+    ) {
+      return (
+        'corporate-stories'
       );
-
-    if (!videoUrl) {
-      return undefined;
     }
 
-    return {
-      id: item.Id,
-
-      title:
-        item.Title ||
-        'Featured Video',
-
-      videoUrl,
-
-      thumbnailUrl: '',
-
-      category:
-        'beyond-terminal'
-    };
+    return (
+      'beyond-terminal'
+    );
   }
 
   private _getUrlValue(
@@ -196,6 +253,7 @@ export default class KqVideoService {
       | string
       | {
           Url?: string;
+          Description?: string;
         }
       | undefined
   ): string {
@@ -211,6 +269,109 @@ export default class KqVideoService {
       return value;
     }
 
-    return value.Url || '';
+    return (
+      value.Url || ''
+    );
+  }
+
+  private _getImageUrl(
+    value:
+      | string
+      | {
+          Url?: string;
+        }
+      | undefined
+  ): string {
+
+    if (!value) {
+      return '';
+    }
+
+    if (
+      typeof value !==
+      'string'
+    ) {
+      return (
+        value.Url || ''
+      );
+    }
+
+    try {
+      const parsed =
+        JSON.parse(
+          value
+        );
+
+      if (
+        parsed &&
+        typeof parsed ===
+        'object'
+      ) {
+
+        if (
+          typeof parsed.serverUrl ===
+            'string' &&
+          typeof parsed.serverRelativeUrl ===
+            'string'
+        ) {
+          return (
+            parsed.serverUrl +
+            parsed.serverRelativeUrl
+          );
+        }
+
+        if (
+          typeof parsed.serverRelativeUrl ===
+          'string'
+        ) {
+          return (
+            window.location.origin +
+            parsed.serverRelativeUrl
+          );
+        }
+
+        if (
+          typeof parsed.Url ===
+          'string'
+        ) {
+          return (
+            parsed.Url
+          );
+        }
+
+        if (
+          typeof parsed.url ===
+          'string'
+        ) {
+          return (
+            parsed.url
+          );
+        }
+      }
+    } catch {
+      if (
+        value.indexOf(
+          'http://'
+        ) === 0 ||
+        value.indexOf(
+          'https://'
+        ) === 0
+      ) {
+        return value;
+      }
+
+      if (
+        value.indexOf(
+          '/'
+        ) === 0
+      ) {
+        return (
+          window.location.origin +
+          value
+        );
+      }
+    }
+
+    return '';
   }
 }

@@ -260,13 +260,13 @@ export default class KqCompanyNews
             {item.title}
           </h3>
 
-          {item.description && (
+          {item.moreInfo && (
             <p
               className={
                 styles.cardDescription
               }
             >
-              {item.description}
+              {item.moreInfo}
             </p>
           )}
 
@@ -341,13 +341,13 @@ export default class KqCompanyNews
             {item.title}
           </h3>
 
-          {item.description && (
+          {item.moreInfo && (
             <p
               className={
                 styles.cardDescription
               }
             >
-              {item.description}
+              {item.moreInfo}
             </p>
           )}
 

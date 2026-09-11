@@ -7,20 +7,58 @@ import {
 
 import { IIntranetBannerProps } from './IIntranetBannerProps';
 
-import {
-  IIntranetBannerItem,
-  ISharePointBannerItem
-} from '../data/intranetBannerData';
+interface ISharePointBanner {
+  Id: number;
+  Title?: string;
+  IsPublished?: boolean;
+  DisplayOrder?: number;
+  StartDate?: string;
+  EndDate?: string;
+  CTAText?: string;
+  CTAUrl?:
+  | string
+  | {
+    Url?: string;
+    Description?: string;
+  };
+  File?: {
+    Name: string;
+    ServerRelativeUrl: string;
+  };
+}
+
+interface IHomepageBanner {
+  id: number;
+  image: string;
+  headline: string;
+  description: string;
+  url: string;
+  ctaText: string;
+}
 
 const IntranetBanner: React.FC<IIntranetBannerProps> = ({
   context
 }) => {
   const [isDarkMode, setIsDarkMode] =
     React.useState<boolean>(() => {
-      return document.documentElement.getAttribute(
-        'data-kq-theme'
-      ) === 'dark';
+      return (
+        document.documentElement.getAttribute(
+          'data-kq-theme'
+        ) === 'dark'
+      );
     });
+
+  const [banners, setBanners] =
+    React.useState<IHomepageBanner[]>([]);
+
+  const [activeIndex, setActiveIndex] =
+    React.useState<number>(0);
+
+  const [isLoading, setIsLoading] =
+    React.useState<boolean>(true);
+
+  const [hasError, setHasError] =
+    React.useState<boolean>(false);
 
   React.useEffect(() => {
     const handleThemeChange = (
@@ -48,122 +86,172 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
       );
     };
   }, []);
-  const [banners, setBanners] =
-    React.useState<IIntranetBannerItem[]>([]);
-
-  const [activeIndex, setActiveIndex] =
-    React.useState<number>(0);
-
-  const [isLoading, setIsLoading] =
-    React.useState<boolean>(true);
-
-  const [hasError, setHasError] =
-    React.useState<boolean>(false);
 
   React.useEffect(() => {
     let isMounted = true;
 
-    const loadBanners = async (): Promise<void> => {
-      try {
-        setIsLoading(true);
-        setHasError(false);
+    const loadBanners =
+      async (): Promise<void> => {
+        try {
+          setIsLoading(true);
+          setHasError(false);
 
-        const webUrl =
-          context.pageContext.web.absoluteUrl;
+          const webUrl =
+            context.pageContext.web.absoluteUrl;
 
-        const libraryName =
-          'KQ Intranet Banners Dev';
+          const libraryName =
+            'KQ Intranet Banners Dev';
 
-        const endpoint =
-          `${webUrl}/_api/web/lists/getbytitle('${libraryName}')/items` +
-          `?$select=Id,Title,File/Name,File/ServerRelativeUrl` +
-          `&$expand=File` +
-          `&$orderby=Modified desc` +
-          `&$top=10`;
+          const endpoint =
+            `${webUrl}/_api/web/lists/getbytitle('${libraryName}')/items` +
+            `?$select=Id,Title,IsPublished,DisplayOrder,StartDate,EndDate,CTAText,CTAUrl,File/Name,File/ServerRelativeUrl` +
+            `&$expand=File` +
+            `&$filter=IsPublished eq 1` +
+            `&$orderby=DisplayOrder asc` +
+            `&$top=10`;
 
-        const response: SPHttpClientResponse =
-          await context.spHttpClient.get(
-            endpoint,
-            SPHttpClient.configurations.v1
+          const response: SPHttpClientResponse =
+            await context.spHttpClient.get(
+              endpoint,
+              SPHttpClient.configurations.v1
+            );
+
+          if (!response.ok) {
+            const errorText =
+              await response.text();
+
+            throw new Error(
+              `Unable to load banners. ` +
+              `SharePoint returned ${response.status}. ` +
+              errorText
+            );
+          }
+
+          const data: {
+            value: ISharePointBanner[];
+          } = await response.json();
+
+          const now = new Date();
+
+          const imageExtensions = [
+            '.jpg',
+            '.jpeg',
+            '.png',
+            '.webp',
+            '.gif',
+            '.svg'
+          ];
+
+          const items: IHomepageBanner[] =
+            data.value
+              .filter((item) => {
+                if (!item.File) {
+                  return false;
+                }
+
+                const fileName =
+                  item.File.Name.toLowerCase();
+
+                const isImage =
+                  imageExtensions.some(
+                    (extension) =>
+                      fileName.endsWith(
+                        extension
+                      )
+                  );
+
+                if (!isImage) {
+                  return false;
+                }
+
+                const startDate =
+                  item.StartDate
+                    ? new Date(
+                      item.StartDate
+                    )
+                    : undefined;
+
+                const endDate =
+                  item.EndDate
+                    ? new Date(
+                      item.EndDate
+                    )
+                    : undefined;
+
+                const hasStarted =
+                  !startDate ||
+                  startDate <= now;
+
+                const hasNotEnded =
+                  !endDate ||
+                  endDate >= now;
+
+                return (
+                  hasStarted &&
+                  hasNotEnded
+                );
+              })
+              .map((item) => {
+                const fileUrl =
+                  `${window.location.origin}` +
+                  `${item.File?.ServerRelativeUrl}`;
+
+                let ctaUrl = '';
+
+                if (
+                  typeof item.CTAUrl ===
+                  'string'
+                ) {
+                  ctaUrl =
+                    item.CTAUrl;
+                } else if (
+                  item.CTAUrl?.Url
+                ) {
+                  ctaUrl =
+                    item.CTAUrl.Url;
+                }
+
+                return {
+                  id: item.Id,
+
+                  image: fileUrl,
+
+                  headline:
+                    item.Title ||
+                    item.File?.Name ||
+                    'KQ Intranet Banner',
+
+                  description: '',
+
+                  url: ctaUrl,
+
+                  ctaText:
+                    item.CTAText || ''
+                };
+              });
+
+          if (isMounted) {
+            setBanners(items);
+            setActiveIndex(0);
+          }
+        } catch (error) {
+          console.error(
+            'Error loading KQ Intranet banners:',
+            error
           );
 
-        if (!response.ok) {
-          throw new Error(
-            `Unable to load banners. Status: ${response.status}`
-          );
+          if (isMounted) {
+            setHasError(true);
+            setBanners([]);
+          }
+        } finally {
+          if (isMounted) {
+            setIsLoading(false);
+          }
         }
+      };
 
-        const data: {
-          value: ISharePointBannerItem[];
-        } = await response.json();
-
-        const imageExtensions = [
-          '.jpg',
-          '.jpeg',
-          '.png',
-          '.webp',
-          '.gif',
-          '.svg'
-        ];
-
-        const items: IIntranetBannerItem[] =
-          data.value
-            .filter((item) => {
-              if (!item.File) {
-                return false;
-              }
-
-              const fileName =
-                item.File.Name.toLowerCase();
-
-              return imageExtensions.some(
-                (extension) =>
-                  fileName.endsWith(extension)
-              );
-            })
-            .map((item) => {
-              const fileUrl =
-                `${window.location.origin}${item.File?.ServerRelativeUrl}`;
-
-              return {
-                id: item.Id,
-                image: fileUrl,
-                headline:
-                  item.Title ||
-                  item.File?.Name ||
-                  'KQ Intranet Banner',
-                description: '',
-                url: ''
-              };
-            });
-
-        if (isMounted) {
-          setBanners(items);
-          setActiveIndex(0);
-        }
-      } catch (error) {
-        console.error(
-          'Error loading KQ Intranet banners:',
-          error
-        );
-
-        if (isMounted) {
-          setHasError(true);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    loadBanners()
-      .catch((error) => {
-        console.error(
-          'Unexpected banner loading error:',
-          error
-        );
-      });
+    void loadBanners();
 
     return () => {
       isMounted = false;
@@ -193,7 +281,8 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
     event.stopPropagation();
 
     setActiveIndex((current) =>
-      current === banners.length - 1
+      current ===
+        banners.length - 1
         ? 0
         : current + 1
     );
@@ -250,7 +339,9 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
 
   return (
     <section
-      className={`${styles.intranetBanner} ${isDarkMode ? styles.darkMode : styles.lightMode
+      className={`${styles.intranetBanner} ${isDarkMode
+        ? styles.darkMode
+        : styles.lightMode
         }`}
     >
       <div
@@ -282,8 +373,18 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
         />
 
         {activeBanner.url && (
-          <a
-            href={activeBanner.url}
+          <button
+            type="button"
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+
+              window.open(
+                activeBanner.url,
+                '_blank',
+                'noopener,noreferrer'
+              );
+            }}
             aria-label={`Read more about ${activeBanner.headline}`}
             style={{
               position: 'absolute',
@@ -296,6 +397,7 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
               height: '40px',
               paddingLeft: '16px',
               paddingRight: '5px',
+              border: 0,
               borderRadius: '999px',
               backgroundColor: '#000000',
               color: '#ffffff',
@@ -303,11 +405,14 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
               fontWeight: 400,
               lineHeight: 1,
               textDecoration: 'none',
-              boxSizing: 'border-box'
+              boxSizing: 'border-box',
+              cursor: 'pointer',
+              fontFamily: 'inherit'
             }}
           >
             <span>
-              Get The Whole Story
+              {activeBanner.ctaText ||
+                'Get The Whole Story'}
             </span>
 
             <span
@@ -327,7 +432,7 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
             >
               ↗
             </span>
-          </a>
+          </button>
         )}
 
         {banners.length > 1 && (
@@ -349,32 +454,42 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
                 gap: '4px'
               }}
             >
-              {banners.map((banner, index) => (
-                <button
-                  key={banner.id}
-                  type="button"
-                  onClick={(event) =>
-                    goToSlide(index, event)
-                  }
-                  aria-label={`View banner ${index + 1}`}
-                  style={{
-                    width:
-                      index === activeIndex
-                        ? '30px'
-                        : '24px',
-                    height: '5px',
-                    border: 0,
-                    padding: 0,
-                    margin: 0,
-                    borderRadius: '999px',
-                    backgroundColor:
-                      index === activeIndex
-                        ? '#e30613'
-                        : '#808080',
-                    cursor: 'pointer'
-                  }}
-                />
-              ))}
+              {banners.map(
+                (banner, index) => (
+                  <button
+                    key={banner.id}
+                    type="button"
+                    onClick={(event) =>
+                      goToSlide(
+                        index,
+                        event
+                      )
+                    }
+                    aria-label={
+                      `View banner ${index + 1}`
+                    }
+                    style={{
+                      width:
+                        index ===
+                          activeIndex
+                          ? '30px'
+                          : '24px',
+                      height: '5px',
+                      border: 0,
+                      padding: 0,
+                      margin: 0,
+                      borderRadius:
+                        '999px',
+                      backgroundColor:
+                        index ===
+                          activeIndex
+                          ? '#e30613'
+                          : '#808080',
+                      cursor: 'pointer'
+                    }}
+                  />
+                )
+              )}
             </div>
 
             <button

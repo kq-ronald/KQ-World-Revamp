@@ -5,4 +5,668 @@
   padding: 0;
   box-sizing: border-box;
   overflow: visible;
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+}
+
+.kqquickactions *,
+.kqquickactions *::before,
+.kqquickactions *::after {
+  box-sizing: border-box;
+}
+
+/* Welcome */
+
+.welcomeSection {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 0 22px;
+}
+
+.welcomeTop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 13px;
+}
+
+.welcomeLabel {
+  color: #1d1d1d;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.welcomeDivider {
+  display: block;
+  width: 1px;
+  height: 20px;
+  flex-shrink: 0;
+  background: #333333;
+}
+
+.kqLogo {
+  display: block;
+  width: 72px;
+  height: auto;
+  object-fit: contain;
+}
+
+.greeting {
+  margin: 0;
+  padding: 0;
+
+  color: #ed1111;
+
+  font-size: clamp(
+    17px,
+    1.35vw,
+    21px
+  );
+
+  line-height: 1.2;
+  font-weight: 600;
+  font-style: italic;
+}
+
+.welcomeText {
+  margin: 10px 0 0;
+  padding: 0;
+
+  color: #929292;
+
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 400;
+}
+
+/* Hero */
+
+.quickActionsHero {
+  position: relative;
+
+  width: 100%;
+  max-width: 100%;
+
+  min-height: 300px;
+
+  padding: 30px 38px 34px;
+
+  overflow: hidden;
+
+  border-radius: 14px;
+
+  background-image:
+    url("../assets/quick-actions-bg.svg");
+
+  background-size: cover;
+  background-position: center right;
+  background-repeat: no-repeat;
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+
+  width: 100%;
+  max-width: 100%;
+}
+
+.sectionLabel {
+  margin: 0 0 8px;
+  padding: 0;
+
+  color: #171717;
+
+  font-size: 10px;
+  line-height: 1;
+
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.heroTitle {
+  margin: 0;
+  padding: 0;
+
+  color: #111111;
+
+  font-size: clamp(
+    17px,
+    1.35vw,
+    21px
+  );
+
+  line-height: 1.15;
+
+  font-weight: 600;
+  font-style: italic;
+}
+
+/* Grid */
+
+.quickActionsGrid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      6,
+      minmax(0, 1fr)
+    );
+
+  gap: 14px;
+
+  width: 100%;
+  max-width: 100%;
+
+  margin-top: 25px;
+}
+
+/* Card */
+
+.quickActionCard {
+  --action-accent: #21c26a;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  width: 100%;
+  min-width: 0;
+
+  min-height: 145px;
+
+  padding: 13px;
+
+  color: #292929;
+  text-decoration: none;
+
+  background: #ffffff;
+
+  border:
+    1px solid
+    rgba(0, 0, 0, 0.13);
+
+  border-radius: 13px;
+
+  box-shadow:
+    0 3px 8px
+    rgba(0, 0, 0, 0.11);
+
+  outline: none;
+
+  cursor: pointer;
+
+  overflow: hidden;
+
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.quickActionCard:hover,
+.quickActionCard:focus-visible {
+  color: #ffffff;
+
+  background:
+    var(--action-accent);
+
+  border-color:
+    var(--action-accent);
+
+  box-shadow:
+    0 6px 14px
+    rgba(0, 0, 0, 0.18);
+
+  transform:
+    translateY(-2px);
+}
+
+.cardTop {
+  min-width: 0;
+}
+
+.iconCircle {
+  width: 34px;
+  height: 34px;
+
+  margin-bottom: 12px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background:
+    var(--action-accent);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition:
+    background-color 180ms ease;
+}
+
+.cardIcon {
+  width: 17px;
+  height: 17px;
+
+  color: #ffffff;
+
+  transition:
+    color 180ms ease;
+}
+
+.quickActionCard:hover
+.iconCircle,
+.quickActionCard:focus-visible
+.iconCircle {
+  background: #ffffff;
+}
+
+.quickActionCard:hover
+.cardIcon,
+.quickActionCard:focus-visible
+.cardIcon {
+  color:
+    var(--action-accent);
+}
+
+.cardTitle {
+  color: inherit;
+
+  font-size: 11px;
+  line-height: 1.2;
+
+  font-weight: 400;
+
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.cardFooter {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  color:
+    var(--action-accent);
+
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 500;
+
+  transition:
+    color 180ms ease;
+}
+
+.quickActionCard:hover
+.cardFooter,
+.quickActionCard:focus-visible
+.cardFooter {
+  color: #ffffff;
+}
+
+.arrowIcon {
+  width: 16px;
+  height: 16px;
+
+  flex-shrink: 0;
+}
+
+/* Accent colours */
+
+.accentCalendar {
+  --action-accent: #21c26a;
+}
+
+.accentAirplane {
+  --action-accent: #e76825;
+}
+
+.accentTicket {
+  --action-accent: #9d174d;
+}
+
+.accentExpense {
+  --action-accent: #b99a5f;
+}
+
+.accentPayslip {
+  --action-accent: #2f80ed;
+}
+
+.accentSafety {
+  --action-accent: #6b4eff;
+}
+
+/* States */
+
+.statusMessage,
+.errorMessage {
+  margin-top: 24px;
+
+  padding: 14px 16px;
+
+  border-radius: 8px;
+
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.statusMessage {
+  color: #333333;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.7
+    );
+}
+
+.errorMessage {
+  color: #b42318;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.85
+    );
+}
+
+/* Dark mode */
+
+.darkMode {
+  .welcomeLabel {
+    color: #ffffff;
+  }
+
+  .welcomeDivider {
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.65
+      );
+  }
+
+  .kqLogo {
+    filter:
+      brightness(0)
+      invert(1);
+  }
+
+  .greeting {
+    color: #ffffff;
+  }
+
+  .welcomeText {
+    color: #c7ccd4;
+  }
+
+  .quickActionCard {
+    color: #ffffff;
+
+    background: #262f3d;
+
+    border:
+      1px solid
+      rgba(
+        255,
+        255,
+        255,
+        0.08
+      );
+
+    box-shadow:
+      0 3px 10px
+      rgba(
+        0,
+        0,
+        0,
+        0.18
+      );
+  }
+
+  .iconCircle {
+    background: #ffffff;
+  }
+
+  .cardIcon {
+    color: #262f3d;
+  }
+
+  .cardFooter {
+    color: #ffffff;
+  }
+
+  .quickActionCard:hover,
+  .quickActionCard:focus-visible {
+    color: #ffffff;
+
+    background:
+      var(--action-accent);
+
+    border-color:
+      var(--action-accent);
+  }
+
+  .quickActionCard:hover
+  .iconCircle,
+  .quickActionCard:focus-visible
+  .iconCircle {
+    background: #ffffff;
+  }
+
+  .quickActionCard:hover
+  .cardIcon,
+  .quickActionCard:focus-visible
+  .cardIcon {
+    color:
+      var(--action-accent);
+  }
+
+  .statusMessage {
+    color: #ffffff;
+
+    background:
+      rgba(
+        38,
+        47,
+        61,
+        0.9
+      );
+  }
+}
+
+/* Medium desktop */
+
+@media (
+  max-width: 1200px
+) {
+  .quickActionsGrid {
+    grid-template-columns:
+      repeat(
+        3,
+        minmax(0, 1fr)
+      );
+  }
+}
+
+/* Tablet */
+
+@media (
+  max-width: 800px
+) {
+  .quickActionsHero {
+    padding:
+      26px
+      24px
+      28px;
+  }
+
+  .quickActionsGrid {
+    grid-template-columns:
+      repeat(
+        3,
+        minmax(0, 1fr)
+      );
+
+    gap: 12px;
+  }
+
+  .quickActionCard {
+    min-height: 135px;
+  }
+}
+
+/* Mobile */
+
+@media (
+  max-width: 600px
+) {
+  .kqquickactions {
+    width: 100%;
+    max-width: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    overflow: hidden;
+  }
+
+  .welcomeSection {
+    margin-bottom: 18px;
+  }
+
+  .welcomeTop {
+    gap: 8px;
+
+    margin-bottom: 10px;
+  }
+
+  .welcomeLabel {
+    font-size: 9px;
+  }
+
+  .kqLogo {
+    width: 62px;
+  }
+
+  .greeting {
+    font-size: 17px;
+  }
+
+  .welcomeText {
+    font-size: 11px;
+  }
+
+  .quickActionsHero {
+    width: 100%;
+    max-width: 100%;
+
+    min-height: auto;
+
+    padding:
+      22px
+      16px
+      24px;
+
+    border-radius: 12px;
+
+    background-position:
+      center center;
+  }
+
+  .sectionLabel {
+    font-size: 9px;
+  }
+
+  .heroTitle {
+    font-size: 18px;
+  }
+
+  .quickActionsGrid {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+
+    gap: 10px;
+
+    margin-top: 20px;
+  }
+
+  .quickActionCard {
+    min-height: 132px;
+
+    padding: 12px;
+
+    border-radius: 11px;
+  }
+
+  .iconCircle {
+    width: 32px;
+    height: 32px;
+
+    margin-bottom: 10px;
+  }
+
+  .cardIcon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .cardTitle {
+    font-size: 11px;
+  }
+
+  .cardFooter {
+    font-size: 10px;
+  }
+}
+
+/* Small phones */
+
+@media (
+  max-width: 360px
+) {
+  .quickActionsHero {
+    padding:
+      20px
+      13px
+      22px;
+  }
+
+  .quickActionsGrid {
+    gap: 8px;
+  }
+
+  .quickActionCard {
+    min-height: 126px;
+
+    padding: 10px;
+  }
+}
+
+/* Extremely narrow screens */
+
+@media (
+  max-width: 320px
+) {
+  .quickActionsGrid {
+    grid-template-columns: 1fr;
+  }
 }

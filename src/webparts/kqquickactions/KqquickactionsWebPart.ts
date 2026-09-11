@@ -22,15 +22,15 @@ export default class KqquickactionsWebPart extends BaseClientSideWebPart<IKqquic
   private _environmentMessage: string = '';
 
   public render(): void {
-    const element: React.ReactElement<IKqquickactionsProps> = React.createElement(
-      Kqquickactions,
-      {
-        description: this.properties.description,
-        isDarkTheme: this._isDarkTheme,
-        environmentMessage: this._environmentMessage,
-        userDisplayName: this.context.pageContext.user.displayName
-      }
-    );
+    const element: React.ReactElement<IKqquickactionsProps> =
+      React.createElement(
+        Kqquickactions,
+        {
+          context: this.context,
+          userDisplayName:
+            this.context.pageContext.user.displayName
+        }
+      );
 
     ReactDom.render(element, this.domElement);
   }

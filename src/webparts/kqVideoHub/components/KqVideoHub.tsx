@@ -15,20 +15,25 @@ import KqVideoService
 import styles
   from './KqVideoHub.module.scss';
 
-
 interface IKqVideoHubState {
-  videos: IKqVideo[];
-  selectedVideo?: IKqVideo;
+  videos:
+    IKqVideo[];
+
+  selectedVideo?:
+    IKqVideo;
 
   activeCategory:
     KqVideoCategory;
 
-  isLoading: boolean;
-  errorMessage: string;
+  isLoading:
+    boolean;
 
-  isDarkMode: boolean;
+  errorMessage:
+    string;
+
+  isDarkMode:
+    boolean;
 }
-
 
 export default class KqVideoHub
   extends React.Component<
@@ -39,12 +44,13 @@ export default class KqVideoHub
   private readonly _videoService:
     KqVideoService;
 
-
   public constructor(
-    props: IKqVideoHubProps
+    props:
+      IKqVideoHubProps
   ) {
-
-    super(props);
+    super(
+      props
+    );
 
     this._videoService =
       new KqVideoService(
@@ -52,15 +58,18 @@ export default class KqVideoHub
       );
 
     const currentTheme =
-      typeof document !== 'undefined'
-        ? document.documentElement
+      typeof document !==
+      'undefined'
+        ? document
+            .documentElement
             .getAttribute(
               'data-kq-theme'
             )
         : 'light';
 
     this.state = {
-      videos: [],
+      videos:
+        [],
 
       selectedVideo:
         undefined,
@@ -75,10 +84,10 @@ export default class KqVideoHub
         '',
 
       isDarkMode:
-        currentTheme === 'dark'
+        currentTheme ===
+        'dark'
     };
   }
-
 
   public async componentDidMount():
     Promise<void> {
@@ -89,19 +98,20 @@ export default class KqVideoHub
     );
 
     const currentTheme =
-      document.documentElement
+      document
+        .documentElement
         .getAttribute(
           'data-kq-theme'
         );
 
     this.setState({
       isDarkMode:
-        currentTheme === 'dark'
+        currentTheme ===
+        'dark'
     });
 
     await this._loadVideos();
   }
-
 
   public componentWillUnmount():
     void {
@@ -112,9 +122,9 @@ export default class KqVideoHub
     );
   }
 
-
   private _handleThemeChange = (
-    event: CustomEvent
+    event:
+      CustomEvent
   ): void => {
 
     const theme =
@@ -122,60 +132,64 @@ export default class KqVideoHub
 
     this.setState({
       isDarkMode:
-        theme === 'dark'
+        theme ===
+        'dark'
     });
   };
-
 
   private async _loadVideos():
     Promise<void> {
 
     try {
-
       this.setState({
-        isLoading: true,
-        errorMessage: ''
+        isLoading:
+          true,
+
+        errorMessage:
+          ''
       });
 
-      const results =
-        await Promise.all([
-          this._videoService
-            .getVideos(),
-
-          this._videoService
-            .getFeaturedVideo()
-        ]);
-
       const videos =
-        results[0];
+        await this
+          ._videoService
+          .getVideos();
 
-      const featured =
-        results[1];
+      const beyondTerminalVideos =
+        videos.filter(
+          (
+            video:
+              IKqVideo
+          ) =>
+            video.category ===
+            'beyond-terminal'
+        );
 
-      let selected:
-        IKqVideo | undefined =
-          featured;
+      const selectedVideo =
+        beyondTerminalVideos.length > 0
+          ? beyondTerminalVideos[0]
+          : videos.length > 0
+            ? videos[0]
+            : undefined;
 
-      if (
-        !selected &&
-        videos.length > 0
-      ) {
-
-        selected =
-          videos[0];
-      }
+      const activeCategory:
+        KqVideoCategory =
+          selectedVideo?.category ||
+          'beyond-terminal';
 
       this.setState({
         videos,
 
-        selectedVideo:
-          selected,
+        selectedVideo,
+
+        activeCategory,
 
         isLoading:
           false
       });
 
-    } catch (error) {
+    } catch (
+      error
+    ) {
 
       console.error(
         'KQ video hub error:',
@@ -194,9 +208,9 @@ export default class KqVideoHub
     }
   }
 
-
   private _selectVideo(
-    video: IKqVideo
+    video:
+      IKqVideo
   ): void {
 
     this.setState({
@@ -205,40 +219,53 @@ export default class KqVideoHub
     });
   }
 
-
   private _setCategory(
     category:
       KqVideoCategory
   ): void {
 
+    const categoryVideos =
+      this.state
+        .videos
+        .filter(
+          (
+            video:
+              IKqVideo
+          ) =>
+            video.category ===
+            category
+        );
+
     this.setState({
       activeCategory:
-        category
+        category,
+
+      selectedVideo:
+        categoryVideos.length > 0
+          ? categoryVideos[0]
+          : undefined
     });
   }
-
 
   private _getVisibleVideos():
     IKqVideo[] {
 
-    const filtered =
-      this.state.videos.filter(
+    return this.state
+      .videos
+      .filter(
         (
           video:
             IKqVideo
         ) =>
           video.category ===
-          this.state.activeCategory
+          this.state
+            .activeCategory
       );
-
-    return filtered.length > 0
-      ? filtered
-      : this.state.videos;
   }
 
-
   private _getVideoEmbedUrl(
-    url: string
+    url:
+      string
   ): string {
 
     if (!url) {
@@ -254,7 +281,6 @@ export default class KqVideoHub
       youtubeWatch &&
       youtubeWatch[1]
     ) {
-
       return (
         'https://www.youtube.com/embed/' +
         youtubeWatch[1] +
@@ -271,7 +297,6 @@ export default class KqVideoHub
       youtubeShort &&
       youtubeShort[1]
     ) {
-
       return (
         'https://www.youtube.com/embed/' +
         youtubeShort[1] +
@@ -279,19 +304,36 @@ export default class KqVideoHub
       );
     }
 
+    const youtubeEmbed =
+      url.match(
+        /youtube\.com\/embed\/([^?&/]+)/i
+      );
+
+    if (
+      youtubeEmbed &&
+      youtubeEmbed[1]
+    ) {
+      return (
+        'https://www.youtube.com/embed/' +
+        youtubeEmbed[1] +
+        '?autoplay=1'
+      );
+    }
+
     return url;
   }
-
 
   private _renderPlayer():
     React.ReactElement {
 
     const {
       selectedVideo
-    } = this.state;
+    } =
+      this.state;
 
-    if (!selectedVideo) {
-
+    if (
+      !selectedVideo
+    ) {
       return (
         <div
           className={
@@ -309,16 +351,18 @@ export default class KqVideoHub
       );
 
     return (
-
       <div
         className={
           styles.player
         }
       >
-
         <iframe
-          key={embedUrl}
-          src={embedUrl}
+          key={
+            embedUrl
+          }
+          src={
+            embedUrl
+          }
           title={
             selectedVideo.title
           }
@@ -335,7 +379,6 @@ export default class KqVideoHub
             styles.playerOverlay
           }
         >
-
           <div
             className={
               styles.nowPlaying
@@ -351,75 +394,75 @@ export default class KqVideoHub
           >
             {selectedVideo.title}
           </div>
-
         </div>
-
       </div>
     );
   }
 
-
   private _renderVideoItem(
-    video: IKqVideo
+    video:
+      IKqVideo
   ): React.ReactElement {
 
     const isSelected =
-      !!this.state.selectedVideo &&
-      this.state.selectedVideo.id ===
-        video.id;
+      !!this.state
+        .selectedVideo &&
+      this.state
+        .selectedVideo
+        .id ===
+      video.id;
 
     return (
-
       <button
-        key={video.id}
+        key={
+          video.id
+        }
         type="button"
-        onClick={() =>
-          this._selectVideo(
-            video
-          )
+        onClick={
+          () =>
+            this._selectVideo(
+              video
+            )
         }
         className={[
           styles.videoItem,
+
           isSelected
-            ? styles.videoItemSelected
+            ? styles
+                .videoItemSelected
             : ''
         ].join(' ')}
       >
-
         <div
           className={
             styles.videoThumbnail
           }
         >
-
-          {video.thumbnailUrl ? (
-
-            <img
-              src={
-                video.thumbnailUrl
-              }
-              alt=""
-              className={
-                styles.thumbnailImage
-              }
-            />
-
-          ) : (
-
-            <div
-              className={
-                styles.thumbnailFallback
-              }
-            />
-
-          )}
+          {video.thumbnailUrl
+            ? (
+              <img
+                src={
+                  video.thumbnailUrl
+                }
+                alt=""
+                className={
+                  styles.thumbnailImage
+                }
+              />
+            )
+            : (
+              <div
+                className={
+                  styles.thumbnailFallback
+                }
+              />
+            )}
 
           <div
             className={
               styles.thumbnailPlayOverlay
             }
           >
-
             <div
               className={
                 styles.thumbnailPlayButton
@@ -427,23 +470,21 @@ export default class KqVideoHub
             >
               ▶
             </div>
-
           </div>
-
         </div>
-
 
         <div
           className={
             styles.videoItemContent
           }
         >
-
           <div
             className={[
               styles.videoItemTitle,
+
               isSelected
-                ? styles.videoItemTitleSelected
+                ? styles
+                    .videoItemTitleSelected
                 : ''
             ].join(' ')}
           >
@@ -459,13 +500,10 @@ export default class KqVideoHub
               ? 'Now playing'
               : 'Play video'}
           </div>
-
         </div>
-
       </button>
     );
   }
-
 
   public render():
     React.ReactElement<
@@ -477,30 +515,39 @@ export default class KqVideoHub
       errorMessage,
       activeCategory,
       isDarkMode
-    } = this.state;
+    } =
+      this.state;
 
     const videos =
       this._getVisibleVideos();
 
-    return (
+    const webUrl =
+      this.props
+        .context
+        .pageContext
+        .web
+        .absoluteUrl;
 
+    const videoLibraryUrl =
+      `${webUrl}` +
+      `/Lists/KQ%20Videos%20Dev/AllItems.aspx`;
+
+    return (
       <section
         className={[
           styles.kqVideoHub,
+
           isDarkMode
             ? styles.darkMode
             : ''
         ].join(' ')}
       >
-
         <div
           className={
             styles.header
           }
         >
-
           <div>
-
             <div
               className={
                 styles.eyebrow
@@ -516,14 +563,11 @@ export default class KqVideoHub
             >
               Videos... Watch what's happening
             </h2>
-
           </div>
-
 
           <a
             href={
-              `${window.location.origin}` +
-              '/homepage/Lists/Videos/AllItems.aspx'
+              videoLibraryUrl
             }
             target="_blank"
             rel="noreferrer"
@@ -537,12 +581,9 @@ export default class KqVideoHub
               →
             </span>
           </a>
-
         </div>
 
-
         {isLoading && (
-
           <div
             className={
               styles.message
@@ -550,120 +591,118 @@ export default class KqVideoHub
           >
             Loading videos...
           </div>
-
         )}
-
 
         {!isLoading &&
           errorMessage && (
-
-          <div
-            className={
-              styles.error
-            }
-          >
-            {errorMessage}
-          </div>
-
-        )}
-
+            <div
+              className={
+                styles.error
+              }
+            >
+              {errorMessage}
+            </div>
+          )}
 
         {!isLoading &&
           !errorMessage && (
-
-          <div
-            className={
-              styles.videoHubCard
-            }
-          >
-
             <div
               className={
-                styles.playerColumn
+                styles.videoHubCard
               }
             >
-              {this._renderPlayer()}
-            </div>
-
-
-            <div
-              className={
-                styles.playlistColumn
-              }
-            >
+              <div
+                className={
+                  styles.playerColumn
+                }
+              >
+                {this._renderPlayer()}
+              </div>
 
               <div
                 className={
-                  styles.tabBar
+                  styles.playlistColumn
                 }
               >
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    this._setCategory(
-                      'beyond-terminal'
-                    )
+                <div
+                  className={
+                    styles.tabBar
                   }
-                  className={[
-                    styles.tab,
-                    activeCategory ===
-                      'beyond-terminal'
-                      ? styles.tabActive
-                      : ''
-                  ].join(' ')}
                 >
-                  ✈&nbsp;&nbsp;Beyond The Terminal
-                </button>
+                  <button
+                    type="button"
+                    onClick={
+                      () =>
+                        this._setCategory(
+                          'beyond-terminal'
+                        )
+                    }
+                    className={[
+                      styles.tab,
 
+                      activeCategory ===
+                        'beyond-terminal'
+                        ? styles.tabActive
+                        : ''
+                    ].join(' ')}
+                  >
+                    ✈&nbsp;&nbsp;Beyond The Terminal
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    this._setCategory(
-                      'corporate-stories'
-                    )
+                  <button
+                    type="button"
+                    onClick={
+                      () =>
+                        this._setCategory(
+                          'corporate-stories'
+                        )
+                    }
+                    className={[
+                      styles.tab,
+
+                      activeCategory ===
+                        'corporate-stories'
+                        ? styles.tabActive
+                        : ''
+                    ].join(' ')}
+                  >
+                    ♫&nbsp;&nbsp;Corporate Stories
+                  </button>
+                </div>
+
+                <div
+                  className={
+                    styles.videoList
                   }
-                  className={[
-                    styles.tab,
-                    activeCategory ===
-                      'corporate-stories'
-                      ? styles.tabActive
-                      : ''
-                  ].join(' ')}
                 >
-                  ♫&nbsp;&nbsp;Corporate Stories
-                </button>
-
+                  {videos.length > 0
+                    ? videos
+                        .slice(
+                          0,
+                          4
+                        )
+                        .map(
+                          (
+                            video:
+                              IKqVideo
+                          ) =>
+                            this._renderVideoItem(
+                              video
+                            )
+                        )
+                    : (
+                      <div
+                        className={
+                          styles.message
+                        }
+                      >
+                        No published videos in this category.
+                      </div>
+                    )}
+                </div>
               </div>
-
-
-              <div
-                className={
-                  styles.videoList
-                }
-              >
-
-                {videos
-                  .slice(0, 4)
-                  .map(
-                    (
-                      video:
-                        IKqVideo
-                    ) =>
-                      this._renderVideoItem(
-                        video
-                      )
-                  )}
-
-              </div>
-
             </div>
-
-          </div>
-
-        )}
-
+          )}
       </section>
     );
   }
