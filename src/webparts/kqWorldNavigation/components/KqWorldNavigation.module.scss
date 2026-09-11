@@ -112,6 +112,29 @@
   white-space: nowrap;
 }
 
+.utilityAction {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #ffffff;
+  font: inherit;
+  line-height: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.utilityAction:hover,
+.utilityAction:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.utilityAction:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.9);
+  outline-offset: 4px;
+  border-radius: 3px;
+}
+
 .systemStatus {
   display: flex;
   align-items: center;
@@ -135,7 +158,7 @@
 ========================================================= */
 
 .desktopNav {
-  position: sticjy;
+  position: relative;
 
   width: 100%;
   height: 70px;
@@ -478,6 +501,15 @@
   box-sizing: border-box;
 }
 
+.dropdown::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -10px;
+  height: 10px;
+}
+
 .dropdownInner {
   width: 100%;
   height: 100%;
@@ -537,6 +569,241 @@
   margin: 0 0 14px;
 }
 
+
+
+/* =========================================================
+   CONTACT / IT SUPPORT MODAL
+========================================================= */
+
+.contactOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.58);
+  box-sizing: border-box;
+}
+
+.contactModal {
+  width: min(560px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  background: #ffffff;
+  color: #2d333b;
+  border-radius: 8px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.3);
+}
+
+.contactModalHeader {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+  padding: 20px 22px;
+  background: #d71920;
+  color: #ffffff;
+  border-radius: 8px 8px 0 0;
+}
+
+.contactHeaderIcon {
+  width: 22px;
+  height: 18px;
+  margin-top: 2px;
+  border: 2px solid currentColor;
+  border-radius: 3px;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.contactHeaderIcon::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  bottom: -5px;
+  width: 6px;
+  height: 6px;
+  border-left: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: skewY(-35deg);
+  background: #d71920;
+}
+
+.contactHeaderCopy {
+  min-width: 0;
+}
+
+.contactHeaderCopy h2 {
+  margin: 0 0 5px;
+  color: inherit;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
+  font-size: 19px;
+  line-height: 1.2;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.contactHeaderCopy p {
+  margin: 0;
+  color: inherit;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.contactCloseButton {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-family: inherit;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.contactCloseButton:hover,
+.contactCloseButton:focus-visible {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.contactForm {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px 22px 16px;
+  background: #ffffff;
+}
+
+.contactField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  color: #4d5662;
+  font-size: 11px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.contactField strong {
+  color: #d71920;
+  font-weight: 700;
+}
+
+.contactField input,
+.contactField select,
+.contactField textarea {
+  width: 100%;
+  border: 1px solid #d8dde5;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #252a31;
+  padding: 9px 10px;
+  font-family: inherit;
+  font-size: 11px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.contactField input,
+.contactField select {
+  min-height: 36px;
+}
+
+.contactField textarea {
+  min-height: 112px;
+  resize: vertical;
+  line-height: 1.45;
+}
+
+.contactField input:focus,
+.contactField select:focus,
+.contactField textarea:focus {
+  border-color: #d71920;
+  box-shadow: 0 0 0 2px rgba(215, 25, 32, 0.08);
+}
+
+.attachmentDropzone {
+  position: relative;
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px dashed #bfc8d4;
+  border-radius: 7px;
+  color: #8a94a3;
+  background: #ffffff;
+  font-weight: 400;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.attachmentDropzone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.attachmentIcon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.contactFormActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.contactSubmitButton {
+  min-width: 110px;
+  min-height: 36px;
+  border: 0;
+  border-radius: 6px;
+  padding: 0 16px;
+  background: #ef233c;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.contactSubmitButton:hover,
+.contactSubmitButton:focus-visible {
+  background: #d71920;
+}
+
+.contactModalFooter {
+  padding: 12px 22px 14px;
+  border-top: 1px solid #edf0f3;
+  background: #f8f9fb;
+  color: #75808c;
+  font-size: 10px;
+  line-height: 1.4;
+  border-radius: 0 0 8px 8px;
+}
+
+.contactModalFooter a {
+  color: #ef233c;
+  text-decoration: none;
+}
+
+.contactModalFooter a:hover {
+  text-decoration: underline;
+}
 
 /* =========================================================
    MOBILE DEFAULT
@@ -877,6 +1144,29 @@
 
     font-size: 13px;
   }
+
+  .contactOverlay {
+    padding: 12px;
+  }
+
+  .contactModal {
+    max-height: calc(100vh - 24px);
+  }
+
+  .contactModalHeader {
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+    gap: 9px;
+    padding: 16px;
+  }
+
+  .contactForm {
+    padding: 16px;
+  }
+
+  .contactModalFooter {
+    padding: 11px 16px 13px;
+  }
+
 }
 
 /* Dark mode */
@@ -1060,6 +1350,49 @@
   .mobileMenuButton {
     color: #ffffff;
   }
+
+  .utilityAction {
+    color: #ffffff;
+  }
+
+  .contactModal {
+    background: #262F3D;
+    color: #ffffff;
+  }
+
+  .contactForm {
+    background: #262F3D;
+  }
+
+  .contactField {
+    color: #e3e7ec;
+  }
+
+  .contactField input,
+  .contactField select,
+  .contactField textarea {
+    background: #171B21;
+    border-color: #46505f;
+    color: #ffffff;
+  }
+
+  .contactField input::placeholder,
+  .contactField textarea::placeholder {
+    color: #9ca5b1;
+  }
+
+  .attachmentDropzone {
+    background: #171B21;
+    border-color: #596575;
+    color: #c3cad2;
+  }
+
+  .contactModalFooter {
+    background: #171B21;
+    border-top-color: #3a4452;
+    color: #c3cad2;
+  }
+
 }
 
 

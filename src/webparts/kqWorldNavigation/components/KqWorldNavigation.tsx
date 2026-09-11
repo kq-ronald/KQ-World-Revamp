@@ -160,6 +160,8 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [mobileExpanded, setMobileExpanded] =
     React.useState<string | null>(null);
+  const [contactOpen, setContactOpen] = React.useState(false);
+  const [attachmentName, setAttachmentName] = React.useState('');
 
   // Theme: follow the device until the user chooses an override.
   const [isDarkMode, setIsDarkMode] = React.useState<boolean>(() => {
@@ -238,6 +240,7 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
       if (event.key === 'Escape') {
         setSearchOpen(false);
         setSelectedSearchIndex(-1);
+        setContactOpen(false);
       }
     };
 
@@ -378,17 +381,13 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
           </div>
 
           <div className={styles.utilityLinks}>
-            <a href="#">
-              Help
-            </a>
-
-            <a href="#">
-              Feedback
-            </a>
-
-            <a href="#">
-              IT Support
-            </a>
+            <button
+              type="button"
+              className={styles.utilityAction}
+              onClick={() => setContactOpen(true)}
+            >
+              Feedback &amp; IT Support
+            </button>
 
             <span className={styles.systemStatus}>
               <span className={styles.statusDot} />
@@ -459,14 +458,17 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
                   }
                 }}
                 onClick={() => {
+                  if (item.url && item.url !== '#') {
+                    window.location.href = item.url;
+                    return;
+                  }
+
                   if (item.children?.length) {
                     setActiveMenu(
                       activeMenu === item.title
                         ? null
                         : item.title
                     );
-                  } else if (item.url) {
-                    window.location.href = item.url;
                   }
                 }}
               >
@@ -1027,6 +1029,110 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
           </div>
         ) : null}
       </div>
+
+      {contactOpen ? (
+        <div
+          className={styles.contactOverlay}
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setContactOpen(false);
+            }
+          }}
+        >
+          <section
+            className={styles.contactModal}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="kq-contact-title"
+          >
+            <div className={styles.contactModalHeader}>
+              <div className={styles.contactHeaderIcon} aria-hidden="true" />
+
+              <div className={styles.contactHeaderCopy}>
+                <h2 id="kq-contact-title">Contact Us</h2>
+                <p>
+                  Have questions or need assistance? Fill out the form below and
+                  we&apos;ll get back to you as soon as possible.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className={styles.contactCloseButton}
+                onClick={() => setContactOpen(false)}
+                aria-label="Close contact form"
+              >
+                ×
+              </button>
+            </div>
+
+            <form
+              className={styles.contactForm}
+              onSubmit={(event) => event.preventDefault()}
+            >
+              <label className={styles.contactField}>
+                <span>Email Address <strong>*</strong></span>
+                <input
+                  type="email"
+                  placeholder="Enter your email address"
+                  required
+                />
+              </label>
+
+              <label className={styles.contactField}>
+                <span>Subject <strong>*</strong></span>
+                <select defaultValue="" required>
+                  <option value="" disabled>Select a subject</option>
+                  <option value="it-support">IT Support</option>
+                  <option value="general-feedback">General Feedback</option>
+                  <option value="access-permissions">Access &amp; Permissions</option>
+                  <option value="content-navigation">Content / Navigation</option>
+                  <option value="other">Other</option>
+                </select>
+              </label>
+
+              <label className={styles.contactField}>
+                <span>Message <strong>*</strong></span>
+                <textarea
+                  placeholder="Enter your message"
+                  rows={5}
+                  required
+                />
+              </label>
+
+              <label className={styles.contactField}>
+                <span>Attachments (Optional)</span>
+                <span className={styles.attachmentDropzone}>
+                  <input
+                    type="file"
+                    onChange={(event) => {
+                      const file = event.currentTarget.files?.[0];
+                      setAttachmentName(file ? file.name : '');
+                    }}
+                  />
+                  <span className={styles.attachmentIcon} aria-hidden="true">⌕</span>
+                  <span>{attachmentName || 'Click to attach files'}</span>
+                </span>
+              </label>
+
+              <div className={styles.contactFormActions}>
+                <button
+                  type="submit"
+                  className={styles.contactSubmitButton}
+                >
+                  Send Message
+                </button>
+              </div>
+            </form>
+
+            <div className={styles.contactModalFooter}>
+              You can also reach us directly at:{' '}
+              <a href="tel:+254711024747">+254 711 024 747</a>
+            </div>
+          </section>
+        </div>
+      ) : null}
     </header>
   );
 };
