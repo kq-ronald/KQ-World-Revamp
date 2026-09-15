@@ -89,14 +89,6 @@
           "manifest": "./src/webparts/kqSocials/KqSocialsWebPart.manifest.json"
         }
       ]
-    },
-    "kq-content-manager-web-part": {
-      "components": [
-        {
-          "entrypoint": "./lib/webparts/kqContentManager/KqContentManagerWebPart.js",
-          "manifest": "./src/webparts/kqContentManager/KqContentManagerWebPart.manifest.json"
-        }
-      ]
     }
   },
   "externals": {},
@@ -111,7 +103,6 @@
     "KqVideoHubWebPartStrings": "lib/webparts/kqVideoHub/loc/{locale}.js",
     "KqMomentsWebPartStrings": "lib/webparts/kqMoments/loc/{locale}.js",
     "KqVivaExchangeWebPartStrings": "lib/webparts/kqVivaExchange/loc/{locale}.js",
-    "KqSocialsWebPartStrings": "lib/webparts/kqSocials/loc/{locale}.js",
-    "KqContentManagerWebPartStrings": "lib/webparts/kqContentManager/loc/{locale}.js"
+    "KqSocialsWebPartStrings": "lib/webparts/kqSocials/loc/{locale}.js"
   }
 }
