@@ -1,0 +1,32 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "ad732068-8df0-4c4d-8894-d96b8f7c974a",
+  "alias": "KqWorldFooterWebPart",
+  "componentType": "WebPart",
+
+  "version": "*",
+  "manifestVersion": 2,
+
+  "supportsFullBleed": true,
+
+  "requiresCustomScript": false,
+
+  "preconfiguredEntries": [
+    {
+      "groupId": "cf066440-0614-43d6-98ae-0b31d7c9a91b",
+      "group": {
+        "default": "Other"
+      },
+      "title": {
+        "default": "KqWorldFooter"
+      },
+      "description": {
+        "default": "KqWorldFooter description"
+      },
+      "officeFabricIconFontName": "Page",
+      "properties": {
+        "description": "KqWorldFooter"
+      }
+    }
+  ]
+}

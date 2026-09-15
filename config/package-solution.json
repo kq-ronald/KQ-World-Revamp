@@ -7,14 +7,12 @@
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
-
     "webApiPermissionRequests": [
       {
         "resource": "Yammer",
         "scope": "access_as_user"
       }
     ],
-
     "developer": {
       "name": "",
       "websiteUrl": "",
@@ -22,7 +20,6 @@
       "termsOfUseUrl": "",
       "mpnId": "Undefined-1.23.2"
     },
-
     "metadata": {
       "shortDescription": {
         "default": "kq-world description"
@@ -34,7 +31,6 @@
       "videoUrl": "",
       "categories": []
     },
-
     "features": [
       {
         "title": "kq-world Feature",
@@ -44,8 +40,7 @@
       }
     ]
   },
-
   "paths": {
     "zippedPackage": "solution/kq-world.sppkg"
   }
-} 
+}
