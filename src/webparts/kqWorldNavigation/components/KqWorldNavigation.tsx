@@ -2,9 +2,9 @@ import * as React from 'react';
 import { kqSearchItems } from '../data/searchData';
 import styles from './KqWorldNavigation.module.scss';
 import type { IKqWorldNavigationProps } from './IKqWorldNavigationProps';
-
+import { IKqNotification } from '../models/IKqNotification';
+import { KqNotificationService } from '../services/KqNotificationService';
 import { navigationItems } from '../data/navigationData';
-
 import kqLogo from '../assets/kqwhitelogo.svg';
 import navBgLeft from '../assets/kqworldbgleft.svg';
 import navBgRight from '../assets/kqworldbgright.svg';
@@ -106,19 +106,21 @@ const MENU_ITEM_ICONS: Record<string, React.ElementType> = {
   /* Departments */
   'Human Resource': People24Regular,
   Finance: Money24Regular,
+  Commercial: ShoppingBag24Regular,
+  'Flight Operations': Airplane24Regular,
   'Ground Services': VehicleCar24Regular,
   'Information Technology': Desktop24Regular,
   'Group CEO': Person24Regular,
-  Commercial: ShoppingBag24Regular,
   Cargo: Box24Regular,
   Technical: Wrench24Regular,
+  Marketing: Megaphone24Regular,
   'Strategy & Innovation': Lightbulb24Regular,
   'Fahari Aviation': Airplane24Regular,
-  Marketing: Megaphone24Regular,
 
   /* Corporate News */
-  'Take 3': Bookmark24Regular,
+  'The Pride': News24Regular,
   'The Pride Newsletter': News24Regular,
+  'Take 3': Bookmark24Regular,
   'KQ Blog': DocumentEdit24Regular,
 
   /* Knowledge Hub */
@@ -126,6 +128,8 @@ const MENU_ITEM_ICONS: Record<string, React.ElementType> = {
   'IATA Manuals': DocumentText24Regular,
   'iPride Manuals and User Guides': BookOpen24Regular,
   'Corporate Training Reading Materials': DocumentEdit24Regular,
+
+  /* Printer icon */
   'Print Data Dashboard': Print24Regular,
   'Printing Data Dashboard': Print24Regular
 };
@@ -155,13 +159,60 @@ const inspirationItems = [
    COMPONENT
 ========================================================= */
 
-const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
+const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
   const [activeMenu, setActiveMenu] = React.useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [mobileExpanded, setMobileExpanded] =
     React.useState<string | null>(null);
   const [contactOpen, setContactOpen] = React.useState(false);
   const [attachmentName, setAttachmentName] = React.useState('');
+  const [notifications, setNotifications] = React.useState<IKqNotification[]>([]);
+  const [notificationsOpen, setNotificationsOpen] = React.useState(false);
+  const [notificationsLoading, setNotificationsLoading] = React.useState(true);
+  const [notificationsError, setNotificationsError] = React.useState('');
+  React.useEffect(() => {
+    let isMounted = true;
+
+    const loadNotifications = async (): Promise<void> => {
+      try {
+        setNotificationsLoading(true);
+        setNotificationsError('');
+
+        const notificationService =
+          new KqNotificationService(props.context);
+
+        const items =
+          await notificationService.getNotifications();
+
+        if (isMounted) {
+          setNotifications(items);
+        }
+      } catch (error) {
+        console.error('Failed to load KQ World notifications:', error);
+
+        if (isMounted) {
+          setNotificationsError(
+            'Unable to load notifications.'
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setNotificationsLoading(false);
+        }
+      }
+    };
+
+    loadNotifications().catch((error) => {
+      console.error(
+        'Failed to initialise KQ World notifications:',
+        error
+      );
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [props.context]);
 
   // Theme: follow the device until the user chooses an override.
   const [isDarkMode, setIsDarkMode] = React.useState<boolean>(() => {
@@ -238,6 +289,7 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
 
     const handleKeyDown = (event: KeyboardEvent): void => {
       if (event.key === 'Escape') {
+        setNotificationsOpen(false);
         setSearchOpen(false);
         setSelectedSearchIndex(-1);
         setContactOpen(false);
@@ -329,7 +381,84 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
 
     return mappedIcon || MENU_ITEM_ICONS[child.title];
   };
+  const getStartOfDay = (date: Date): Date => {
+    const result = new Date(date);
+    result.setHours(0, 0, 0, 0);
 
+    return result;
+  };
+
+  const getNotificationGroup = (
+    publishDate: Date
+  ): 'Today' | 'Yesterday' | 'Earlier' => {
+    const today = getStartOfDay(new Date());
+    const notificationDate = getStartOfDay(publishDate);
+
+    const difference =
+      today.getTime() - notificationDate.getTime();
+
+    const daysDifference = Math.floor(
+      difference / (1000 * 60 * 60 * 24)
+    );
+
+    if (daysDifference <= 0) {
+      return 'Today';
+    }
+
+    if (daysDifference === 1) {
+      return 'Yesterday';
+    }
+
+    return 'Earlier';
+  };
+
+  const getRelativeTime = (publishDate: Date): string => {
+    const now = new Date();
+
+    const difference =
+      now.getTime() - publishDate.getTime();
+
+    const minutes = Math.max(
+      0,
+      Math.floor(difference / (1000 * 60))
+    );
+
+    if (minutes < 1) {
+      return 'JUST NOW';
+    }
+
+    if (minutes < 60) {
+      return `${minutes} MIN${minutes === 1 ? '' : 'S'} AGO`;
+    }
+
+    const hours = Math.floor(minutes / 60);
+
+    if (hours < 24) {
+      return `${hours} HOUR${hours === 1 ? '' : 'S'} AGO`;
+    }
+
+    const days = Math.floor(hours / 24);
+
+    return `${days} DAY${days === 1 ? '' : 'S'} AGO`;
+  };
+
+  const todayNotifications: IKqNotification[] =
+    notifications.filter(
+      (notification: IKqNotification) =>
+        getNotificationGroup(notification.publishDate) === 'Today'
+    );
+
+  const yesterdayNotifications: IKqNotification[] =
+    notifications.filter(
+      (notification: IKqNotification) =>
+        getNotificationGroup(notification.publishDate) === 'Yesterday'
+    );
+
+  const earlierNotifications: IKqNotification[] =
+    notifications.filter(
+      (notification: IKqNotification) =>
+        getNotificationGroup(notification.publishDate) === 'Earlier'
+    );
   return (
     <header
       className={`${styles.navigationRoot} ${isDarkMode ? styles.darkMode : ''}`}
@@ -621,6 +750,7 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
               className={styles.iconButton}
               aria-label="Notifications"
               title="Notifications"
+              onClick={() => setNotificationsOpen(true)}
             >
               <Alert24Regular className={styles.actionIcon} />
             </button>
@@ -788,11 +918,12 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
               >
                 {activeItem.children.map((child) => {
                   const ChildIcon = getChildIcon(child);
-
                   return (
                     <a
                       key={child.title}
                       href={child.url || '#'}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -917,6 +1048,7 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
           className={styles.iconButton}
           aria-label="Notifications"
           title="Notifications"
+          onClick={() => setNotificationsOpen(true)}
         >
           <Alert24Regular className={styles.actionIcon} />
         </button>
@@ -977,6 +1109,8 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
                         <a
                           key={child.title}
                           href={child.url || '#'}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -1029,7 +1163,250 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = () => {
           </div>
         ) : null}
       </div>
+      {notificationsOpen ? (
+        <div
+          className={styles.notificationOverlay}
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setNotificationsOpen(false);
+            }
+          }}
+        >
+          <aside
+            className={`${styles.notificationDrawer} ${isDarkMode ? styles.notificationDrawerDark : ''
+              }`}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="kq-notification-title"
+          >
+            <div className={styles.notificationHeader}>
+              <img
+                src={navBgRight}
+                alt=""
+                aria-hidden="true"
+                className={styles.notificationHeaderBackground}
+              />
 
+              <div className={styles.notificationHeaderTop}>
+                <div>
+                  <div className={styles.notificationBrand}>
+                    KQ WORLD
+                  </div>
+
+                  <h2 id="kq-notification-title">
+                    Notification Center
+                  </h2>
+
+                  <p>
+                    {notifications.length}{' '}
+                    {notifications.length === 1
+                      ? 'unread notification'
+                      : 'unread notifications'}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  className={styles.notificationClose}
+                  aria-label="Close notifications"
+                  onClick={() => setNotificationsOpen(false)}
+                >
+                  ×
+                </button>
+              </div>
+
+              <button
+                type="button"
+                className={styles.markAllRead}
+              >
+                Mark all as Read
+              </button>
+            </div>
+
+            <div className={styles.notificationBody}>
+              {notificationsLoading ? (
+                <div className={styles.notificationState}>
+                  <span className={styles.notificationSpinner} />
+                  <p>Loading notifications...</p>
+                </div>
+              ) : notificationsError ? (
+                <div className={styles.notificationState}>
+                  <Alert24Regular />
+                  <p>{notificationsError}</p>
+                </div>
+              ) : notifications.length === 0 ? (
+                <div className={styles.notificationState}>
+                  <Alert24Regular />
+                  <h3>You&apos;re all caught up</h3>
+                  <p>There are no new notifications right now.</p>
+                </div>
+              ) : (
+                <>
+                  {todayNotifications.length > 0 ? (
+                    <section className={styles.notificationSection}>
+                      <h3>Today</h3>
+
+                      {todayNotifications.map((notification) => (
+                        <a
+                          key={notification.id}
+                          href={notification.link || '#'}
+                          target={
+                            notification.link ? '_blank' : undefined
+                          }
+                          rel={
+                            notification.link
+                              ? 'noopener noreferrer'
+                              : undefined
+                          }
+                          className={styles.notificationItem}
+                          onClick={(event) => {
+                            if (!notification.link) {
+                              event.preventDefault();
+                            }
+                          }}
+                        >
+                          <span
+                            className={styles.notificationIcon}
+                            aria-hidden="true"
+                          >
+                            <Alert24Regular />
+                          </span>
+
+                          <span className={styles.notificationContent}>
+                            <span className={styles.notificationMeta}>
+                              {getRelativeTime(notification.publishDate)}
+                              {' · '}
+                              {notification.notificationType.toUpperCase()}
+                            </span>
+
+                            <strong>{notification.title}</strong>
+
+                            <span className={styles.notificationMessage}>
+                              {notification.message}
+                            </span>
+                          </span>
+
+                          <span
+                            className={styles.unreadDot}
+                            aria-label="Unread"
+                          />
+                        </a>
+                      ))}
+                    </section>
+                  ) : null}
+
+                  {yesterdayNotifications.length > 0 ? (
+                    <section className={styles.notificationSection}>
+                      <h3>Yesterday</h3>
+
+                      {yesterdayNotifications.map((notification) => (
+                        <a
+                          key={notification.id}
+                          href={notification.link || '#'}
+                          target={
+                            notification.link ? '_blank' : undefined
+                          }
+                          rel={
+                            notification.link
+                              ? 'noopener noreferrer'
+                              : undefined
+                          }
+                          className={styles.notificationItem}
+                          onClick={(event) => {
+                            if (!notification.link) {
+                              event.preventDefault();
+                            }
+                          }}
+                        >
+                          <span
+                            className={styles.notificationIcon}
+                            aria-hidden="true"
+                          >
+                            <Alert24Regular />
+                          </span>
+
+                          <span className={styles.notificationContent}>
+                            <span className={styles.notificationMeta}>
+                              {getRelativeTime(notification.publishDate)}
+                              {' · '}
+                              {notification.notificationType.toUpperCase()}
+                            </span>
+
+                            <strong>{notification.title}</strong>
+
+                            <span className={styles.notificationMessage}>
+                              {notification.message}
+                            </span>
+                          </span>
+
+                          <span
+                            className={styles.unreadDot}
+                            aria-label="Unread"
+                          />
+                        </a>
+                      ))}
+                    </section>
+                  ) : null}
+
+                  {earlierNotifications.length > 0 ? (
+                    <section className={styles.notificationSection}>
+                      <h3>Earlier</h3>
+
+                      {earlierNotifications.map((notification) => (
+                        <a
+                          key={notification.id}
+                          href={notification.link || '#'}
+                          target={
+                            notification.link ? '_blank' : undefined
+                          }
+                          rel={
+                            notification.link
+                              ? 'noopener noreferrer'
+                              : undefined
+                          }
+                          className={styles.notificationItem}
+                          onClick={(event) => {
+                            if (!notification.link) {
+                              event.preventDefault();
+                            }
+                          }}
+                        >
+                          <span
+                            className={styles.notificationIcon}
+                            aria-hidden="true"
+                          >
+                            <Alert24Regular />
+                          </span>
+
+                          <span className={styles.notificationContent}>
+                            <span className={styles.notificationMeta}>
+                              {getRelativeTime(notification.publishDate)}
+                              {' · '}
+                              {notification.notificationType.toUpperCase()}
+                            </span>
+
+                            <strong>{notification.title}</strong>
+
+                            <span className={styles.notificationMessage}>
+                              {notification.message}
+                            </span>
+                          </span>
+
+                          <span
+                            className={styles.unreadDot}
+                            aria-label="Unread"
+                          />
+                        </a>
+                      ))}
+                    </section>
+                  ) : null}
+                </>
+              )}
+            </div>
+          </aside>
+        </div>
+      ) : null}
       {contactOpen ? (
         <div
           className={styles.contactOverlay}
