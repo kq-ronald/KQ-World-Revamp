@@ -197,7 +197,9 @@ export default class Kqquickactions
         currentTheme === 'dark'
     });
 
-    void this.loadQuickActions();
+    this.loadQuickActions().catch((error: unknown) => {
+      console.error('Quick Actions initialization failed:', error);
+    });
   }
 
   public componentWillUnmount(): void {
@@ -362,7 +364,7 @@ export default class Kqquickactions
         : styles.kqquickactions;
 
     return (
-      <section className={rootClassName}>
+      <section className={rootClassName} data-kq-quick-actions="true">
         <div className={styles.welcomeSection}>
           <div className={styles.welcomeTop}>
             <span className={styles.welcomeLabel}>

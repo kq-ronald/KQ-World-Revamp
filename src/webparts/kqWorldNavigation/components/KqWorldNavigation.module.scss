@@ -1,12 +1,57 @@
+/* Hide the Microsoft 365 header only on KQ navigation pages. */
+:global(body:has(.kqWorldNavigationHost) #SuiteNavWrapper) {
+  display: none !important;
+}
+
 .navigationRoot {
-  width: 100%;
+  --kq-nav-gutter: 4.5%;
   position: relative;
-  z-index: 1000;
 
-  font-family: "Montserrat", Arial, Helvetica, sans-serif;
+  width: 100%;
+  max-width: 100%;
 
-  padding-bottom: 20px;
+  z-index: 1;
+
+  padding: 0;
+
   box-sizing: border-box;
+}
+
+:global(.kqWorldNavigationStickyHost) {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10000 !important;
+  overflow: visible !important;
+}
+
+:global(.kqWorldNavigationStickyZone) {
+  overflow: visible !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.navigationRoot,
+.navigationRoot button,
+.navigationRoot input,
+.navigationRoot select,
+.navigationRoot textarea,
+.navigationRoot a,
+.navigationRoot p,
+.navigationRoot span,
+.navigationRoot label {
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
+}
+
+.navigationRoot h1,
+.navigationRoot h2,
+.navigationRoot h3,
+.navigationRoot h4,
+.navigationRoot h5,
+.navigationRoot h6,
+.megaMenuTagline {
+  font-family: "Lucida Sans", "Lucida Grande", sans-serif;
 }
 
 
@@ -15,7 +60,7 @@
 ========================================================= */
 
 .topBar {
-  position: sticky;
+  position: relative;
   overflow: hidden;
 
   width: 100%;
@@ -28,28 +73,16 @@
   box-sizing: border-box;
 }
 
-.bgLeft,
-.bgRight {
+.ankaraBackground {
   position: absolute;
-  top: 0;
-  bottom: 0;
-
+  inset: 0;
+  width: 100%;
   height: 100%;
-  width: 28%;
-
-  object-fit: cover;
-
+  object-fit: fill;
+  object-position: center;
   pointer-events: none;
-}
-
-.bgLeft {
-  left: 0;
-  object-position: left center;
-}
-
-.bgRight {
-  right: 0;
-  object-position: right center;
+  user-select: none;
+  z-index: 0;
 }
 
 .topBarInner {
@@ -59,7 +92,7 @@
   width: 100%;
   height: 100%;
 
-  padding: 0 4.5%;
+  padding: 0 var(--kq-nav-gutter);
 
   display: flex;
   align-items: center;
@@ -110,6 +143,13 @@
   color: #ffffff;
   text-decoration: none;
   white-space: nowrap;
+}
+
+.utilityLinks a:hover,
+.utilityLinks a:focus-visible,
+.utilityAction:hover,
+.utilityAction:focus-visible {
+  color: #ffffff;
 }
 
 .utilityAction {
@@ -201,7 +241,7 @@
   color: #222222;
 
   font-family: "Montserrat", sans-serif !important;
-  font-weight: 50 !important;
+  font-weight: 400 !important;
   font-style: normal;
 
   font-size: 13px !important;
@@ -232,8 +272,15 @@
 }
 
 .navButton:hover,
+.navButton:focus-visible,
 .activeNavButton {
   color: #d71920;
+}
+
+.navButton:hover .chevron,
+.navButton:focus-visible .chevron,
+.activeNavButton .chevron {
+  border-color: #d71920;
 }
 
 
@@ -514,7 +561,7 @@
   width: 100%;
   height: 100%;
 
-  padding: 18px 5%;
+  padding: 18px var(--kq-nav-gutter);
 
   display: grid;
 
@@ -638,7 +685,7 @@
 .contactHeaderCopy h2 {
   margin: 0 0 5px;
   color: inherit;
-  font-family: "Montserrat", Arial, Helvetica, sans-serif;
+  font-family: "Lucida Sans", "Lucida Grande", sans-serif;
   font-size: 19px;
   line-height: 1.2;
   font-weight: 700;
@@ -847,7 +894,7 @@
     height: 60px;
     min-height: 60px;
 
-    padding: 0 22px;
+    padding: 0 var(--kq-nav-gutter);
   }
 
   .brandArea {
@@ -881,7 +928,7 @@
 
     gap: 10px;
 
-    padding: 0 22px;
+    padding: 0 var(--kq-nav-gutter);
 
     background: #ffffff;
 
@@ -1034,7 +1081,7 @@
     height: 58px;
     min-height: 58px;
 
-    padding: 0 14px;
+    padding: 0 var(--kq-nav-gutter);
   }
 
 
@@ -1091,7 +1138,7 @@
     height: 62px;
     min-height: 62px;
 
-    padding: 0 12px;
+    padding: 0 var(--kq-nav-gutter);
 
     gap: 8px;
   }
@@ -1180,12 +1227,6 @@
     color: #ffffff;
   }
 
-  /* Hide red decorative header artwork */
-  .bgLeft,
-  .bgRight {
-    display: none;
-  }
-
   .logo {
     filter: brightness(0) invert(1);
   }
@@ -1221,12 +1262,26 @@
   }
 
   .navButton:hover,
+  .navButton:focus-visible,
   .activeNavButton {
-    color: #ffffff;
+    color: #d71920;
   }
 
   .chevron {
     border-color: #ffffff;
+  }
+
+  .navButton:hover .chevron,
+  .navButton:focus-visible .chevron,
+  .activeNavButton .chevron {
+    border-color: #d71920;
+  }
+
+  .mobileMenuItem > button:hover,
+  .mobileMenuItem > button:focus-visible,
+  .mobileSubmenu a:hover,
+  .mobileSubmenu a:focus-visible {
+    color: #d71920;
   }
 
   /* Search remains white */
@@ -1443,8 +1498,11 @@
 
 .notificationOverlay {
   position: fixed;
-  inset: 0;
-  z-index: 100000;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100001;
   background: rgba(0, 0, 0, 0.48);
   display: flex;
   justify-content: flex-end;
@@ -1452,6 +1510,8 @@
 }
 
 .notificationDrawer {
+  position: relative;
+  top: 0;
   width: min(440px, 100vw);
   height: 100vh;
   background: #ffffff;
@@ -1491,16 +1551,7 @@
   z-index: 0;
 }
 
-.notificationHeader::after {
-  content: '';
-  position: absolute;
-  width: 260px;
-  height: 260px;
-  right: -100px;
-  bottom: -165px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 50%;
-}
+
 
 .notificationHeaderTop {
   position: relative;
@@ -1583,12 +1634,17 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   background: #ffffff;
-  padding: 22px 26px 40px;
+  padding: 28px 30px 40px;
   box-sizing: border-box;
 }
 
 .notificationSection {
-  margin-bottom: 28px;
+  margin-top: 24px;
+  margin-bottom: 32px;
+}
+
+.notificationSection:first-child {
+  margin-top: 0;
 }
 
 .notificationSection:last-child {
@@ -1596,7 +1652,7 @@
 }
 
 .notificationSection > h3 {
-  margin: 0 0 10px;
+  margin: 0 0 14px;
   color: #777777;
   font-size: 10px;
   line-height: 1.2;
@@ -1608,10 +1664,11 @@
 .notificationItem {
   position: relative;
   display: grid;
-  grid-template-columns: 38px minmax(0, 1fr) 8px;
-  column-gap: 12px;
+  grid-template-columns: 38px minmax(0, 1fr);
+  column-gap: 14px;
   align-items: flex-start;
-  padding: 15px 0;
+  width: 100%;
+  padding: 16px 24px 16px 0;
   border-bottom: 1px solid #ededed;
   color: inherit;
   text-decoration: none;
@@ -1646,6 +1703,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
+  padding-right: 4px;
 }
 
 .notificationMeta {
@@ -1673,9 +1731,12 @@
 }
 
 .unreadDot {
+  position: absolute;
+  top: 21px;
+  right: 4px;
   width: 7px;
   height: 7px;
-  margin-top: 7px;
+  margin: 0;
   border-radius: 50%;
   background: #d71920;
 }
@@ -1722,12 +1783,12 @@
 }
 
 .notificationDrawerDark {
-  background: #111418;
+  background: #262F3D;
   color: #ffffff;
 }
 
 .notificationDrawerDark .notificationBody {
-  background: #111418;
+  background: #262F3D;
 }
 
 .notificationDrawerDark .notificationSection > h3,
@@ -1796,12 +1857,23 @@
   }
 
   .notificationBody {
-    padding: 18px 18px 32px;
+    padding: 22px 20px 32px;
+  }
+
+  .notificationSection {
+    margin-top: 20px;
+    margin-bottom: 28px;
   }
 
   .notificationItem {
-    grid-template-columns: 34px minmax(0, 1fr) 7px;
-    column-gap: 10px;
+    grid-template-columns: 34px minmax(0, 1fr);
+    column-gap: 12px;
+    padding: 15px 20px 15px 0;
+  }
+
+  .unreadDot {
+    top: 20px;
+    right: 2px;
   }
 
   .notificationIcon {
@@ -1809,3 +1881,37 @@
     height: 31px;
   }
 }
+
+/* Shared page alignment; sticky positioning remains unchanged. */
+.desktopNavInner { padding-left: var(--kq-nav-gutter); padding-right: var(--kq-nav-gutter); }
+.navButton:first-child { padding-left: 0; }
+@media (max-width: 1100px) {
+  .navigationRoot { --kq-nav-gutter: 24px; }
+  .mobileMenuItem > button {
+    padding-left: var(--kq-nav-gutter);
+    padding-right: var(--kq-nav-gutter);
+  }
+  .mobileSubmenu a {
+    padding-left: calc(var(--kq-nav-gutter) + 12px);
+    padding-right: var(--kq-nav-gutter);
+  }
+}
+@media (max-width: 600px) {
+  .navigationRoot { --kq-nav-gutter: 16px; }
+}
+
+/* Keep the Ankara pattern visible over the shared dark surface. */
+.darkMode .ankaraBackground { opacity: 0.18; }
+.notificationDrawerDark .notificationHeader { background: #171B21; }
+.notificationDrawerDark .notificationHeaderBackground { opacity: 0.18; }
+.notificationDrawerDark .notificationItem { border-bottom-color: rgba(255,255,255,0.22); }
+.notificationDrawerDark .notificationIcon { background: #171B21; color: #ffffff; }
+.notificationDrawerDark .notificationSection > h3,
+.notificationDrawerDark .notificationMeta { color: #c7ccd4; }
+.notificationDrawerDark .notificationSpinner {
+  border-color: #46505f;
+  border-top-color: #ed1c24;
+}
+/* The feedback overlay is a sibling of the header, with its own theme class. */
+.contactOverlay.darkMode { background: rgba(0, 0, 0, 0.48); }
+.contactOverlay { font-family: 'Montserrat', Arial, Helvetica, sans-serif; }

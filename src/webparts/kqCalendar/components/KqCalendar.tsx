@@ -1,4 +1,5 @@
 import * as React from 'react';
+import styles from './KqCalendar.module.scss';
 
 import {
   ChevronLeft24Regular,
@@ -44,6 +45,104 @@ export default class KqCalendar
   private readonly eventsService:
     KqEventsService;
 
+  private readonly calendarRef = React.createRef<HTMLElement>();
+  private bannerObserver?: ResizeObserver;
+  private layoutObserver?: MutationObserver;
+  private observedBanner: HTMLElement | null = null;
+  private layoutFrame = 0;
+  private disposed = false;
+
+  // Only the section containing BOTH cards is resized. Never the navigation.
+  private markedElements: Array<{ element: HTMLElement; name: string; previous: string | null }> = [];
+  private pairedZone: HTMLElement | null = null;
+
+  private mark(element: HTMLElement, name: string): void {
+    this.markedElements.push({ element, name, previous: element.getAttribute(name) });
+    element.setAttribute(name, 'true');
+  }
+
+  private clearPairLayout = (): void => {
+    this.markedElements.forEach(({ element, name, previous }) => {
+      if (previous === null) element.removeAttribute(name);
+      else element.setAttribute(name, previous);
+    });
+    this.markedElements = [];
+    this.pairedZone = null;
+    this.calendarRef.current?.style.removeProperty('--calendar-banner-height');
+  };
+
+  private queueLayout = (): void => {
+    if (!this.layoutFrame && !this.disposed) {
+      this.layoutFrame = window.requestAnimationFrame(this.syncBannerLayout);
+    }
+  };
+
+  private syncBannerLayout = (): void => {
+    this.layoutFrame = 0;
+    const root = this.calendarRef.current;
+    if (!root || this.disposed) return;
+    const zone = root.closest<HTMLElement>('[data-automation-id="CanvasZone"]');
+    const banner = zone?.querySelector<HTMLElement>('[data-kq-banner]') || null;
+    if (banner !== this.observedBanner) {
+      this.clearPairLayout();
+      if (this.observedBanner) this.bannerObserver?.unobserve(this.observedBanner);
+      this.observedBanner = banner;
+      if (banner) this.bannerObserver?.observe(banner);
+    }
+    if (!zone || !banner || window.innerWidth <= 1100 ||
+      zone.querySelector('.kqWorldNavigationHost')) {
+      this.clearPairLayout();
+      return;
+    }
+
+    if (this.pairedZone !== zone || this.markedElements.some(({ element }) => !element.isConnected)) {
+      this.clearPairLayout();
+      // Find the actual common row and its two column branches.
+      let row: HTMLElement | null = banner.parentElement;
+      while (row && row !== zone && !row.contains(root)) row = row.parentElement;
+      if (!row || !row.contains(root)) return;
+      const branch = (element: HTMLElement): HTMLElement => {
+        let result = element;
+        while (result.parentElement && result.parentElement !== row) result = result.parentElement;
+        return result;
+      };
+      const left = branch(banner);
+      const right = branch(root);
+      if (left === right) return;
+      // Avoid changing a section with a third content column.
+      const otherContent = Array.from(row.children).some((child) =>
+        child !== left && child !== right &&
+        child.querySelector('[data-automation-id="CanvasControl"]') !== null
+      );
+      if (otherContent) return;
+      this.mark(zone, 'data-kq-hero-zone');
+      let shell: HTMLElement | null = row;
+      while (shell && shell !== zone) {
+        this.mark(shell, 'data-kq-hero-shell');
+        shell = shell.parentElement;
+      }
+      this.mark(row, 'data-kq-hero-row');
+      this.mark(left, 'data-kq-hero-left');
+      this.mark(right, 'data-kq-hero-right');
+      // Remove nested column/control gutters only along these two paths.
+      [banner, root].forEach((element) => {
+        let wrapper = element.parentElement;
+        while (wrapper && wrapper !== row) {
+          this.mark(wrapper, 'data-kq-hero-wrapper');
+          wrapper = wrapper.parentElement;
+        }
+      });
+      this.pairedZone = zone;
+    }
+    const height = banner.getBoundingClientRect().height;
+    if (height > 0) {
+      const value = `${Math.round(height * 100) / 100}px`;
+      if (root.style.getPropertyValue('--calendar-banner-height') !== value) {
+        root.style.setProperty('--calendar-banner-height', value);
+      }
+    }
+  };
+
   public constructor(
     props: IKqCalendarProps
   ) {
@@ -77,6 +176,19 @@ export default class KqCalendar
   }
 
   public componentDidMount(): void {
+    this.bannerObserver = new ResizeObserver(this.queueLayout);
+    const root = this.calendarRef.current;
+    if (root) {
+      this.bannerObserver.observe(root);
+      const canvas = root.closest<HTMLElement>('[data-automation-id="CanvasLayout"]');
+      if (canvas) {
+        this.bannerObserver.observe(canvas);
+        this.layoutObserver = new MutationObserver(this.queueLayout);
+        this.layoutObserver.observe(canvas, { childList: true, subtree: true });
+      }
+    }
+    window.addEventListener('resize', this.queueLayout);
+    this.queueLayout();
     window.addEventListener(
       'kqworld-theme-change',
       this.handleThemeChange
@@ -93,6 +205,12 @@ export default class KqCalendar
   }
 
   public componentWillUnmount(): void {
+    this.disposed = true;
+    this.clearPairLayout();
+    this.bannerObserver?.disconnect();
+    this.layoutObserver?.disconnect();
+    window.cancelAnimationFrame(this.layoutFrame);
+    window.removeEventListener('resize', this.queueLayout);
     window.removeEventListener(
       'kqworld-theme-change',
       this.handleThemeChange
@@ -120,6 +238,7 @@ export default class KqCalendar
         await this.eventsService
           .getEvents();
 
+      if (this.disposed) return;
       this.setState({
         events,
         loading: false,
@@ -131,6 +250,7 @@ export default class KqCalendar
         error
       );
 
+      if (this.disposed) return;
       this.setState({
         loading: false,
         error:
@@ -374,24 +494,24 @@ export default class KqCalendar
 
     return (
       <section
+        ref={this.calendarRef}
+        className={styles.kqCalendar}
         style={{
           width: '100%',
           boxSizing: 'border-box',
           fontFamily:
-            "'Segoe UI', Arial, sans-serif"
+            "'Montserrat', Arial, sans-serif"
         }}
       >
         <div
+          className={styles.calendarCard}
           style={{
-            width: '100%',
-            height:
-              'clamp(270px, 20vw, 300px)',
             boxSizing: 'border-box',
             background: cardBackground,
             border:
               `1px solid ${borderColor}`,
             borderRadius: '12px',
-            padding: '18px 20px',
+            padding: '20px',
             boxShadow:
               isDarkMode
                 ? 'none'
@@ -415,10 +535,10 @@ export default class KqCalendar
               <div
                 style={{
                   fontFamily: "'Montserrat', sans-serif",
-                  fontWeight: 80,
+                  fontWeight: 500,
                   fontStyle: 'normal',
-                  fontSize: '14px',
-                  lineHeight: '12px',
+                  fontSize: '12px',
+                  lineHeight: '1.4',
                   letterSpacing: '0',
                   color: isDarkMode
                     ? '#ffffff'
@@ -433,7 +553,7 @@ export default class KqCalendar
                 style={{
                   margin: 0,
                   fontFamily: "'Montserrat', sans-serif",
-                  fontWeight: 200,
+                  fontWeight: 500,
                   fontStyle: 'normal',
                   fontSize: '20px',
                   lineHeight: '100%',

@@ -1,42 +1,172 @@
+/* Scoped to this web part: does not alter SharePoint or sticky navigation. */
 .intranetBanner {
-  width: calc(100% + 70px);
-  margin-left: -60px;
-  margin-right: 0;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0 auto;
   padding: 0;
   box-sizing: border-box;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
 }
-
-.lightMode {
-  background: transparent;
-  color: #171717;
+.intranetBanner *,
+.intranetBanner *::before,
+.intranetBanner *::after { box-sizing: border-box; }
+.intranetBanner button { font-family: inherit; }
+.intranetBanner h1 { font-size: 28px; }
+.intranetBanner h2 { font-size: 22px; }
+.intranetBanner h3 { font-size: 18px; }
+.intranetBanner h1,
+.intranetBanner h2,
+.intranetBanner h3 {
+  font-family: "Lucida Sans", "Lucida Grande", sans-serif;
+  line-height: 1.25;
 }
+.lightMode { background: transparent; color: #171717; }
+.darkMode { background: #171b21; color: #ffffff; }
 
-.darkMode {
-  background: #171b21;
+.bannerFrame {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  isolation: isolate;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.bannerImage {
+  display: block;
+  width: 100% !important;
+  max-width: none !important;
+  height: auto !important;
+  margin: 0;
+  aspect-ratio: 1276 / 446;
+  object-fit: cover;
+  object-position: center;
+  border: 0;
+}
+.bannerState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  padding: 24px;
+  text-align: center;
+}
+.bannerToolbar {
+  position: absolute;
+  z-index: 2;
+  left: 4%;
+  right: 4%;
+  bottom: 8%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.bannerCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  max-width: 100%;
+  padding: 4px 4px 4px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: #000000;
   color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  cursor: pointer;
 }
-
-:global(.CanvasZone),
-:global(.CanvasZoneContainer) {
-  padding-left: 0 !important;
-  padding-right: 0 !important;
+.bannerCtaText { min-width: 0; overflow-wrap: anywhere; text-align: left; }
+.bannerCtaIcon {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #e30613;
+  font-size: 18px;
+  font-weight: 600;
 }
-
-:global([data-sp-feature-tag="Column"]) {
-  padding-left: 0 !important;
-  padding-right: 0 !important;
+.bannerControls {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
 }
-
+.bannerIndicators { display: flex; align-items: center; gap: 4px; }
+.bannerIndicator {
+  display: flex;
+  align-items: center;
+  width: 24px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.bannerIndicator::after {
+  content: "";
+  width: 100%;
+  height: 5px;
+  border-radius: 999px;
+  background: #666666;
+}
+.activeIndicator::after { background: #e30613; }
+.bannerArrow {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  background: #e30613;
+  color: #ffffff;
+  font-size: 28px; /* Icon, not body text. */
+  line-height: 1;
+  cursor: pointer;
+}
+.slideCount { display: none; font-size: 12px; white-space: nowrap; }
+.bannerArrow svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.intranetBanner button:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px #171717;
+}
+/* On narrower screens, controls move below the image. */
 @media (max-width: 1100px) {
-  .intranetBanner {
-    width: calc(100% + 16px);
-    margin-left: -16px;
+  .bannerToolbar {
+    position: static;
+    padding: 12px;
+    background: #f4f4f4;
+    color: #171717;
   }
+  .darkMode .bannerToolbar { background: #262f3d; color: #ffffff; }
+  .bannerIndicators { display: none; }
+  .slideCount { display: inline; }
 }
-
 @media (max-width: 600px) {
-  .intranetBanner {
-    width: 100%;
-    margin-left: 0;
-  }
+  .intranetBanner h1 { font-size: 24px; }
+  .intranetBanner h2 { font-size: 20px; }
+  .bannerToolbar { gap: 8px; }
+  .bannerCta { font-size: 12px; }
 }

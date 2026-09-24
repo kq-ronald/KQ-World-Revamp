@@ -251,7 +251,9 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
         }
       };
 
-    void loadBanners();
+    loadBanners().catch((error: unknown) => {
+      console.error('Unexpected banner loading error:', error);
+    });
 
     return () => {
       isMounted = false;
@@ -298,37 +300,17 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
     setActiveIndex(index);
   };
 
-  if (isLoading) {
-    return (
-      <section
-        className={styles.intranetBanner}
-        style={{
-          width: '100%',
-          minHeight: '280px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxSizing: 'border-box'
-        }}
-      >
-        Loading banners...
-      </section>
-    );
-  }
+  const rootClassName = [
+    styles.intranetBanner,
+    isDarkMode ? styles.darkMode : styles.lightMode
+  ].join(' ');
 
-  if (hasError) {
+  if (isLoading || hasError) {
     return (
-      <section
-        style={{
-          width: '100%',
-          minHeight: '160px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxSizing: 'border-box'
-        }}
-      >
-        Unable to load intranet banners.
+      <section data-kq-banner="true" className={rootClassName} aria-busy={isLoading}>
+        <div className={styles.bannerState} role={hasError ? 'alert' : 'status'}>
+          {hasError ? 'Unable to load intranet banners.' : 'Loading banners...'}
+        </div>
       </section>
     );
   }
@@ -339,210 +321,68 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
 
   return (
     <section
-      className={`${styles.intranetBanner} ${isDarkMode
-        ? styles.darkMode
-        : styles.lightMode
-        }`}
+      data-kq-banner="true"
+      className={rootClassName}
+      aria-label="KQ World announcements"
+      aria-roledescription="carousel"
     >
-      <div
-        style={{
-          position: 'relative',
-          width: '100%',
-          aspectRatio: '1276 / 446',
-          overflow: 'hidden',
-          borderRadius: '12px',
-          margin: 0,
-          padding: 0
-        }}
-      >
+      <div className={styles.bannerFrame}>
         <img
           src={activeBanner.image}
           alt={activeBanner.headline}
-          style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'block',
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            objectPosition: 'center',
-            border: 0,
-            margin: 0,
-            padding: 0
-          }}
+          className={styles.bannerImage}
         />
-
-        {activeBanner.url && (
-          <button
-            type="button"
-            onClick={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-
-              window.open(
-                activeBanner.url,
-                '_blank',
-                'noopener,noreferrer'
-              );
-            }}
-            aria-label={`Read more about ${activeBanner.headline}`}
-            style={{
-              position: 'absolute',
-              zIndex: 20,
-              left: '5%',
-              bottom: '9%',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '9px',
-              height: '40px',
-              paddingLeft: '16px',
-              paddingRight: '5px',
-              border: 0,
-              borderRadius: '999px',
-              backgroundColor: '#000000',
-              color: '#ffffff',
-              fontSize: '15px',
-              fontWeight: 400,
-              lineHeight: 1,
-              textDecoration: 'none',
-              boxSizing: 'border-box',
-              cursor: 'pointer',
-              fontFamily: 'inherit'
-            }}
-          >
-            <span>
-              {activeBanner.ctaText ||
-                'Get The Whole Story'}
-            </span>
-
-            <span
-              style={{
-                width: '30px',
-                height: '30px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                borderRadius: '50%',
-                backgroundColor: '#ffffff',
-                color: '#e30613',
-                fontSize: '16px',
-                fontWeight: 600
-              }}
-            >
-              ↗
-            </span>
-          </button>
-        )}
-
-        {banners.length > 1 && (
-          <div
-            style={{
-              position: 'absolute',
-              zIndex: 20,
-              right: '2.8%',
-              bottom: '8%',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px'
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}
-            >
-              {banners.map(
-                (banner, index) => (
-                  <button
-                    key={banner.id}
-                    type="button"
-                    onClick={(event) =>
-                      goToSlide(
-                        index,
-                        event
-                      )
-                    }
-                    aria-label={
-                      `View banner ${index + 1}`
-                    }
-                    style={{
-                      width:
-                        index ===
-                          activeIndex
-                          ? '30px'
-                          : '24px',
-                      height: '5px',
-                      border: 0,
-                      padding: 0,
-                      margin: 0,
-                      borderRadius:
-                        '999px',
-                      backgroundColor:
-                        index ===
-                          activeIndex
-                          ? '#e30613'
-                          : '#808080',
-                      cursor: 'pointer'
-                    }}
-                  />
-                )
-              )}
-            </div>
-
-            <button
-              type="button"
-              onClick={goPrevious}
-              aria-label="Previous banner"
-              style={{
-                width: '38px',
-                height: '38px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                border: 0,
-                borderRadius: '50%',
-                padding: 0,
-                margin: 0,
-                backgroundColor: '#e30613',
-                color: '#ffffff',
-                fontSize: '27px',
-                fontWeight: 300,
-                lineHeight: 1,
-                cursor: 'pointer'
-              }}
-            >
-              ‹
-            </button>
-
-            <button
-              type="button"
-              onClick={goNext}
-              aria-label="Next banner"
-              style={{
-                width: '38px',
-                height: '38px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                border: 0,
-                borderRadius: '50%',
-                padding: 0,
-                margin: 0,
-                backgroundColor: '#e30613',
-                color: '#ffffff',
-                fontSize: '27px',
-                fontWeight: 300,
-                lineHeight: 1,
-                cursor: 'pointer'
-              }}
-            >
-              ›
-            </button>
+        {(activeBanner.url || banners.length > 1) && (
+          <div className={styles.bannerToolbar}>
+            {activeBanner.url && (
+              <button
+                type="button"
+                className={styles.bannerCta}
+                onClick={() => {
+                  window.open(activeBanner.url, '_blank', 'noopener,noreferrer');
+                }}
+                aria-label={`Read more about ${activeBanner.headline} (opens in a new tab)`}
+              >
+                <span className={styles.bannerCtaText}>
+                  {activeBanner.ctaText || 'Get The Whole Story'}
+                </span>
+                <span className={styles.bannerCtaIcon} aria-hidden="true">↗</span>
+              </button>
+            )}
+            {banners.length > 1 && (
+              <div className={styles.bannerControls}>
+                <div className={styles.bannerIndicators}>
+                  {banners.map((banner, index) => (
+                    <button
+                      key={banner.id}
+                      type="button"
+                      className={[
+                        styles.bannerIndicator,
+                        index === activeIndex ? styles.activeIndicator : ''
+                      ].join(' ')}
+                      onClick={(event) => goToSlide(index, event)}
+                      aria-label={`View banner ${index + 1}`}
+                      aria-current={index === activeIndex ? 'true' : undefined}
+                    />
+                  ))}
+                </div>
+                <span className={styles.slideCount} aria-live="polite">
+                  {activeIndex + 1} / {banners.length}
+                </span>
+                <button type="button" className={styles.bannerArrow}
+                  onClick={goPrevious} aria-label="Previous banner">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M15 5 L8 12 L15 19" />
+                  </svg>
+                </button>
+                <button type="button" className={styles.bannerArrow}
+                  onClick={goNext} aria-label="Next banner">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M9 5 L16 12 L9 19" />
+                  </svg>
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

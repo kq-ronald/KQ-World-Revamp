@@ -41,6 +41,41 @@ export default class KqVideoHub
     IKqVideoHubState
   > {
 
+  private readonly rootRef = React.createRef<HTMLElement>();
+  private layoutCleanup?: () => void;
+  private disposed = false;
+
+  private setupLayout(): void {
+    const root = this.rootRef.current;
+    const zone = root?.closest<HTMLElement>('[data-automation-id="CanvasZone"]');
+    if (!root || !zone || zone.querySelector('.kqWorldNavigationHost') ||
+        zone.querySelectorAll('[data-automation-id="CanvasControl"]').length !== 1) return;
+    const marked: Array<{ element: HTMLElement; attribute: string; previous: string | null }> = [];
+    const mark = (element: HTMLElement, attribute: string): void => {
+      marked.push({ element, attribute, previous: element.getAttribute(attribute) });
+      element.setAttribute(attribute, 'true');
+    };
+    mark(zone, 'data-kq-video-zone');
+    // Remove width caps on wrappers belonging only to this standalone section.
+    const canvas = zone.closest<HTMLElement>('[data-automation-id="CanvasLayout"]');
+    let outer = zone.parentElement;
+    while (outer && outer !== canvas && canvas &&
+           outer.querySelectorAll('[data-automation-id="CanvasZone"]').length === 1 &&
+           !outer.querySelector('.kqWorldNavigationHost')) {
+      mark(outer, 'data-kq-video-wrapper');
+      outer = outer.parentElement;
+    }
+    let wrapper = root.parentElement;
+    while (wrapper && wrapper !== zone) {
+      mark(wrapper, 'data-kq-video-wrapper');
+      wrapper = wrapper.parentElement;
+    }
+    this.layoutCleanup = () => marked.forEach(({ element, attribute, previous }) => {
+      if (previous === null) element.removeAttribute(attribute);
+      else element.setAttribute(attribute, previous);
+    });
+  }
+
   private readonly _videoService:
     KqVideoService;
 
@@ -110,11 +145,14 @@ export default class KqVideoHub
         'dark'
     });
 
+    this.setupLayout();
     await this._loadVideos();
   }
 
   public componentWillUnmount():
     void {
+    this.disposed = true;
+    this.layoutCleanup?.();
 
     window.removeEventListener(
       'kqworld-theme-change',
@@ -154,6 +192,8 @@ export default class KqVideoHub
           ._videoService
           .getVideos();
 
+      if (this.disposed) return;
+
       const beyondTerminalVideos =
         videos.filter(
           (
@@ -178,6 +218,7 @@ export default class KqVideoHub
 
       this.setState({
         videos,
+        errorMessage: this._videoService.getCorporateError(),
 
         selectedVideo,
 
@@ -191,6 +232,7 @@ export default class KqVideoHub
       error
     ) {
 
+      if (this.disposed) return;
       console.error(
         'KQ video hub error:',
         error
@@ -263,64 +305,22 @@ export default class KqVideoHub
       );
   }
 
-  private _getVideoEmbedUrl(
-    url:
-      string
-  ): string {
-
-    if (!url) {
-      return '';
-    }
-
-    const youtubeWatch =
-      url.match(
-        /youtube\.com\/watch\?v=([^&]+)/i
-      );
-
-    if (
-      youtubeWatch &&
-      youtubeWatch[1]
-    ) {
-      return (
-        'https://www.youtube.com/embed/' +
-        youtubeWatch[1] +
-        '?autoplay=1'
-      );
-    }
-
-    const youtubeShort =
-      url.match(
-        /youtu\.be\/([^?&/]+)/i
-      );
-
-    if (
-      youtubeShort &&
-      youtubeShort[1]
-    ) {
-      return (
-        'https://www.youtube.com/embed/' +
-        youtubeShort[1] +
-        '?autoplay=1'
-      );
-    }
-
-    const youtubeEmbed =
-      url.match(
-        /youtube\.com\/embed\/([^?&/]+)/i
-      );
-
-    if (
-      youtubeEmbed &&
-      youtubeEmbed[1]
-    ) {
-      return (
-        'https://www.youtube.com/embed/' +
-        youtubeEmbed[1] +
-        '?autoplay=1'
-      );
-    }
-
-    return url;
+  private _getVideoEmbedUrl(value: string): string {
+    try {
+      const url = new URL(value, this.props.context.pageContext.web.absoluteUrl + '/');
+      if (url.protocol !== 'https:' && url.protocol !== 'http:') return '';
+      const host = url.hostname.toLowerCase();
+      let id = '';
+      if (host === 'youtu.be') id = url.pathname.split('/')[1] || '';
+      if (['youtube.com', 'www.youtube.com', 'm.youtube.com', 'www.youtube-nocookie.com'].indexOf(host) !== -1) {
+        id = url.searchParams.get('v') || '';
+        if (!id && /^\/(embed|shorts|live)\//.test(url.pathname)) id = url.pathname.split('/')[2] || '';
+      }
+      if (/^[A-Za-z0-9_-]{11}$/.test(id)) {
+        return `https://www.youtube.com/embed/${id}?rel=0`;
+      }
+      return url.href;
+    } catch { return ''; }
   }
 
   private _renderPlayer():
@@ -356,6 +356,11 @@ export default class KqVideoHub
           styles.player
         }
       >
+        {/\.(mp4|webm|ogg)(?:[?#]|$)/i.test(embedUrl) ? (
+          <video key={embedUrl} src={embedUrl} controls playsInline
+            poster={selectedVideo.thumbnailUrl || undefined}
+            className={styles.playerFrame} />
+        ) : (
         <iframe
           key={
             embedUrl
@@ -373,6 +378,7 @@ export default class KqVideoHub
             styles.playerFrame
           }
         />
+        )}
 
         <div
           className={
@@ -534,6 +540,7 @@ export default class KqVideoHub
 
     return (
       <section
+        ref={this.rootRef}
         className={[
           styles.kqVideoHub,
 
@@ -561,16 +568,18 @@ export default class KqVideoHub
                 styles.sectionTitle
               }
             >
-              Videos... Watch what's happening
+              Videos... Watch what&apos;s happening
             </h2>
           </div>
 
           <a
             href={
-              videoLibraryUrl
+              activeCategory === 'beyond-terminal'
+                ? 'https://corporate.kenya-airways.com/en/press-room/beyond-the-terminal-podcast/'
+                : videoLibraryUrl
             }
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className={
               styles.libraryLink
             }
@@ -594,7 +603,7 @@ export default class KqVideoHub
         )}
 
         {!isLoading &&
-          errorMessage && (
+          activeCategory === 'corporate-stories' && errorMessage && (
             <div
               className={
                 styles.error
@@ -604,8 +613,7 @@ export default class KqVideoHub
             </div>
           )}
 
-        {!isLoading &&
-          !errorMessage && (
+        {!isLoading && (
             <div
               className={
                 styles.videoHubCard

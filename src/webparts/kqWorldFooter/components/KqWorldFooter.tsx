@@ -10,19 +10,20 @@ import {
   socialLinks
 } from '../data/footerLinks';
 
-import footerLogo from '../assets/KQ Logo-White-01 (1) 1.svg';
+import footerLogo from '../assets/kq-logo-white.svg';
+import footerRed from '../assets/footerred.svg';
 
 import awardAirline from
-  '../assets/2025-winner-shields-africas-leading-airline 1.svg';
+  '../assets/2025-winner-shields-africas-leading-airline.svg';
 
 import awardBusinessClass from
-  '../assets/2025-winner-shields-africas-leading-business-class 1.svg';
+  '../assets/2025-winner-shields-africas-leading-business-class.svg';
 
 import awardInflightMagazine from
-  '../assets/2025-winner-shields-africas-leading-inflight-magazine 1.svg';
+  '../assets/2025-winner-shields-africas-leading-inflight-magazine.svg';
 
 import awardAirlineBrand from
-  '../assets/2025-winner-shields-leading-airline 1.svg';
+  '../assets/2025-winner-shields-leading-airline.svg';
 
 import {
   ArrowUp24Regular
@@ -219,30 +220,71 @@ const getSocialIcon = (label: string): JSX.Element => {
 
 const KqWorldFooter: React.FC<IKqWorldFooterProps> = () => {
 
+  const rootRef = React.useRef<HTMLElement>(null);
+
+  // Scope section width changes to this standalone footer only.
+  React.useEffect(() => {
+    const root = rootRef.current;
+    const zone = root?.closest<HTMLElement>('[data-automation-id="CanvasZone"]');
+    if (!root || !zone || zone.querySelector('.kqWorldNavigationHost') ||
+        zone.querySelectorAll('[data-automation-id="CanvasControl"]').length !== 1) return;
+    const marked: Array<{ element: HTMLElement; attribute: string; previous: string | null }> = [];
+    const mark = (element: HTMLElement, attribute: string): void => {
+      marked.push({ element, attribute, previous: element.getAttribute(attribute) });
+      element.setAttribute(attribute, 'true');
+    };
+    mark(zone, 'data-kq-footer-zone');
+    // Remove width caps on wrappers belonging only to this standalone section.
+    const canvas = zone.closest<HTMLElement>('[data-automation-id="CanvasLayout"]');
+    let outer = zone.parentElement;
+    while (outer && outer !== canvas && canvas &&
+           outer.querySelectorAll('[data-automation-id="CanvasZone"]').length === 1 &&
+           !outer.querySelector('.kqWorldNavigationHost')) {
+      mark(outer, 'data-kq-footer-wrapper');
+      outer = outer.parentElement;
+    }
+    let wrapper = root.parentElement;
+    while (wrapper && wrapper !== zone) {
+      mark(wrapper, 'data-kq-footer-wrapper');
+      wrapper = wrapper.parentElement;
+    }
+    return () => marked.forEach(({ element, attribute, previous }) => {
+      if (previous === null) element.removeAttribute(attribute);
+      else element.setAttribute(attribute, previous);
+    });
+  }, []);
+
+
+
   const scrollToTop = (): void => {
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: 'smooth'
-    });
+  const scrollContainer = rootRef.current?.closest(
+    '[data-automation-id="contentScrollRegion"]'
+  ) as HTMLElement | null;
 
-    document.documentElement.scrollTo({
+  if (scrollContainer) {
+    scrollContainer.scrollTo({
       top: 0,
-      left: 0,
-      behavior: 'smooth'
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
     });
+    return;
+  }
 
-    document.body.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: 'smooth'
-    });
-  };
+  window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+  });
+};
 
   return (
-    <footer className={styles.footer}>
+    <footer ref={rootRef} className={styles.footer}>
 
       <div className={styles.topCurve}>
+        <svg className={styles.curveSurface} viewBox="0 0 1728 159" aria-hidden="true" focusable="false">
+          <path d="M1992.02 50.5698C1523.91 80.1515 1026.34 128.521 645.212 110.763C264.083 93.0041 -306.423 23.9994 -687.8 15.0675L-687.8 159H1992.02Z" />
+        </svg>
+        <img src={footerRed} alt="" aria-hidden="true" className={styles.footerArtwork} />
+
         <button
           type="button"
           className={styles.backToTop}

@@ -1,30 +1,49 @@
 import * as React from 'react';
 
-import { IKqCompanyNewsProps } from './IKqCompanyNewsProps';
+import {
+  IKqCompanyNewsProps
+} from './IKqCompanyNewsProps';
 
-import KqCompanyNewsService from '../services/KqCompanyNewsService';
+import KqCompanyNewsService
+  from '../services/KqCompanyNewsService';
 
 import {
   IKqCompanyNewsItem,
   KqCompanyNewsType
 } from '../models/IKqCompanyNewsItem';
 
-import styles from './KqCompanyNews.module.scss';
+import styles
+  from './KqCompanyNews.module.scss';
 
-type ActiveTab = KqCompanyNewsType;
+
+type ActiveTab =
+  KqCompanyNewsType;
+
 
 interface IKqCompanyNewsState {
-  activeTab: ActiveTab;
 
-  take3: IKqCompanyNewsItem[];
-  blogs: IKqCompanyNewsItem[];
-  pride: IKqCompanyNewsItem[];
+  activeTab:
+    ActiveTab;
 
-  isLoading: boolean;
-  errorMessage: string;
+  take3:
+    IKqCompanyNewsItem[];
 
-  isDarkMode: boolean;
+  blogs:
+    IKqCompanyNewsItem[];
+
+  pride:
+    IKqCompanyNewsItem[];
+
+  isLoading:
+    boolean;
+
+  errorMessage:
+    string;
+
+  isDarkMode:
+    boolean;
 }
+
 
 export default class KqCompanyNews
   extends React.Component<
@@ -32,67 +51,93 @@ export default class KqCompanyNews
     IKqCompanyNewsState
   > {
 
-  private readonly _newsService: KqCompanyNewsService;
 
-  public constructor(props: IKqCompanyNewsProps) {
+  private readonly _newsService:
+    KqCompanyNewsService;
+
+
+  public constructor(
+    props: IKqCompanyNewsProps
+  ) {
+
     super(props);
+
 
     this._newsService =
       new KqCompanyNewsService(
         this.props.context
       );
 
+
     const currentTheme =
       typeof document !== 'undefined'
-        ? document.documentElement.getAttribute(
-          'data-kq-theme'
-        )
+        ? document.documentElement
+            .getAttribute(
+              'data-kq-theme'
+            )
         : 'light';
 
+
     this.state = {
-      activeTab: 'take3',
 
-      take3: [],
-      blogs: [],
-      pride: [],
+      activeTab:
+        'take3',
 
-      isLoading: true,
-      errorMessage: '',
+      take3:
+        [],
+
+      blogs:
+        [],
+
+      pride:
+        [],
+
+      isLoading:
+        true,
+
+      errorMessage:
+        '',
 
       isDarkMode:
         currentTheme === 'dark'
     };
   }
 
-  public async componentDidMount():
-    Promise<void> {
 
-    window.addEventListener(
-      'kqworld-theme-change',
-      this._handleThemeChange as EventListener
-    );
+  /*
+   * ==========================================================
+   * COMPONENT LIFECYCLE
+   * ==========================================================
+   */
 
-    const currentTheme =
-      document.documentElement.getAttribute(
-        'data-kq-theme'
-      );
+  public async componentDidMount(): Promise<void> {
+  window.addEventListener(
+    'kqworld-theme-change',
+    this._handleThemeChange as EventListener
+  );
 
-    this.setState({
-      isDarkMode:
-        currentTheme === 'dark'
-    });
+  const currentTheme =
+    document.documentElement.getAttribute('data-kq-theme');
 
-    await this._loadNews();
-  }
+  this.setState({
+    isDarkMode: currentTheme === 'dark'
+  });
 
-  public componentWillUnmount():
-    void {
+  await this._loadNews();
+}
 
-    window.removeEventListener(
-      'kqworld-theme-change',
-      this._handleThemeChange as EventListener
-    );
-  }
+public componentWillUnmount(): void {
+  window.removeEventListener(
+    'kqworld-theme-change',
+    this._handleThemeChange as EventListener
+  );
+}
+
+  /*
+   * ==========================================================
+   * THEME
+   * ==========================================================
+   */
 
   private _handleThemeChange = (
     event: CustomEvent
@@ -101,31 +146,54 @@ export default class KqCompanyNews
     const theme =
       event.detail?.theme;
 
+
     this.setState({
       isDarkMode:
         theme === 'dark'
     });
   };
 
+
+  /*
+   * ==========================================================
+   * LOAD DATA
+   * ==========================================================
+   */
+
   private async _loadNews():
     Promise<void> {
 
     try {
+
       this.setState({
-        isLoading: true,
-        errorMessage: ''
+        isLoading:
+          true,
+
+        errorMessage:
+          ''
       });
+
 
       const result =
         await this._newsService
           .getAllCompanyNews();
 
+
       this.setState({
-        take3: result.take3,
-        blogs: result.blogs,
-        pride: result.pride,
-        isLoading: false
+
+        take3:
+          result.take3,
+
+        blogs:
+          result.blogs,
+
+        pride:
+          result.pride,
+
+        isLoading:
+          false
       });
+
 
     } catch (error) {
 
@@ -134,8 +202,11 @@ export default class KqCompanyNews
         error
       );
 
+
       this.setState({
-        isLoading: false,
+
+        isLoading:
+          false,
 
         errorMessage:
           error instanceof Error
@@ -145,14 +216,23 @@ export default class KqCompanyNews
     }
   }
 
+
+  /*
+   * ==========================================================
+   * TABS
+   * ==========================================================
+   */
+
   private _setActiveTab(
     tab: ActiveTab
   ): void {
 
     this.setState({
-      activeTab: tab
+      activeTab:
+        tab
     });
   }
+
 
   private _getActiveItems():
     IKqCompanyNewsItem[] {
@@ -164,42 +244,79 @@ export default class KqCompanyNews
       pride
     } = this.state;
 
+
     switch (activeTab) {
 
-      case 'blog':
-        return blogs.slice(0, 3);
+  case 'blog':
+    return blogs.slice(
+      0,
+      3
+    );
 
-      case 'pride':
-        return pride.slice(0, 4);
+  case 'pride':
+    return pride.slice(
+      0,
+      4
+    );
 
-      case 'take3':
-      default:
-        return take3.slice(0, 6);
-    }
+  case 'take3':
+    return take3.slice(
+      0,
+      6
+    );
+
+  default:
+    return take3.slice(
+      0,
+      6
+    );
   }
+  }
+
+
+  /*
+   * ==========================================================
+   * VIEW MORE URL
+   * ==========================================================
+   */
 
   private _getViewMoreUrl():
     string {
 
     switch (this.state.activeTab) {
 
-      case 'blog':
-        return (
-          'https://corporate.kenya-airways.com' +
-          '/en/press-room/kq-blog/' +
-          '?types=External+Articles'
-        );
+  case 'blog':
+    return (
+      'https://corporate.kenya-airways.com/' +
+      'en/press-room/kq-blog/'
+    );
 
-      case 'pride':
-      case 'take3':
-      default:
-        return (
-          `${window.location.origin}` +
-          '/homepage/SitePages/' +
-          'Forms/AllPages.aspx'
-        );
-    }
+  case 'pride':
+    return (
+      'https://kenyaairwaysplc.sharepoint.com/' +
+      'homepage/SitePages/Forms/AllPages.aspx'
+    );
+
+  case 'take3':
+    return (
+      'https://kenyaairwaysplc.sharepoint.com/' +
+      'homepage/SitePages/Forms/AllPages.aspx'
+    );
+
+  default:
+    return (
+      'https://kenyaairwaysplc.sharepoint.com/' +
+      'homepage/SitePages/Forms/AllPages.aspx'
+    );
+}
   }
+
+
+  /*
+   * ==========================================================
+   * DATE
+   * ==========================================================
+   */
 
   private _formatDate(
     date: Date
@@ -209,28 +326,46 @@ export default class KqCompanyNews
       return '';
     }
 
+
     return date.toLocaleDateString(
       'en-GB',
       {
-        day: '2-digit',
-        month: 'short'
+        day:
+          '2-digit',
+
+        month:
+          'short',
+
+        year:
+          'numeric'
       }
     );
   }
+
+
+  /*
+   * ==========================================================
+   * TAKE 3 CARD
+   * ==========================================================
+   */
 
   private _renderTake3Card(
     item: IKqCompanyNewsItem
   ): React.ReactElement {
 
     return (
+
       <article
         key={`take3-${item.id}`}
         className={styles.newsCard}
       >
 
-        <div className={styles.cardImage}>
+        <div
+          className={styles.cardImage}
+        >
 
           {item.imageUrl ? (
+
             <img
               src={item.imageUrl}
               alt=""
@@ -238,7 +373,9 @@ export default class KqCompanyNews
                 styles.cardImageElement
               }
             />
+
           ) : (
+
             <div
               className={
                 styles.imageFallback
@@ -246,21 +383,32 @@ export default class KqCompanyNews
             >
               TAKE 3
             </div>
+
           )}
 
         </div>
 
-        <div className={styles.cardBody}>
 
-          <div className={styles.cardLabel}>
+        <div
+          className={styles.cardBody}
+        >
+
+          <div
+            className={styles.cardLabel}
+          >
             TAKE 3
           </div>
 
-          <h3 className={styles.cardTitle}>
+
+          <h3
+            className={styles.cardTitle}
+          >
             {item.title}
           </h3>
 
+
           {item.moreInfo && (
+
             <p
               className={
                 styles.cardDescription
@@ -268,24 +416,28 @@ export default class KqCompanyNews
             >
               {item.moreInfo}
             </p>
+
           )}
 
-          <div className={styles.cardFooter}>
+
+          <div
+            className={styles.cardFooter}
+          >
 
             <span
-              className={
-                styles.cardMeta
-              }
+              className={styles.cardMeta}
             >
               {this._formatDate(
                 item.publishedDate
               )}
             </span>
 
+
             <a
               href={item.itemUrl}
+              aria-label={`${item.title} (opens in a new tab)`}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className={styles.readLink}
             >
               Read story →
@@ -299,19 +451,30 @@ export default class KqCompanyNews
     );
   }
 
+
+  /*
+   * ==========================================================
+   * BLOG CARD
+   * ==========================================================
+   */
+
   private _renderBlogCard(
     item: IKqCompanyNewsItem
   ): React.ReactElement {
 
     return (
+
       <article
         key={`blog-${item.id}`}
         className={styles.newsCard}
       >
 
-        <div className={styles.cardImage}>
+        <div
+          className={styles.cardImage}
+        >
 
           {item.imageUrl ? (
+
             <img
               src={item.imageUrl}
               alt=""
@@ -319,7 +482,9 @@ export default class KqCompanyNews
                 styles.cardImageElement
               }
             />
+
           ) : (
+
             <div
               className={
                 styles.blogFallback
@@ -327,21 +492,32 @@ export default class KqCompanyNews
             >
               BLOG
             </div>
+
           )}
 
         </div>
 
-        <div className={styles.cardBody}>
 
-          <div className={styles.cardLabel}>
+        <div
+          className={styles.cardBody}
+        >
+
+          <div
+            className={styles.cardLabel}
+          >
             BLOG
           </div>
 
-          <h3 className={styles.cardTitle}>
+
+          <h3
+            className={styles.cardTitle}
+          >
             {item.title}
           </h3>
 
+
           {item.moreInfo && (
+
             <p
               className={
                 styles.cardDescription
@@ -349,27 +525,31 @@ export default class KqCompanyNews
             >
               {item.moreInfo}
             </p>
+
           )}
 
-          <div className={styles.cardFooter}>
+
+          <div
+            className={styles.cardFooter}
+          >
 
             <span
-              className={
-                styles.cardMeta
-              }
+              className={styles.cardMeta}
             >
+
               {item.readTimeMinutes
                 ? `${item.readTimeMinutes} min read`
-                : ''}
+                : this._formatDate(item.publishedDate)}
+
             </span>
+
 
             <a
               href={item.itemUrl}
+              aria-label={`${item.title} (opens in a new tab)`}
               target="_blank"
-              rel="noreferrer"
-              className={
-                styles.readLink
-              }
+              rel="noopener noreferrer"
+              className={styles.readLink}
             >
               Read story →
             </a>
@@ -382,73 +562,73 @@ export default class KqCompanyNews
     );
   }
 
+
+  /*
+   * ==========================================================
+   * THE PRIDE CARD
+   * ==========================================================
+   */
+
   private _renderPrideCard(
     item: IKqCompanyNewsItem
   ): React.ReactElement {
 
     return (
+
       <article
         key={`pride-${item.id}`}
-        className={
-          styles.prideCard
-        }
+        className={styles.prideCard}
       >
 
         <div
-          className={
-            styles.prideArtwork
-          }
+          className={styles.prideArtwork}
         >
 
           <div
-            className={
-              styles.prideEyebrow
-            }
+            className={styles.prideEyebrow}
           >
             QUARTERLY NEWSLETTER
           </div>
 
+
           <div
-            className={
-              styles.prideLogoText
-            }
+            className={styles.prideLogoText}
           >
             The
             <br />
             Pride
           </div>
 
+
           {item.issueNumber && (
+
             <div
-              className={
-                styles.issueNumber
-              }
+              className={styles.issueNumber}
             >
               Issue No.{' '}
               {item.issueNumber}
             </div>
+
           )}
 
         </div>
 
+
         <div
-          className={
-            styles.prideBody
-          }
+          className={styles.prideBody}
         >
 
           <h3
-            className={
-              styles.prideTitle
-            }
+            className={styles.prideTitle}
           >
             {item.title}
           </h3>
 
+
           <a
             href={item.itemUrl}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className={styles.readLink}
           >
             Read newsletter →
@@ -460,43 +640,45 @@ export default class KqCompanyNews
     );
   }
 
+
+  /*
+   * ==========================================================
+   * BLOG REPOSITORY CARD
+   * ==========================================================
+   */
+
   private _renderBlogEmptyState():
     React.ReactElement {
 
     return (
+
       <div
-        className={
-          styles.emptyState
-        }
+        className={styles.emptyState}
       >
 
         <div
-          className={
-            styles.emptyTitle
-          }
+          className={styles.emptyTitle}
         >
           KQ Blogs
         </div>
 
+
         <div
-          className={
-            styles.emptyText
-          }
+          className={styles.emptyText}
         >
           Browse the latest Kenya Airways
-          external articles on the corporate
-          website.
+          stories and articles on the
+          corporate website.
         </div>
+
 
         <a
           href={
             this._getViewMoreUrl()
           }
           target="_blank"
-          rel="noreferrer"
-          className={
-            styles.readLink
-          }
+          rel="noopener noreferrer"
+          className={styles.readLink}
         >
           View Blogs →
         </a>
@@ -505,20 +687,31 @@ export default class KqCompanyNews
     );
   }
 
+
+  /*
+   * ==========================================================
+   * ACTIVE CARDS
+   * ==========================================================
+   */
+
   private _renderActiveCards():
     React.ReactNode {
 
     const items =
       this._getActiveItems();
 
+
     if (
-      this.state.activeTab === 'blog' &&
+      this.state.activeTab ===
+        'blog' &&
       items.length === 0
     ) {
+
       return (
         this._renderBlogEmptyState()
       );
     }
+
 
     return items.map(
       (
@@ -526,7 +719,10 @@ export default class KqCompanyNews
           IKqCompanyNewsItem
       ) => {
 
-        if (item.type === 'pride') {
+        if (
+          this.state.activeTab === 'pride'
+        ) {
+
           return (
             this._renderPrideCard(
               item
@@ -534,13 +730,18 @@ export default class KqCompanyNews
           );
         }
 
-        if (item.type === 'blog') {
+
+        if (
+          this.state.activeTab === 'blog'
+        ) {
+
           return (
             this._renderBlogCard(
               item
             )
           );
         }
+
 
         return (
           this._renderTake3Card(
@@ -550,6 +751,13 @@ export default class KqCompanyNews
       }
     );
   }
+
+
+  /*
+   * ==========================================================
+   * RENDER
+   * ==========================================================
+   */
 
   public render():
     React.ReactElement<
@@ -563,56 +771,58 @@ export default class KqCompanyNews
       isDarkMode
     } = this.state;
 
+
     const gridClass =
       activeTab === 'pride'
         ? styles.prideGrid
         : styles.standardGrid;
 
+
     return (
+
       <section
+        data-kq-company-news="true"
         className={[
           styles.kqCompanyNews,
+
           isDarkMode
             ? styles.darkMode
             : ''
+
         ].join(' ')}
       >
 
         <div
-          className={
-            styles.eyebrow
-          }
+          className={styles.eyebrow}
         >
           STAY INFORMED
         </div>
 
+
         <h2
-          className={
-            styles.sectionTitle
-          }
+          className={styles.sectionTitle}
         >
           Company News &amp; Updates
         </h2>
 
+
         <div
-          className={
-            styles.toolbar
-          }
+          className={styles.toolbar}
         >
 
           <div
-            className={
-              styles.tabBar
-            }
+            className={styles.tabBar}
           >
 
             <button
               type="button"
+
               onClick={() =>
                 this._setActiveTab(
                   'take3'
                 )
               }
+
               className={
                 activeTab === 'take3'
                   ? styles.tabActive
@@ -622,13 +832,16 @@ export default class KqCompanyNews
               ▣&nbsp;&nbsp;Take 3
             </button>
 
+
             <button
               type="button"
+
               onClick={() =>
                 this._setActiveTab(
                   'blog'
                 )
               }
+
               className={
                 activeTab === 'blog'
                   ? styles.tabActive
@@ -638,13 +851,16 @@ export default class KqCompanyNews
               ◇&nbsp;&nbsp;Blogs
             </button>
 
+
             <button
               type="button"
+
               onClick={() =>
                 this._setActiveTab(
                   'pride'
                 )
               }
+
               className={
                 activeTab === 'pride'
                   ? styles.tabActive
@@ -656,54 +872,68 @@ export default class KqCompanyNews
 
           </div>
 
+
           <a
             href={
               this._getViewMoreUrl()
             }
+
             target="_blank"
-            rel="noreferrer"
+
+            rel="noopener noreferrer"
+
             className={
               styles.viewMore
             }
           >
             View More Stories
-            <span>→</span>
+
+            <span>
+              →
+            </span>
           </a>
 
         </div>
 
+
         {isLoading && (
+
           <div
-            className={
-              styles.message
-            }
+            className={styles.message}
           >
             Loading company news...
           </div>
+
         )}
+
 
         {!isLoading &&
           errorMessage && (
-            <div
-              className={
-                styles.error
-              }
-            >
-              {errorMessage}
-            </div>
-          )}
+
+          <div
+            className={styles.error}
+          >
+            {errorMessage}
+          </div>
+
+        )}
+
 
         {!isLoading &&
           !errorMessage && (
-            <div
-              className={[
-                styles.newsGrid,
-                gridClass
-              ].join(' ')}
-            >
-              {this._renderActiveCards()}
-            </div>
-          )}
+
+          <div
+            className={[
+              styles.newsGrid,
+              gridClass
+            ].join(' ')}
+          >
+
+            {this._renderActiveCards()}
+
+          </div>
+
+        )}
 
       </section>
     );

@@ -1,510 +1,319 @@
+/* Only the section containing both Viva Engage and Socials is marked. */
+:global([data-kq-social-zone]) {
+  width: 100% !important;
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 4.5% !important;
+  padding-right: 4.5% !important;
+  box-sizing: border-box !important;
+}
+
+:global([data-kq-social-shell]),
+:global([data-kq-social-wrapper]) {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  box-sizing: border-box !important;
+}
+
+:global([data-kq-social-row]) {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 20px !important;
+  align-items: stretch !important;
+}
+
+/* Stretch through the SharePoint wrappers to the card roots. */
+:global([data-kq-social-wrapper]) {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
+
+:global([data-kq-social-left]) {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+}
+
+:global([data-kq-social-right]) {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+}
+
 .kqSocials {
   width: 100%;
   max-width: 100%;
-
-  min-height: 100%;
-
+  min-width: 0;
+  flex: 1 1 auto;
   margin: 0;
-
-  padding: 16px;
-
-  overflow: hidden;
-
+  padding: 20px;
   box-sizing: border-box;
-
-  font-family:
-    'Montserrat',
-    'Segoe UI',
-    Arial,
-    Helvetica,
-    sans-serif;
-
+  font-family: 'Montserrat', 'Segoe UI', Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
   color: #171717;
-
   background: #ffffff;
-
   border: 1px solid #d9dde4;
   border-radius: 14px;
-
-  box-shadow:
-    0 4px 14px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .06);
 }
 
-
-/* ============================================================
-   HEADER
-============================================================ */
-
-.header {
-  width: 100%;
-
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-
-  gap: 16px;
-
-  margin-bottom: 16px;
-
+.kqSocials *,
+.kqSocials *::before,
+.kqSocials *::after {
   box-sizing: border-box;
 }
 
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
 
 .eyebrow {
-  margin-bottom: 5px;
-
+  margin-bottom: 6px;
   color: #d71920;
-
-  font-size: 9px;
-  line-height: 1;
-
+  font-size: 12px;
+  line-height: 1.3;
   font-weight: 500;
-
-  letter-spacing: 0.16em;
+  letter-spacing: .06em;
 }
+
 
 
 .title {
   color: #171717;
-
-  font-size: 14px;
-  line-height: 1.2;
-
-  font-weight: 400;
+  margin: 0;
+  font-family: "Lucida Sans", "Lucida Grande", sans-serif;
+  font-size: 18px;
+  line-height: 1.3;
+  font-weight: 600;
+  font-style: italic;
 }
-
-
-/* ============================================================
-   TABS
-============================================================ */
 
 .tabBar {
-  width: 240px;
-
   display: grid;
-
-  grid-template-columns:
-    1fr 1fr;
-
+  grid-template-columns: 1fr 1fr;
+  width: 220px;
+  max-width: 100%;
   padding: 3px;
-
-  box-sizing: border-box;
-
   background: #ffffff;
-
   border: 1px solid #d9dde4;
   border-radius: 999px;
-
-  box-shadow:
-    0 2px 7px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 2px 7px rgba(0, 0, 0, .07);
 }
-
 
 .tab {
-  border: none;
-
+  border: 0;
   border-radius: 999px;
-
-  padding: 8px 14px;
-
+  padding: 9px 14px;
   background: transparent;
-
   color: #171717;
-
   cursor: pointer;
-
-  font-family: inherit;
-
-  font-size: 9px;
-  line-height: 1;
-
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.3;
   font-weight: 500;
-
-  transition:
-    background-color 160ms ease,
-    color 160ms ease;
 }
-
 
 .tab:hover {
   background: #f0f0f0;
 }
 
-
-.tabActive {
-  background: #ff1616;
-
-  color: #ffffff;
-}
-
-
+.tabActive,
 .tabActive:hover {
   background: #ff1616;
-
   color: #ffffff;
 }
-
-
-/* ============================================================
-   LINKS LIST
-============================================================ */
 
 .linksList {
   display: flex;
   flex-direction: column;
-
-  gap: 8px;
+  gap: 10px;
 }
-
 
 .externalList {
   gap: 0;
 }
 
-
-/* ============================================================
-   INTERNAL LINK
-============================================================ */
+.internalItem,
+.externalItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  background: #ffffff;
+  text-align: left;
+  text-decoration: none;
+  color: inherit;
+  font-family: inherit;
+  transition: background-color 160ms ease;
+}
 
 .internalItem {
-  width: 100%;
-
-  display: flex;
-  align-items: center;
-
-  gap: 9px;
-
-  padding:
-    8px 9px;
-
-  box-sizing: border-box;
-
-  border:
-    1px solid #dfe3e8;
-  border-radius: 14px;
-
-  background: #ffffff;
-
-  cursor: pointer;
-
-  text-align: left;
-
-  font-family: inherit;
-
-  transition:
-    background-color 160ms ease,
-    transform 160ms ease;
+  border: 1px solid #dfe3e8;
+  border-radius: 12px;
 }
-
-
-.internalItem:hover {
-  background: #f7f7f7;
-
-  transform:
-    translateY(-1px);
-}
-
-
-/* ============================================================
-   EXTERNAL LINK
-============================================================ */
 
 .externalItem {
-  width: 100%;
-
-  display: flex;
-  align-items: center;
-
-  gap: 9px;
-
-  padding:
-    10px 6px;
-
-  box-sizing: border-box;
-
-  border: none;
-
-  border-bottom:
-    1px solid #e4e7eb;
-
-  background: #ffffff;
-
-  cursor: pointer;
-
-  text-align: left;
-
-  font-family: inherit;
-
-  transition:
-    background-color 160ms ease;
+  padding: 12px 6px;
+  border-bottom: 1px solid #e4e7eb;
 }
-
 
 .externalItem:last-child {
-  border-bottom: none;
+  border-bottom: 0;
 }
 
-
+.internalItem:hover,
 .externalItem:hover {
   background: #f7f7f7;
+  text-decoration: none;
 }
 
-
-/* ============================================================
-   ICON
-============================================================ */
-
 .socialIcon {
-  width: 30px;
-  height: 30px;
-
-  min-width: 30px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
   border-radius: 50%;
-
-  background:
-    var(--icon-bg);
-
+  background: var(--icon-bg);
   color: #ffffff;
-
-  font-size:
-    var(--icon-size);
-
-  line-height: 1;
-
-  font-weight: 600;
 }
 
-
-/* ============================================================
-   ITEM CONTENT
-============================================================ */
+.socialIcon svg {
+  display: block;
+  width: 21px;
+  height: 21px;
+}
 
 .itemContent {
+  display: block;
   min-width: 0;
-
   flex: 1;
 }
 
-
 .itemTitle {
-  color: #171717;
-
-  font-size: 10px;
-  line-height: 1.2;
-
+  display: block;
+  font-size: 14px;
+  line-height: 1.3;
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
-
 
 .itemSubtitle {
-  margin-top: 2px;
-
-  color: #8a93a3;
-
-  font-size: 8.5px;
-  line-height: 1.2;
-
-  font-weight: 400;
+  display: block;
+  margin-top: 3px;
+  color: #697586;
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
-
 
 .itemArrow {
-  padding-right: 2px;
-
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
   color: #7b8494;
-
-  font-size: 11px;
-  line-height: 1;
 }
 
-
-/* ============================================================
-   DARK MODE
-============================================================ */
+.kqSocials a:focus-visible,
+.tab:focus-visible {
+  outline: 2px solid #d71920;
+  outline-offset: 3px;
+}
 
 .darkMode {
-  background: #262F3D;
-
-  border-color:
-    rgba(255, 255, 255, 0.42);
-
+  background: #262f3d;
+  border-color: rgba(255, 255, 255, .42);
   color: #ffffff;
-
   box-shadow: none;
 }
-
 
 .darkMode .eyebrow {
   color: #ffffff;
 }
 
-
-.darkMode .title {
-  color: #ffffff;
-}
-
-
-/*
- * Tab bar remains white.
- * Active tab is black in the Figma.
- */
-
 .darkMode .tabBar {
   background: #ffffff;
-
   border-color: #ffffff;
 }
 
-
-.darkMode .tab {
-  color: #171B21;
-}
-
-
-.darkMode .tab:hover {
-  background: #eeeeee;
-}
-
-
-.darkMode .tabActive {
-  background: #000000;
-
-  color: #ffffff;
-}
-
-
+.darkMode .tabActive,
 .darkMode .tabActive:hover {
   background: #000000;
-
   color: #ffffff;
 }
 
-
-/*
- * Internal cards stay on the same dark surface
- * with light borders, matching the reference.
- */
-
-.darkMode .internalItem {
-  background: #262F3D;
-
-  border-color:
-    rgba(255, 255, 255, 0.65);
-}
-
-
-.darkMode .internalItem:hover {
-  background: #303a49;
-}
-
-
+.darkMode .internalItem,
 .darkMode .externalItem {
-  background: #262F3D;
-
-  border-bottom-color:
-    rgba(255, 255, 255, 0.22);
+  background: #262f3d;
+  border-color: rgba(255, 255, 255, .4);
 }
 
-
+.darkMode .internalItem:hover,
 .darkMode .externalItem:hover {
   background: #303a49;
 }
 
-
-/*
- * Figma uses white circular icon surfaces
- * in dark mode.
- */
-
-.darkMode .socialIcon {
-  background: #ffffff;
-
-  color: #171B21;
-}
-
-
-.darkMode .itemTitle {
-  color: #ffffff;
-}
-
-
 .darkMode .itemSubtitle {
-  color:
-    rgba(255, 255, 255, 0.68);
+  color: rgba(255, 255, 255, .75);
 }
-
 
 .darkMode .itemArrow {
   color: #ffffff;
 }
 
-
-/* ============================================================
-   TABLET
-============================================================ */
-
-@media screen and (max-width: 1100px) {
-
-  .kqSocials {
-    padding: 15px;
+/* Preserve brand colours so filled SVG marks remain legible. */
+@media (max-width: 1100px) {
+  :global([data-kq-social-zone]) {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
   }
 
+  :global([data-kq-social-row]) {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  :global([data-kq-social-left]) {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+
+  :global([data-kq-social-right]) {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+  }
+}
+
+@media (max-width: 600px) {
+  :global([data-kq-social-zone]) {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .kqSocials {
+    padding: 16px;
+    border-radius: 12px;
+  }
 
   .header {
     flex-direction: column;
-
     align-items: stretch;
   }
-
 
   .tabBar {
     width: 100%;
   }
-
-}
-
-
-/* ============================================================
-   MOBILE
-============================================================ */
-
-@media screen and (max-width: 600px) {
-
-  .kqSocials {
-    width: 100%;
-
-    margin: 0;
-
-    padding: 14px;
-
-    border-radius: 12px;
-  }
-
-
-  .header {
-    margin-bottom: 14px;
-  }
-
-
-  .title {
-    font-size: 13px;
-  }
-
-
-  .tab {
-    padding:
-      8px 10px;
-  }
-
-
-  .internalItem {
-    padding:
-      9px;
-  }
-
 }

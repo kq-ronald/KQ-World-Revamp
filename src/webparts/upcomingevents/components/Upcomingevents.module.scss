@@ -1,0 +1,221 @@
+.upcomingevents {
+    --event-text: #202020;
+    --event-muted: #777;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 400px;
+    height: auto;
+    margin: 0;
+    padding: 24px 20px;
+    box-sizing: border-box;
+    color: var(--event-text);
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, .08);
+    font-family: "Montserrat", Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.upcomingevents *,
+.upcomingevents *::before,
+.upcomingevents *::after {
+    box-sizing: border-box;
+}
+
+.header {
+    margin-bottom: 12px;
+}
+
+.sectionLabel {
+    margin: 0 0 8px;
+    color: var(--event-muted);
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 500;
+}
+
+.title {
+  flex-shrink: 0;
+  margin: 0 0 16px;
+  color: #111;
+  font-family: "Montserrat", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 100%;
+  letter-spacing: 0;
+}
+
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 20px;
+}
+
+.filterButton {
+    min-height: 32px;
+    padding: 6px 12px;
+    border: 0;
+    border-radius: 999px;
+    color: var(--event-text);
+    background: transparent;
+    font-family: inherit;
+    font-size: 12px;
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+.activeFilter {
+    color: #fff;
+    background: #202020;
+}
+
+.filterButton:focus-visible {
+    outline: 2px solid #d71920;
+    outline-offset: 3px;
+}
+
+.eventList {
+    display: grid;
+    gap: 20px;
+}
+
+.eventRow {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    min-height: 64px;
+}
+
+.dateBlock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.month {
+    color: #e30613;
+    font-size: 14px;
+    line-height: 1.3;
+}
+
+.day {
+    color: var(--event-muted);
+    font-size: 30px;
+    font-weight: 300;
+    line-height: 1.1;
+}
+
+.eventInformation {
+    min-width: 0;
+}
+
+.eventTitle {
+    margin: 0 0 6px;
+    color: var(--event-text);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.eventMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    color: var(--event-muted);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.eventMeta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.eventMeta svg {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+}
+
+.statusMessage {
+    margin: 0;
+    padding: 24px 0;
+    color: var(--event-muted);
+    text-align: center;
+    font-size: 14px;
+}
+
+.darkMode {
+    --event-text: #fff;
+    --event-muted: #c7ccd4;
+    background: #262f3d;
+    border-color: #3a4555;
+    box-shadow: none;
+}
+
+.darkMode .activeFilter {
+    color: #171b21;
+    background: #fff;
+}
+
+/* Matches the banner/calendar section: 4.5% gutters, 20px gap, 3:1 columns.
+   These markers are applied only to the section holding these two web parts. */
+@media (min-width: 1101px) {
+    :global([data-kq-content-zone]) {
+        width: 100% !important;
+        max-width: none !important;
+        box-sizing: border-box !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 4.5% !important;
+        padding-right: 4.5% !important;
+    }
+
+    :global([data-kq-content-shell]),
+    :global([data-kq-content-wrapper]) {
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    :global([data-kq-content-row]) {
+        display: grid !important;
+        grid-template-columns: minmax(0, 3fr) minmax(260px, 1fr) !important;
+        gap: 20px !important;
+        align-items: start !important;
+    }
+
+    :global([data-kq-content-left]) {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+    }
+
+    :global([data-kq-content-right]) {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+    }
+}
+
+@media (max-width: 600px) {
+    .upcomingevents {
+        min-height: 0;
+        padding: 20px 16px;
+    }
+}

@@ -403,7 +403,7 @@ export default class KqVivaExchange
                 post.webUrl
               }
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className={
                 styles.shareLink
               }
@@ -437,6 +437,7 @@ export default class KqVivaExchange
     return (
 
       <section
+        data-kq-viva="true"
         className={[
           styles.kqVivaExchange,
           isDarkMode
@@ -462,7 +463,7 @@ export default class KqVivaExchange
                 styles.vivaIcon
               }
             >
-              ◯
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="9" cy="9" r="6" /><circle cx="15" cy="15" r="6" /></svg>
             </div>
 
 
@@ -494,7 +495,7 @@ export default class KqVivaExchange
               this._getCommunityUrl()
             }
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className={
               styles.communityLink
             }
@@ -587,6 +588,7 @@ export default class KqVivaExchange
 
             <input
               type="text"
+              aria-label="Share something with the KQ family"
               value={
                 draftText
               }
@@ -637,6 +639,7 @@ export default class KqVivaExchange
 
             <button
               type="button"
+              aria-label="Publish post"
               disabled={
                 isPosting ||
                 !draftText.trim()

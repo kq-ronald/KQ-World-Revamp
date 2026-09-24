@@ -1,377 +1,97 @@
-import {
-  SPHttpClient,
-  SPHttpClientResponse
-} from '@microsoft/sp-http';
+import { SPHttpClient } from '@microsoft/sp-http';
+import { WebPartContext } from '@microsoft/sp-webpart-base';
+import { IKqVideo } from '../models/IKqVideo';
 
-import {
-  WebPartContext
-} from '@microsoft/sp-webpart-base';
-
-import {
-  IKqVideo,
-  KqVideoCategory
-} from '../models/IKqVideo';
-
+type UrlField = string | { Url?: string; Description?: string } | undefined;
 interface ISharePointVideoItem {
   Id: number;
   Title?: string;
-
-  VideoUrl?:
-    | string
-    | {
-        Url?: string;
-        Description?: string;
-      };
-
-  Thumbnail?:
-    | string
-    | {
-        Url?: string;
-      };
-
+  VideoUrl?: UrlField;
+  Thumbnail?: UrlField;
   Category?: string;
-
-  IsPublished?:
-    | boolean
-    | number
-    | string;
-
+  IsPublished?: boolean | number | string;
   DisplayOrder?: number;
 }
 
 export default class KqVideoService {
-  private readonly _context:
-    WebPartContext;
+  private readonly _context: WebPartContext;
+  private _corporateError = '';
 
-  private readonly _listName =
-    'KQ Videos Dev';
+  public constructor(context: WebPartContext) { this._context = context; }
+  public getCorporateError(): string { return this._corporateError; }
 
-  public constructor(
-    context: WebPartContext
-  ) {
-    this._context =
-      context;
+  // Verified Kenya Airways episodes. This is a maintained selection,
+  // not an automatic channel feed. Add further official episode IDs here.
+  private _getBeyondTerminalVideos(): IKqVideo[] {
+    const episodes = [
+      { id: 'Vt7a4NbEFj4', title: '40 Years in the Skies | The Dickson Nyibule Story' },
+      { id: 'c69quEwwK4M', title: 'Mid-Air Birth at 30,000 Feet' },
+      { id: 'WGT3pgGSENU', title: 'Capt Bob on Life, Responsibility & Surviving COVID' },
+      { id: '-QFyWSwI2bg', title: 'The Jack Maina Story: Passion, Grit & Purpose' }
+    ];
+    return episodes.map((episode, index): IKqVideo => ({
+      id: -(index + 1),
+      title: episode.title,
+      videoUrl: `https://www.youtube.com/watch?v=${episode.id}`,
+      thumbnailUrl: `https://i.ytimg.com/vi/${episode.id}/hqdefault.jpg`,
+      category: 'beyond-terminal'
+    }));
   }
 
-  public async getVideos():
-    Promise<IKqVideo[]> {
-
-    const webUrl =
-      this._context
-        .pageContext
-        .web
-        .absoluteUrl;
-
-    const url =
-      `${webUrl}` +
-      `/_api/web/lists/getbytitle('${this._listName}')/items` +
-      `?$top=100`;
-
-    console.log(
-      'KQ Videos DEV request:',
-      url
-    );
-
-    const response:
-      SPHttpClientResponse =
-        await this._context
-          .spHttpClient
-          .get(
-            url,
-            SPHttpClient
-              .configurations
-              .v1,
-            {
-              headers: {
-                Accept:
-                  'application/json;odata=nometadata'
-              }
-            }
-          );
-
-    if (!response.ok) {
-      const errorText =
-        await response.text();
-
-      console.error(
-        'KQ Videos DEV SharePoint error:',
-        response.status,
-        response.statusText,
-        errorText
-      );
-
-      throw new Error(
-        `Unable to load videos. SharePoint returned ${response.status}.`
-      );
-    }
-
-    const data:
-      {
-        value:
-          ISharePointVideoItem[];
-      } =
-        await response.json();
-
-    const items =
-      data.value || [];
-
-    console.log(
-      'KQ Videos DEV raw items:',
-      items
-    );
-
-    if (
-      items.length > 0
-    ) {
-      console.log(
-        'KQ Videos DEV field names:',
-        Object.keys(
-          items[0]
-        )
-      );
-    }
-
-    return items
-      .filter(
-        (
-          item:
-            ISharePointVideoItem
-        ) =>
-          this._isPublished(
-            item.IsPublished
-          )
-      )
-      .sort(
-        (
-          first,
-          second
-        ) =>
-          this._getDisplayOrder(
-            first
-          ) -
-          this._getDisplayOrder(
-            second
-          )
-      )
-      .map(
-        (
-          item:
-            ISharePointVideoItem
-        ): IKqVideo => ({
-          id:
-            item.Id,
-
-          title:
-            item.Title ||
-            'KQ Video',
-
-          videoUrl:
-            this._getUrlValue(
-              item.VideoUrl
-            ),
-
-          thumbnailUrl:
-            this._getImageUrl(
-              item.Thumbnail
-            ),
-
-          category:
-            this._mapCategory(
-              item.Category
-            )
-        })
-      )
-      .filter(
-        (
-          video:
-            IKqVideo
-        ) =>
-          !!video.videoUrl
-      );
-  }
-
-  private _isPublished(
-    value:
-      boolean |
-      number |
-      string |
-      undefined
-  ): boolean {
-
-    return (
-      value === true ||
-      value === 1 ||
-      String(
-        value
-      ).toLowerCase() ===
-        'true'
-    );
-  }
-
-  private _getDisplayOrder(
-    item:
-      ISharePointVideoItem
-  ): number {
-
-    return (
-      typeof item.DisplayOrder ===
-      'number'
-        ? item.DisplayOrder
-        : 9999
-    );
-  }
-
-  private _mapCategory(
-    value?: string
-  ): KqVideoCategory {
-
-    const category =
-      (
-        value || ''
-      )
-        .trim()
-        .toLowerCase();
-
-    if (
-      category ===
-        'corporate stories' ||
-      category ===
-        'corporate-stories'
-    ) {
-      return (
-        'corporate-stories'
-      );
-    }
-
-    return (
-      'beyond-terminal'
-    );
-  }
-
-  private _getUrlValue(
-    value:
-      | string
-      | {
-          Url?: string;
-          Description?: string;
-        }
-      | undefined
-  ): string {
-
-    if (!value) {
-      return '';
-    }
-
-    if (
-      typeof value ===
-      'string'
-    ) {
-      return value;
-    }
-
-    return (
-      value.Url || ''
-    );
-  }
-
-  private _getImageUrl(
-    value:
-      | string
-      | {
-          Url?: string;
-        }
-      | undefined
-  ): string {
-
-    if (!value) {
-      return '';
-    }
-
-    if (
-      typeof value !==
-      'string'
-    ) {
-      return (
-        value.Url || ''
-      );
-    }
-
+  public async getVideos(): Promise<IKqVideo[]> {
+    this._corporateError = '';
+    const youtube = this._getBeyondTerminalVideos();
     try {
-      const parsed =
-        JSON.parse(
-          value
-        );
-
-      if (
-        parsed &&
-        typeof parsed ===
-        'object'
-      ) {
-
-        if (
-          typeof parsed.serverUrl ===
-            'string' &&
-          typeof parsed.serverRelativeUrl ===
-            'string'
-        ) {
-          return (
-            parsed.serverUrl +
-            parsed.serverRelativeUrl
-          );
-        }
-
-        if (
-          typeof parsed.serverRelativeUrl ===
-          'string'
-        ) {
-          return (
-            window.location.origin +
-            parsed.serverRelativeUrl
-          );
-        }
-
-        if (
-          typeof parsed.Url ===
-          'string'
-        ) {
-          return (
-            parsed.Url
-          );
-        }
-
-        if (
-          typeof parsed.url ===
-          'string'
-        ) {
-          return (
-            parsed.url
-          );
-        }
-      }
-    } catch {
-      if (
-        value.indexOf(
-          'http://'
-        ) === 0 ||
-        value.indexOf(
-          'https://'
-        ) === 0
-      ) {
-        return value;
-      }
-
-      if (
-        value.indexOf(
-          '/'
-        ) === 0
-      ) {
-        return (
-          window.location.origin +
-          value
-        );
-      }
+      return [...youtube, ...await this._getCorporateVideos()];
+    } catch (error) {
+      console.error('Corporate Stories loading failed:', error);
+      this._corporateError = 'Unable to load Corporate Stories from KQ Videos Dev.';
+      return youtube;
     }
+  }
 
-    return '';
+  private async _getCorporateVideos(): Promise<IKqVideo[]> {
+    // Uses the signed-in user's access to the current SharePoint site.
+    const webUrl = this._context.pageContext.web.absoluteUrl;
+    const url = `${webUrl}/_api/web/lists/getbytitle('KQ Videos Dev')/items?$top=100`;
+    const response = await this._context.spHttpClient.get(url, SPHttpClient.configurations.v1, {
+      headers: { Accept: 'application/json;odata=nometadata' }
+    });
+    if (!response.ok) throw new Error(`SharePoint returned ${response.status}.`);
+    const data: { value?: ISharePointVideoItem[] } = await response.json();
+    return (data.value || [])
+      .filter((item) => {
+        const published = String(item.IsPublished).trim().toLowerCase();
+        const category = (item.Category || '').trim().toLowerCase().replace(/\s+/g, '-');
+        return (published === 'true' || published === '1') && category === 'corporate-stories';
+      })
+      .sort((a, b) => (a.DisplayOrder ?? 9999) - (b.DisplayOrder ?? 9999))
+      .map((item): IKqVideo => ({
+        id: item.Id,
+        title: item.Title || 'Corporate Story',
+        videoUrl: this._getUrl(item.VideoUrl),
+        thumbnailUrl: this._getImageUrl(item.Thumbnail),
+        category: 'corporate-stories'
+      }))
+      .filter((item) => !!item.videoUrl);
+  }
+
+  private _getUrl(value: UrlField): string {
+    const raw = typeof value === 'string' ? value : value?.Url;
+    if (!raw) return '';
+    try {
+      const url = new URL(raw, this._context.pageContext.web.absoluteUrl + '/');
+      return ['https:', 'http:'].indexOf(url.protocol) !== -1 ? url.href : '';
+    } catch { return ''; }
+  }
+
+  private _getImageUrl(value: UrlField): string {
+    if (typeof value !== 'string') return this._getUrl(value);
+    try {
+      const parsed: { serverUrl?: string; serverRelativeUrl?: string; Url?: string; url?: string } = JSON.parse(value);
+      if (!parsed || typeof parsed !== 'object') return '';
+      if (parsed.serverRelativeUrl) return this._getUrl((parsed.serverUrl || '') + parsed.serverRelativeUrl);
+      return this._getUrl(parsed.Url || parsed.url);
+    } catch { return this._getUrl(value); }
   }
 }

@@ -1,29 +1,90 @@
+/* Calendar styles. Pair measurements are coordinated by KqCalendar.tsx. */
 .kqCalendar {
-  overflow: hidden;
-  padding: 1em;
-  color: "[theme:bodyText, default: #323130]";
-  color: var(--bodyText);
-}
-
-.welcome {
-  text-align: center;
-}
-
-.welcomeImage {
   width: 100%;
-  max-width: 420px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  box-sizing: border-box;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
-.links {
-  a {
-    text-decoration: none;
-    color: "[theme:link, default:#03787c]";
-    color: var(--link); // note: CSS Custom Properties support is limited to modern browsers only
+.kqCalendar *,
+.kqCalendar *::before,
+.kqCalendar *::after {
+  box-sizing: border-box;
+}
 
-    &:hover {
-      text-decoration: underline;
-      color: "[theme:linkHovered, default: #014446]";
-      color: var(--linkHovered); // note: CSS Custom Properties support is limited to modern browsers only
-    }
+.kqCalendar button {
+  font-family: inherit;
+}
+
+.kqCalendar h2,
+.kqCalendar h3 {
+  font-family: "Lucida Sans", "Lucida Grande", sans-serif;
+}
+
+.calendarCard {
+  width: 100%;
+  height: 340px;
+}
+
+.kqCalendar button:focus-visible {
+  outline: 2px solid #d71920;
+  outline-offset: 2px;
+}
+
+/* Only the section identified by the calendar component receives these rules. */
+@media (min-width: 1101px) {
+  :global([data-kq-hero-zone]) {
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 4.5% !important;
+    padding-right: 4.5% !important;
+  }
+
+  :global([data-kq-hero-shell]),
+  :global([data-kq-hero-wrapper]) {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  :global([data-kq-hero-row]) {
+    display: grid !important;
+    grid-template-columns: minmax(0, 3fr) minmax(260px, 1fr) !important;
+    gap: 20px !important;
+    align-items: start !important;
+  }
+
+  :global([data-kq-hero-left]) {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+
+  :global([data-kq-hero-right]) {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+  }
+
+  .calendarCard {
+    width: 100%;
+    height: var(--calendar-banner-height, 340px);
+  }
+}
+
+@media (max-width: 600px) {
+  .calendarCard {
+    height: 340px;
   }
 }

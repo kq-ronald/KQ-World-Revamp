@@ -1,11 +1,13 @@
 .kqCompanyNews {
-  width: calc(100% + 50px);
-  max-width: none;
+  width: 100%;
+  max-width: 100%;
 
-  margin-left: -50px;
+  margin-left: 0;
   margin-right: 0;
 
-  padding: 26px 0 38px;
+  padding: 0;
+  min-width: 0;
+  container-type: inline-size;
 
   box-sizing: border-box;
 
@@ -29,7 +31,7 @@
 
   color: #171717;
 
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1;
 
   font-weight: 500;
@@ -40,14 +42,15 @@
 .sectionTitle {
   margin: 0 0 20px;
 
-  color: #ff1616;
-
-  font-size: 21px;
-  line-height: 1.15;
-
-  font-weight: 500;
-
+  font-family: "Lucida Sans", "Lucida Grande", sans-serif;
+  font-size: 22px;
+  font-weight: 600;
   font-style: italic;
+  line-height: 100%;
+  letter-spacing: 0;
+
+  vertical-align: middle;
+  color: #ff1616;
 }
 
 
@@ -110,7 +113,7 @@
 
   font-family: inherit;
 
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1;
 
   font-weight: 500;
@@ -163,7 +166,7 @@
 
   text-decoration: none;
 
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1;
 
   font-weight: 500;
@@ -249,11 +252,9 @@
   overflow: hidden;
 
   background:
-    linear-gradient(
-      135deg,
+    linear-gradient(135deg,
       #3496d3,
-      #5168c7
-    );
+      #5168c7);
 }
 
 .cardImageElement {
@@ -287,11 +288,9 @@
 
 .blogFallback {
   background:
-    linear-gradient(
-      135deg,
+    linear-gradient(135deg,
       #646ff2,
-      #5144d5
-    );
+      #5144d5);
 }
 
 
@@ -317,7 +316,7 @@
 
   color: #ff1616;
 
-  font-size: 9.5px;
+  font-size: 12px;
   line-height: 1;
 
   font-weight: 500;
@@ -330,7 +329,7 @@
 
   color: #171717;
 
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.3;
 
   font-weight: 600;
@@ -341,7 +340,7 @@
 
   color: #747474;
 
-  font-size: 10.5px;
+  font-size: 12px;
   line-height: 1.4;
 
   font-weight: 400;
@@ -371,7 +370,7 @@
 .cardMeta {
   color: #8a8a8a;
 
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1;
 
   font-weight: 400;
@@ -382,7 +381,7 @@
 
   text-decoration: none;
 
-  font-size: 9.5px;
+  font-size: 12px;
   line-height: 1;
 
   font-weight: 500;
@@ -437,15 +436,13 @@
   color: #ffffff;
 
   background:
-    linear-gradient(
-      145deg,
+    linear-gradient(145deg,
       #f12632,
-      #ad101d
-    );
+      #ad101d);
 }
 
 .prideEyebrow {
-  font-size: 8.5px;
+  font-size: 12px;
   line-height: 1;
 
   font-weight: 500;
@@ -465,7 +462,7 @@
 .issueNumber {
   margin-top: 8px;
 
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1;
 
   font-weight: 400;
@@ -487,7 +484,7 @@
 
   color: #171717;
 
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.3;
 
   font-weight: 600;
@@ -538,7 +535,7 @@
 
   color: #777777;
 
-  font-size: 10.5px;
+  font-size: 12px;
   line-height: 1.4;
 
   font-weight: 400;
@@ -551,7 +548,7 @@
 
   color: #777777;
 
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .error {
@@ -563,7 +560,7 @@
 
   border-radius: 12px;
 
-  font-size: 10px;
+  font-size: 12px;
 }
 
 
@@ -663,8 +660,7 @@
   color: #ffffff;
 
   border:
-    1px solid
-    rgba(255, 255, 255, 0.18);
+    1px solid rgba(255, 255, 255, 0.18);
 }
 
 
@@ -675,9 +671,9 @@
 @media screen and (max-width: 1100px) {
 
   .kqCompanyNews {
-    width: calc(100% + 16px);
+    width: 100%;
 
-    margin-left: -16px;
+    margin-left: 0;
 
     padding:
       24px 0 34px;
@@ -708,7 +704,7 @@
   }
 
   .eyebrow {
-    font-size: 10px;
+    font-size: 12px;
   }
 
   .sectionTitle {
@@ -738,7 +734,7 @@
     padding:
       8px 8px;
 
-    font-size: 9px;
+    font-size: 12px;
   }
 
   .viewMore {
@@ -775,7 +771,121 @@
 
   .tab,
   .tabActive {
-    font-size: 8px;
+    font-size: 12px;
   }
 
+}
+
+/* Consistent typography and column-based responsive grids. */
+.sectionTitle {
+  font-family: "Lucida Sans", "Lucida Grande", sans-serif;
+  line-height: 1.3;
+}
+
+.kqCompanyNews *,
+.kqCompanyNews *::before,
+.kqCompanyNews *::after {
+  box-sizing: border-box;
+}
+
+.toolbar {
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.tabBar {
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+
+.tab,
+.tabActive {
+  min-width: 0;
+  min-height: 32px;
+  line-height: 1.4;
+}
+
+.viewMore {
+  min-width: 0;
+  line-height: 1.4;
+}
+
+.standardGrid,
+.prideGrid {
+  gap: 20px;
+}
+
+.cardFooter {
+  flex-wrap: wrap;
+}
+
+.cardDescription {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.cardTitle,
+.prideTitle {
+  overflow-wrap: anywhere;
+}
+
+.cardMeta,
+.cardLabel,
+.readLink {
+  line-height: 1.4;
+}
+
+.kqCompanyNews button:focus-visible,
+.kqCompanyNews a:focus-visible {
+  outline: 2px solid #d71920;
+  outline-offset: 3px;
+}
+
+@container (max-width: 850px) {
+
+  .standardGrid,
+  .prideGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (max-width: 500px) {
+
+  .standardGrid,
+  .prideGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .sectionTitle {
+    font-size: 20px;
+  }
+}
+
+.kqCompanyNews {
+  padding: 0;
+}
+
+/* The existing new-tab anchor covers its card, including the image and title. */
+.newsCard,
+.prideCard {
+  position: relative;
+}
+
+.newsCard .readLink::after,
+.prideCard .readLink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.newsCard:hover,
+.prideCard:hover {
+  border-color: #d71920;
+}
+
+.newsCard:focus-within,
+.prideCard:focus-within {
+  outline: 2px solid #d71920;
+  outline-offset: 3px;
 }

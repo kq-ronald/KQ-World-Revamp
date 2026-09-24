@@ -34,10 +34,95 @@ interface IOnlineProcessesState {
   error: string;
 }
 
+
+function bindNewsRow(root: HTMLElement): () => void {
+    const canvas = root.closest<HTMLElement>('[data-automation-id="CanvasLayout"]');
+    let frame = 0;
+    let stopped = false;
+    let pairedLeft: HTMLElement | null = null;
+    let marked: Array<{ element: HTMLElement; name: string; previous: string | null }> = [];
+    const clear = (): void => {
+      marked.forEach(({ element, name, previous }) => {
+        if (previous === null) element.removeAttribute(name);
+        else element.setAttribute(name, previous);
+      });
+      marked = [];
+      pairedLeft = null;
+    };
+    const mark = (element: HTMLElement, name: string): void => {
+      marked.push({ element, name, previous: element.getAttribute(name) });
+      element.setAttribute(name, 'true');
+    };
+    const sync = (): void => {
+      frame = 0;
+      if (stopped) return;
+      const zone = root.closest<HTMLElement>('[data-automation-id="CanvasZone"]');
+      const companyNews = zone?.querySelector<HTMLElement>('[data-kq-company-news]');
+      if (!zone || !companyNews || window.innerWidth <= 1100 ||
+          zone.querySelector('.kqWorldNavigationHost')) {
+        clear();
+        return;
+      }
+      if (pairedLeft === companyNews && marked.every(({ element }) => element.isConnected)) return;
+      clear();
+      let row: HTMLElement | null = companyNews.parentElement;
+      while (row && row !== zone && !row.contains(root)) row = row.parentElement;
+      if (!row || !row.contains(root)) return;
+      const branch = (element: HTMLElement): HTMLElement => {
+        let result = element;
+        while (result.parentElement && result.parentElement !== row) result = result.parentElement;
+        return result;
+      };
+      const left = branch(companyNews);
+      const right = branch(root);
+      if (left === right) return;
+      if (Array.from(row.children).some((child) => child !== left && child !== right &&
+          child.querySelector('[data-automation-id="CanvasControl"]'))) return;
+      mark(zone, 'data-kq-news-zone');
+      let shell: HTMLElement | null = row;
+      while (shell && shell !== zone) {
+        mark(shell, 'data-kq-news-shell');
+        shell = shell.parentElement;
+      }
+      mark(row, 'data-kq-news-row');
+      mark(left, 'data-kq-news-left');
+      mark(right, 'data-kq-news-right');
+      [companyNews, root].forEach((element) => {
+        let wrapper = element.parentElement;
+        while (wrapper && wrapper !== row) {
+          mark(wrapper, 'data-kq-news-wrapper');
+          wrapper = wrapper.parentElement;
+        }
+      });
+      pairedLeft = companyNews;
+    };
+    const queue = (): void => {
+      if (!frame && !stopped) frame = window.requestAnimationFrame(sync);
+    };
+    const observer = new MutationObserver(queue);
+    if (canvas) observer.observe(canvas, { childList: true, subtree: true });
+    window.addEventListener('resize', queue);
+    queue();
+    return () => {
+      stopped = true;
+      observer.disconnect();
+      window.removeEventListener('resize', queue);
+      window.cancelAnimationFrame(frame);
+      clear();
+    };
+}
+
 export default class KqOnlineProcesses extends React.Component<
   IKqOnlineProcessesProps,
   IOnlineProcessesState
 > {
+  private readonly rootRef = React.createRef<HTMLElement>();
+  private disposeLayout?: () => void;
+
+  public componentWillUnmount(): void {
+    this.disposeLayout?.();
+  }
+
   public constructor(props: IKqOnlineProcessesProps) {
     super(props);
 
@@ -51,6 +136,7 @@ export default class KqOnlineProcesses extends React.Component<
   }
 
   public componentDidMount(): void {
+    if (this.rootRef.current) this.disposeLayout = bindNewsRow(this.rootRef.current);
     this.loadOnlineProcesses().catch((error: Error) => {
       console.error('Unexpected Online Processes error', error);
     });
@@ -402,6 +488,7 @@ export default class KqOnlineProcesses extends React.Component<
 
     return (
       <section
+        ref={this.rootRef}
         className={
           styles.onlineProcesses
         }
@@ -472,6 +559,7 @@ export default class KqOnlineProcesses extends React.Component<
                   <button
                     key={filter}
                     type="button"
+                    aria-pressed={activeFilter === filter}
                     onClick={() =>
                       this.setFilter(
                         filter

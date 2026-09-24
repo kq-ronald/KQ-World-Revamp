@@ -5,4 +5,5 @@ export interface IKqEvent {
   dateText: string;
   location: string;
   imageUrl: string;
+  category: string;
 }

@@ -1,4 +1,5 @@
 import * as React from 'react';
+import styles from './Upcomingevents.module.scss';
 
 import {
   Clock16Regular,
@@ -6,8 +7,17 @@ import {
 } from '@fluentui/react-icons';
 
 import {
-  upcomingEvents,
-  IUpcomingEvent,
+  IUpcomingeventsProps
+} from './IUpcomingeventsProps';
+
+import {
+  IKqEvent
+} from '../../../shared/models/IKqEvent';
+
+import KqEventsService
+  from '../../../shared/services/KqEventsService';
+
+import {
   UpcomingEventCategory
 } from '../data/upcomingeventsData';
 
@@ -20,7 +30,18 @@ const FILTERS: UpcomingEventCategory[] = [
 ];
 
 
-const Upcomingevents: React.FC = () => {
+const Upcomingevents: React.FC<IUpcomingeventsProps> = ({
+  context
+}) => {
+
+  const [events, setEvents] =
+    React.useState<IKqEvent[]>([]);
+
+  const [isLoading, setIsLoading] =
+    React.useState<boolean>(true);
+
+  const [loadError, setLoadError] =
+    React.useState<string>('');
 
   const [activeFilter, setActiveFilter] =
     React.useState<UpcomingEventCategory>('All');
@@ -33,27 +54,149 @@ const Upcomingevents: React.FC = () => {
       }
 
       return (
-        document.documentElement.getAttribute('data-kq-theme') === 'dark'
+        document.documentElement.getAttribute(
+          'data-kq-theme'
+        ) === 'dark'
       );
     });
 
 
   React.useEffect(() => {
 
-    const handleThemeChange = (event: Event): void => {
+    let isMounted = true;
 
-      const customEvent = event as CustomEvent<{
-        theme?: string;
-      }>;
+    const loadEvents = async (): Promise<void> => {
 
-      setIsDarkMode(
-        customEvent.detail?.theme === 'dark'
-      );
+      try {
+
+        const eventsService =
+          new KqEventsService(context);
+
+        const loadedEvents =
+          await eventsService.getEvents();
+
+        const today =
+          new Date();
+
+        today.setHours(
+          0,
+          0,
+          0,
+          0
+        );
+
+        const thirtyDaysFromToday =
+          new Date(today);
+
+        thirtyDaysFromToday.setDate(
+          thirtyDaysFromToday.getDate() + 30
+        );
+
+        thirtyDaysFromToday.setHours(
+          23,
+          59,
+          59,
+          999
+        );
+
+        const upcoming =
+          loadedEvents
+            .filter(
+              (event: IKqEvent): boolean => {
+
+                const eventDate =
+                  new Date(event.date);
+
+                return (
+                  eventDate.getTime() >=
+                    today.getTime() &&
+                  eventDate.getTime() <=
+                    thirtyDaysFromToday.getTime()
+                );
+
+              }
+            )
+            .sort(
+              (
+                first: IKqEvent,
+                second: IKqEvent
+              ): number =>
+                first.date.getTime() -
+                second.date.getTime()
+            )
+            .slice(0, 5);
+
+        if (isMounted) {
+
+          setEvents(upcoming);
+          setLoadError('');
+          setIsLoading(false);
+
+        }
+
+      } catch (error) {
+
+        console.error(
+          'Failed loading Upcoming Events:',
+          error
+        );
+
+        if (isMounted) {
+
+          setEvents([]);
+
+          setLoadError(
+            'Unable to load upcoming events.'
+          );
+
+          setIsLoading(false);
+
+        }
+
+      }
+
     };
 
 
+    loadEvents().catch(
+      (error: Error) => {
+
+        console.error(
+          'Upcoming Events initialization failed:',
+          error
+        );
+
+      }
+    );
+
+
+    return () => {
+      isMounted = false;
+    };
+
+  }, [context]);
+
+
+  React.useEffect(() => {
+
+    const handleThemeChange =
+      (event: Event): void => {
+
+        const customEvent =
+          event as CustomEvent<{
+            theme?: string;
+          }>;
+
+        setIsDarkMode(
+          customEvent.detail?.theme === 'dark'
+        );
+      };
+
+
     const currentTheme =
-      document.documentElement.getAttribute('data-kq-theme');
+      document.documentElement.getAttribute(
+        'data-kq-theme'
+      );
 
     setIsDarkMode(
       currentTheme === 'dark'
@@ -78,36 +221,39 @@ const Upcomingevents: React.FC = () => {
   }, []);
 
 
-  const filteredEvents: IUpcomingEvent[] =
+  const filteredEvents: IKqEvent[] =
     React.useMemo(() => {
 
       if (activeFilter === 'All') {
-        return upcomingEvents;
+        return events;
       }
 
-      return upcomingEvents.filter(
-        event => event.category === activeFilter
+      return events.filter(
+        (event: IKqEvent): boolean =>
+          event.category === activeFilter
       );
 
-    }, [activeFilter]);
+    }, [
+      activeFilter,
+      events
+    ]);
 
 
   const formatDateParts = (
-    dateString: string
+    date: Date
   ): {
     month: string;
     day: string;
   } => {
-
-    const date =
-      new Date(`${dateString}T00:00:00`);
 
     return {
 
       month: date
         .toLocaleString(
           'en-US',
-          { month: 'short' }
+          {
+            month: 'short'
+          }
         )
         .toUpperCase(),
 
@@ -119,411 +265,155 @@ const Upcomingevents: React.FC = () => {
   };
 
 
-  const cardBackground =
-    isDarkMode
-      ? '#262F3D'
-      : '#ffffff';
+  const formatEventTime = (
+    date: Date
+  ): string => {
 
-  const primaryText =
-    isDarkMode
-      ? '#ffffff'
-      : '#202020';
+    return date.toLocaleTimeString(
+      'en-KE',
+      {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: 'Africa/Nairobi'
+      }
+    ) + ' EAT';
 
-  const secondaryText =
-    isDarkMode
-      ? '#ffffff'
-      : '#666666';
+  };
 
-  const borderColor =
-    isDarkMode
-      ? 'rgba(255,255,255,0.30)'
-      : '#d7d7d7';
 
+  const rootRef = React.useRef<HTMLElement>(null);
+
+  React.useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const canvas = root.closest<HTMLElement>('[data-automation-id="CanvasLayout"]');
+    let frame = 0;
+    let stopped = false;
+    let pairedLeft: HTMLElement | null = null;
+    let marked: Array<{ element: HTMLElement; name: string; previous: string | null }> = [];
+    const clear = (): void => {
+      marked.forEach(({ element, name, previous }) => {
+        if (previous === null) element.removeAttribute(name);
+        else element.setAttribute(name, previous);
+      });
+      marked = [];
+      pairedLeft = null;
+    };
+    const mark = (element: HTMLElement, name: string): void => {
+      marked.push({ element, name, previous: element.getAttribute(name) });
+      element.setAttribute(name, 'true');
+    };
+    const sync = (): void => {
+      frame = 0;
+      if (stopped) return;
+      const zone = root.closest<HTMLElement>('[data-automation-id="CanvasZone"]');
+      const quickActions = zone?.querySelector<HTMLElement>('[data-kq-quick-actions]');
+      if (!zone || !quickActions || window.innerWidth <= 1100 ||
+          zone.querySelector('.kqWorldNavigationHost')) {
+        clear();
+        return;
+      }
+      if (pairedLeft === quickActions && marked.every(({ element }) => element.isConnected)) return;
+      clear();
+      let row: HTMLElement | null = quickActions.parentElement;
+      while (row && row !== zone && !row.contains(root)) row = row.parentElement;
+      if (!row || !row.contains(root)) return;
+      const branch = (element: HTMLElement): HTMLElement => {
+        let result = element;
+        while (result.parentElement && result.parentElement !== row) result = result.parentElement;
+        return result;
+      };
+      const left = branch(quickActions);
+      const right = branch(root);
+      if (left === right) return;
+      if (Array.from(row.children).some((child) => child !== left && child !== right &&
+          child.querySelector('[data-automation-id="CanvasControl"]'))) return;
+      mark(zone, 'data-kq-content-zone');
+      let shell: HTMLElement | null = row;
+      while (shell && shell !== zone) {
+        mark(shell, 'data-kq-content-shell');
+        shell = shell.parentElement;
+      }
+      mark(row, 'data-kq-content-row');
+      mark(left, 'data-kq-content-left');
+      mark(right, 'data-kq-content-right');
+      [quickActions, root].forEach((element) => {
+        let wrapper = element.parentElement;
+        while (wrapper && wrapper !== row) {
+          mark(wrapper, 'data-kq-content-wrapper');
+          wrapper = wrapper.parentElement;
+        }
+      });
+      pairedLeft = quickActions;
+    };
+    const queue = (): void => {
+      if (!frame && !stopped) frame = window.requestAnimationFrame(sync);
+    };
+    const observer = new MutationObserver(queue);
+    if (canvas) observer.observe(canvas, { childList: true, subtree: true });
+    window.addEventListener('resize', queue);
+    queue();
+    return () => {
+      stopped = true;
+      observer.disconnect();
+      window.removeEventListener('resize', queue);
+      window.cancelAnimationFrame(frame);
+      clear();
+    };
+  }, []);
 
   return (
-
     <section
-      className="kq-upcoming-events"
-      style={{
-        width: '100%',
-        boxSizing: 'border-box',
-
-        backgroundColor: cardBackground,
-
-        border: `1px solid ${borderColor}`,
-        borderRadius: '12px',
-
-        padding: '20px 20px 18px 20px',
-
-        boxShadow: 'none',
-
-        fontFamily:
-          "'Montserrat', 'Segoe UI', Arial, Helvetica, sans-serif",
-
-        overflow: 'hidden'
-      }}
+      ref={rootRef}
+      className={`${styles.upcomingevents} ${isDarkMode ? styles.darkMode : ''}`}
+      aria-label="Upcoming events"
     >
-
-      <style>
-        {`
-          .kq-upcoming-events {
-            height: 500px;
-          }
-
-          @media (max-width: 1100px) {
-            .kq-upcoming-events {
-              height: auto;
-              min-height: 450px;
-            }
-          }
-
-          @media (max-width: 600px) {
-            .kq-upcoming-events {
-              height: auto;
-              min-height: 0;
-              padding: 18px 16px !important;
-            }
-          }
-        `}
-      </style>
-
-
-      {/* Header */}
-
-      <div
-        style={{
-          marginBottom: '12px'
-        }}
-      >
-
-        <div
-          style={{
-            color: primaryText,
-
-            fontSize: '10px',
-            lineHeight: 1,
-
-            fontWeight: 500,
-
-            letterSpacing: '0.02em',
-
-            textTransform: 'uppercase',
-
-            marginBottom: '7px'
-          }}
-        >
-          COMING UP
-        </div>
-
-
-        <div
-          style={{
-            color: primaryText,
-
-            fontSize: '14px',
-            lineHeight: 1.15,
-
-            fontWeight: 400
-          }}
-        >
-          Next 30 days · {upcomingEvents.length} events
-        </div>
-
-      </div>
-
-
-      {/* Filters */}
-
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-
-          gap: '9px',
-
-          flexWrap: 'wrap',
-
-          marginBottom: '14px'
-        }}
-      >
-
-        {FILTERS.map(filter => {
-
-          const isActive =
-            activeFilter === filter;
-
-          return (
-
-            <button
-              key={filter}
-
-              type="button"
-
-              onClick={() =>
-                setActiveFilter(filter)
-              }
-
-              style={{
-                border: 'none',
-
-                backgroundColor:
-                  isActive
-                    ? '#ffffff'
-                    : 'transparent',
-
-                color:
-                  isActive
-                    ? '#171B21'
-                    : primaryText,
-
-                borderRadius: '999px',
-
-                padding:
-                  isActive
-                    ? '5px 13px'
-                    : '5px 3px',
-
-                fontFamily:
-                  "'Montserrat', 'Segoe UI', sans-serif",
-
-                fontSize: '10px',
-                lineHeight: 1,
-
-                fontWeight: 400,
-
-                cursor: 'pointer'
-              }}
-            >
-              {filter}
-            </button>
-
-          );
-
-        })}
-
-      </div>
-
-
-      {/* Event list */}
-
-      <div>
-
-        {filteredEvents.length === 0 ? (
-
-          <div
-            style={{
-              padding: '24px 0',
-
-              textAlign: 'center',
-
-              color: secondaryText,
-
-              fontSize: '10px'
-            }}
+      <header className={styles.header}>
+        <p className={styles.sectionLabel}>COMING UP</p>
+        <h2 className={styles.title}>Next 30 days · {events.length} events</h2>
+      </header>
+      <div className={styles.filters} role="group" aria-label="Filter events by category">
+        {FILTERS.map((filter) => (
+          <button
+            key={filter}
+            type="button"
+            className={`${styles.filterButton} ${activeFilter === filter ? styles.activeFilter : ''}`}
+            aria-pressed={activeFilter === filter}
+            onClick={() => setActiveFilter(filter)}
           >
-            No upcoming events in this category.
-          </div>
-
-        ) : (
-
-          filteredEvents.map(event => {
-
-            const dateParts =
-              formatDateParts(event.date);
-
-
-            return (
-
-              <div
-                key={event.id}
-
-                style={{
-                  display: 'grid',
-
-                  gridTemplateColumns:
-                    '54px minmax(0, 1fr)',
-
-                  columnGap: '12px',
-
-                  alignItems: 'center',
-
-                  minHeight: '57px',
-
-                  padding: '3px 0',
-
-                  boxSizing: 'border-box'
-                }}
-              >
-
-                {/* Date */}
-
-                <div
-                  style={{
-                    textAlign: 'center',
-
-                    color: primaryText,
-
-                    alignSelf: 'center'
-                  }}
-                >
-
-                  <div
-                    style={{
-                      fontSize: '11px',
-
-                      lineHeight: 1,
-
-                      fontWeight: 400
-                    }}
-                  >
-                    {dateParts.month}
-                  </div>
-
-
-                  <div
-                    style={{
-                      marginTop: '1px',
-
-                      fontSize: '25px',
-
-                      lineHeight: 0.95,
-
-                      fontWeight: 300,
-
-                      color: primaryText
-                    }}
-                  >
-                    {dateParts.day}
-                  </div>
-
-                </div>
-
-
-                {/* Event information */}
-
-                <div
-                  style={{
-                    minWidth: 0
-                  }}
-                >
-
-                  <div
-                    style={{
-                      color: primaryText,
-
-                      fontSize: '11px',
-
-                      lineHeight: 1.2,
-
-                      fontWeight: 400,
-
-                      marginBottom: '6px',
-
-                      whiteSpace: 'normal'
-                    }}
-                  >
-                    {event.title}
-                  </div>
-
-
-                  <div
-                    style={{
-                      display: 'flex',
-
-                      alignItems: 'center',
-
-                      flexWrap: 'wrap',
-
-                      gap: '5px 13px',
-
-                      color: secondaryText
-                    }}
-                  >
-
-                    {/* Time */}
-
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-
-                        gap: '5px',
-
-                        fontSize: '9px',
-
-                        lineHeight: 1
-                      }}
-                    >
-
-                      <Clock16Regular
-                        style={{
-                          width: '13px',
-                          height: '13px',
-
-                          color: primaryText,
-
-                          flexShrink: 0
-                        }}
-                      />
-
-                      <span>
-                        {event.time}
-                      </span>
-
-                    </div>
-
-
-                    {/* Location */}
-
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-
-                        gap: '5px',
-
-                        fontSize: '9px',
-
-                        lineHeight: 1
-                      }}
-                    >
-
-                      <Location16Regular
-                        style={{
-                          width: '13px',
-                          height: '13px',
-
-                          color: primaryText,
-
-                          flexShrink: 0
-                        }}
-                      />
-
-                      <span>
-                        {event.location}
-                      </span>
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            );
-
-          })
-
-        )}
-
+            {filter}
+          </button>
+        ))}
       </div>
-
+      <div className={styles.eventList} aria-live="polite" aria-busy={isLoading}>
+        {isLoading ? (
+          <p className={styles.statusMessage}>Loading upcoming events...</p>
+        ) : loadError ? (
+          <p className={styles.statusMessage} role="alert">{loadError}</p>
+        ) : filteredEvents.length === 0 ? (
+          <p className={styles.statusMessage}>No upcoming events in this category.</p>
+        ) : filteredEvents.map((event) => {
+          const dateParts = formatDateParts(event.date);
+          return (
+            <article key={event.id} className={styles.eventRow}>
+              <div className={styles.dateBlock}>
+                <span className={styles.month}>{dateParts.month}</span>
+                <span className={styles.day}>{dateParts.day}</span>
+              </div>
+              <div className={styles.eventInformation}>
+                <h3 className={styles.eventTitle}>{event.title}</h3>
+                <div className={styles.eventMeta}>
+                  <span><Clock16Regular aria-hidden="true" />{formatEventTime(event.date)}</span>
+                  <span><Location16Regular aria-hidden="true" />{event.location}</span>
+                </div>
+              </div>
+            </article>
+          );
+        })}
+      </div>
     </section>
-
   );
-
 };
-
 
 export default Upcomingevents;

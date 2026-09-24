@@ -136,7 +136,10 @@ export default class KqEventsService {
               location:
                 item.Location || '',
 
-              imageUrl: ''
+              imageUrl: '',
+
+              category:
+                item.Category || ''
             };
           }
         )
