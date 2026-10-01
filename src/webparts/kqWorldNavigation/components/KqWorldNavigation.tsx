@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { kqSearchItems } from '../data/searchData';
+import KqSearch from './KqSearch';
 import styles from './KqWorldNavigation.module.scss';
 import type { IKqWorldNavigationProps } from './IKqWorldNavigationProps';
 import { IKqNotification } from '../models/IKqNotification';
@@ -211,21 +211,25 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
     () => new KqNotificationService(props.context), [props.context]
   );
   const unreadCount = notifications.filter(item => !item.isRead).length;
-
   React.useEffect(() => {
     let isMounted = true;
-    let inFlight = false;
+    const pendingRequests = new Set<string>();
     let lastAttempt = 0;
     setNotifications([]);
     setNotificationsLoading(true);
     setNotificationsError('');
     setNotificationWarnings([]);
-
     const loadNotifications = async (): Promise<void> => {
-      if (!isMounted || inFlight || document.visibilityState === 'hidden') return;
+      if (
+        !isMounted ||
+        pendingRequests.has('refresh') ||
+        document.visibilityState === 'hidden'
+      ) {
+        return;
+      }
       // Avoid duplicate requests when focus, visibility and bell-click coincide.
       if (Date.now() - lastAttempt < 15000) return;
-      inFlight = true;
+      pendingRequests.add('refresh');
       lastAttempt = Date.now();
       try {
         const items = await notificationService.getNotifications();
@@ -240,7 +244,7 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
           setNotificationsError('Unable to refresh notifications. Please try again shortly.');
         }
       } finally {
-        inFlight = false;
+        pendingRequests.delete('refresh');
         if (isMounted) setNotificationsLoading(false);
       }
     };
@@ -267,7 +271,6 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
       document.removeEventListener('visibilitychange', refresh);
     };
   }, [notificationService]);
-
   const markNotificationRead = (item: IKqNotification): void => {
     notificationService.markRead([item]);
     setNotifications(current => notificationService.applyReadState(current));
@@ -307,11 +310,7 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
       nextTheme ? 'dark' : 'light'
     );
   };
-  // SEARCH
-  const [searchQuery, setSearchQuery] = React.useState('');
-  const [searchOpen, setSearchOpen] = React.useState(false);
-  const [selectedSearchIndex, setSelectedSearchIndex] = React.useState(-1);
-  const searchRef = React.useRef<HTMLDivElement>(null);
+
   // Publish the active theme so the other KQ World web parts can respond to it.
   React.useEffect(() => {
     const theme = isDarkMode ? 'dark' : 'light';
@@ -337,73 +336,22 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
     };
   }, []);
   // Close desktop search on outside click or Escape.
+  // Close panels on Escape.
   React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent): void => {
-      if (
-        searchRef.current &&
-        !searchRef.current.contains(event.target as Node)
-      ) {
-        setSearchOpen(false);
-        setSelectedSearchIndex(-1);
-      }
-    };
     const handleKeyDown = (event: KeyboardEvent): void => {
       if (event.key === 'Escape') {
+        setMobileOpen(false);
+        setMobileExpanded(null);
         setNotificationsOpen(false);
-        setSearchOpen(false);
-        setSelectedSearchIndex(-1);
         setContactOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleKeyDown);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
   // SEARCH RESULTS
-  const searchResults = React.useMemo(() => {
-    const query = searchQuery
-      .trim()
-      .toLowerCase();
-    if (!query) {
-      return [];
-    }
-    return kqSearchItems
-      .map((item) => {
-        const title = item.title.toLowerCase();
-        const keywords = item.keywords
-          .join(' ')
-          .toLowerCase();
-        const aliases = (item.aliases || [])
-          .join(' ')
-          .toLowerCase();
-        let score = 0;
-        if (title === query) {
-          score += 100;
-        }
-        if (title.startsWith(query)) {
-          score += 80;
-        }
-        if (title.includes(query)) {
-          score += 60;
-        }
-        if (aliases.includes(query)) {
-          score += 50;
-        }
-        if (keywords.includes(query)) {
-          score += 40;
-        }
-        return {
-          ...item,
-          score
-        };
-      })
-      .filter((item) => item.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 6);
-  }, [searchQuery]);
   const activeItem = navigationItems.find(
     (item) => item.title === activeMenu
   );
@@ -536,9 +484,9 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
                 Feedback
               </button>
               <a
-                href="tel:+254711024747"
-                className={styles.utilityAction}
-                aria-label="Call IT Support on +254 711 024 747"
+                href="https://kenyaairwaysplc.sharepoint.com/sites/isr/workflows/Pages/request.aspx"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 IT Support
               </a>
@@ -643,109 +591,10 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
                 marginLeft: '8px'
               }}
             >
+
               {/* SEARCH */}
-              <div
-                ref={searchRef}
-                className={styles.searchBox}
-                style={{
-                  width: '240px',
-                  minWidth: '200px',
-                  maxWidth: '240px',
-                  flexShrink: 0
-                }}
-              >
-                <span className={styles.searchIcon}>
-                  ⌕
-                </span>
-                <input
-                  type="text"
-                  placeholder="Search KQ World"
-                  value={searchQuery}
-                  onFocus={() => {
-                    setSearchOpen(true);
-                  }}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setSearchQuery(value);
-                    setSelectedSearchIndex(-1);
-                    if (value.trim()) {
-                      setSearchOpen(true);
-                    } else {
-                      setSearchOpen(false);
-                    }
-                  }}
-                />
-                {searchOpen && (
-                  <div className={styles.searchDropdown}>
-                    {!searchQuery.trim() ? (
-                      <>
-                        <div className={styles.searchDropdownTitle}>
-                          Need inspiration? Try searching for...
-                        </div>
-                        <div className={styles.searchSuggestionList}>
-                          {inspirationItems.map((item) => (
-                            <button
-                              key={item}
-                              type="button"
-                              className={styles.searchSuggestion}
-                              onClick={() => {
-                                setSearchQuery(item);
-                              }}
-                            >
-                              <span className={styles.searchSuggestionIcon}>
-                                ⌕
-                              </span>
-                              <span className={styles.searchSuggestionText}>
-                                {item}
-                              </span>
-                              <span className={styles.searchSuggestionArrow}>
-                                →
-                              </span>
-                            </button>
-                          ))}
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className={styles.searchDropdownTitle}>
-                          Suggested results
-                        </div>
-                        <div className={styles.searchSuggestionList}>
-                          {searchResults.length > 0 ? (
-                            searchResults.map((item, index) => (
-                              <button
-                                key={item.id}
-                                type="button"
-                                className={`${styles.searchSuggestion} ${selectedSearchIndex === index
-                                  ? styles.searchSuggestionActive
-                                  : ''
-                                  }`}
-                                onClick={() => {
-                                  window.location.href = item.url;
-                                }}
-                              >
-                                <span className={styles.searchSuggestionIcon}>
-                                  ⌕
-                                </span>
-                                <span className={styles.searchSuggestionText}>
-                                  {item.title}
-                                </span>
-                                <span className={styles.searchSuggestionArrow}>
-                                  →
-                                </span>
-                              </button>
-                            ))
-                          ) : (
-                            <div className={styles.noSearchResults}>
-                              No results found
-                            </div>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
+              <KqSearch variant="desktop" context={props.context} />
+
               {/* Notifications */}
               <button
                 type="button"
@@ -987,35 +836,20 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
           <button
             type="button"
             className={styles.mobileMenuButton}
-            onClick={() =>
-              setMobileOpen(
-                (current) => !current
-              )
-            }
+            onClick={() => {
+              setMobileOpen((current) => !current);
+            }}
             aria-label="Toggle navigation"
+            aria-expanded={mobileOpen}
           >
             {mobileOpen ? '×' : '☰'}
           </button>
-          <div
-            className={styles.mobileSearch}
-          >
-            <span className={styles.searchIcon}>
-              ⌕
-            </span>
-            <input
-              type="text"
-              placeholder="Search KQ World"
-              value={searchQuery}
-              onFocus={() => {
-                setSearchOpen(true);
-              }}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setSearchOpen(true);
-                setSelectedSearchIndex(-1);
-              }}
-            />
-          </div>
+          <KqSearch
+            variant="mobile"
+            context={props.context}
+            onFocus={() => setMobileOpen(false)}
+          />
+
           {/* Theme */}
           <button
             type="button"
@@ -1036,110 +870,115 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
             type="button"
             className={styles.iconButton}
             aria-label={`Notifications, ${unreadCount} unread`}
-                style={{ position: 'relative' }}
+            style={{ position: 'relative' }}
             title="Notifications"
             onClick={openNotifications}
           >
             <Alert24Regular className={styles.actionIcon} />
-                {notificationBadge}
+            {notificationBadge}
           </button>
-          {/* =====================================================
+        </div>
+        {/* =====================================================
           MOBILE MENU
       ====================================================== */}
-          {mobileOpen ? (
-            <div className={styles.mobileMenu}>
-              {navigationItems.map((item) => (
-                <div
-                  key={item.title}
-                  className={styles.mobileMenuItem}
+        {mobileOpen ? (
+          <div className={styles.mobileMenu}>
+            {navigationItems.map((item) => (
+              <div
+                key={item.title}
+                className={styles.mobileMenuItem}
+              >
+                <button
+                  type="button"
+                  aria-expanded={item.children?.length ? mobileExpanded === item.title : undefined}
+                  onClick={() => {
+                    if (item.children?.length) {
+                      setMobileExpanded(
+                        mobileExpanded === item.title
+                          ? null
+                          : item.title
+                      );
+                    } else if (item.url) {
+                      window.location.href =
+                        item.url;
+                    }
+                  }}
                 >
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (item.children?.length) {
-                        setMobileExpanded(
-                          mobileExpanded === item.title
-                            ? null
-                            : item.title
-                        );
-                      } else if (item.url) {
-                        window.location.href =
-                          item.url;
-                      }
-                    }}
-                  >
+                  <span>
+                    {item.title}
+                  </span>
+                  {item.children?.length ? (
                     <span>
-                      {item.title}
+                      {mobileExpanded === item.title
+                        ? '⌃'
+                        : '⌄'}
                     </span>
-                    {item.children?.length ? (
-                      <span>
-                        {mobileExpanded === item.title
-                          ? '⌃'
-                          : '⌄'}
-                      </span>
-                    ) : null}
-                  </button>
-                  {/* MOBILE SUBMENU */}
-                  {mobileExpanded === item.title &&
-                    item.children?.length ? (
-                    <div
-                      className={
-                        styles.mobileSubmenu
-                      }
-                    >
-                      {item.children.map((child) => {
-                        const ChildIcon =
-                          getChildIcon(child);
-                        return (
-                          <a
-                            key={child.title}
-                            href={child.url || '#'}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                  ) : null}
+                </button>
+                {/* MOBILE SUBMENU */}
+                {mobileExpanded === item.title &&
+                  item.children?.length ? (
+                  <div
+                    className={
+                      styles.mobileSubmenu
+                    }
+                  >
+                    {item.children.map((child) => {
+                      const ChildIcon =
+                        getChildIcon(child);
+                      return (
+                        <a
+                          key={child.title}
+                          href={child.url || '#'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px'
+                          }}
+                        >
+                          <span
                             style={{
+                              width: '30px',
+                              height: '30px',
+                              minWidth: '30px',
+                              flex: '0 0 30px',
+                              borderRadius: '50%',
+                              background: '#eeeeee',
                               display: 'flex',
                               alignItems: 'center',
-                              gap: '10px'
+                              justifyContent:
+                                'center'
                             }}
                           >
-                            <span
-                              style={{
-                                width: '30px',
-                                height: '30px',
-                                minWidth: '30px',
-                                flex: '0 0 30px',
-                                borderRadius: '50%',
-                                background: '#eeeeee',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent:
-                                  'center'
-                              }}
-                            >
-                              {ChildIcon ? (
-                                <ChildIcon
-                                  style={{
-                                    width: '17px',
-                                    height: '17px',
-                                    color: '#333333',
-                                    display: 'block'
-                                  }}
-                                />
-                              ) : null}
-                            </span>
-                            <span>
-                              {child.title}
-                            </span>
-                          </a>
-                        );
-                      })}
-                    </div>
-                  ) : null}
-                </div>
-              ))}
+                            {ChildIcon ? (
+                              <ChildIcon
+                                style={{
+                                  width: '17px',
+                                  height: '17px',
+                                  color: '#333333',
+                                  display: 'block'
+                                }}
+                              />
+                            ) : null}
+                          </span>
+                          <span>
+                            {child.title}
+                          </span>
+                        </a>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </div>
+            ))}
+            <div className={styles.mobileUtilities}>
+              <button type="button" onClick={() => { setMobileOpen(false); setContactOpen(true); }}>Feedback</button>
+              <a href="tel:+254711024747">IT Support</a>
             </div>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
         {notificationsOpen ? (
           <div
             className={styles.notificationOverlay}
@@ -1217,7 +1056,7 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
                   <div className={styles.notificationState}>
                     <Alert24Regular />
                     <h3>You&apos;re all caught up</h3>
-                    <p>There are no new notifications right now.</p>
+                    <p>Share your feedback with us and we&apos;ll get back.</p>
                   </div>
                 ) : (
                   <>
@@ -1414,16 +1253,7 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
                     required
                   />
                 </label>
-                <label className={styles.contactField}>
-                  <span>Subject <strong>*</strong></span>
-                  <select defaultValue="" required>
-                    <option value="" disabled>Select a subject</option>
-                    <option value="general-feedback">General Feedback</option>
-                    <option value="access-permissions">Access & Permissions</option>
-                    <option value="content-navigation">Content / Navigation</option>
-                    <option value="other">Other</option>
-                  </select>
-                </label>
+                
                 <label className={styles.contactField}>
                   <span>Message <strong>*</strong></span>
                   <textarea

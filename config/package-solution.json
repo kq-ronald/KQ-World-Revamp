@@ -3,15 +3,13 @@
   "solution": {
     "name": "kq-world-client-side-solution",
     "id": "085b539f-6aab-4b49-92ef-cfef60ad1307",
-    "version": "1.0.0.1",
+    "version": "1.0.0.5",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
     "webApiPermissionRequests": [
-      {
-        "resource": "Yammer",
-        "scope": "access_as_user"
-      }
+      { "resource": "Viva Engage", "scope": "access_as_user" },
+      { "resource": "Microsoft Graph", "scope": "Files.Read.All" }
     ],
     "developer": {
       "name": "",
@@ -21,12 +19,8 @@
       "mpnId": "Undefined-1.23.2"
     },
     "metadata": {
-      "shortDescription": {
-        "default": "kq-world description"
-      },
-      "longDescription": {
-        "default": "kq-world description"
-      },
+      "shortDescription": { "default": "kq-world description" },
+      "longDescription": { "default": "kq-world description" },
       "screenshotPaths": [],
       "videoUrl": "",
       "categories": []
@@ -40,7 +34,5 @@
       }
     ]
   },
-  "paths": {
-    "zippedPackage": "solution/kq-world.sppkg"
-  }
+  "paths": { "zippedPackage": "solution/kq-world.sppkg" }
 }

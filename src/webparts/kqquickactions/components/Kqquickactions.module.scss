@@ -1,4 +1,3 @@
-/* Width comes from the shared 3:1 section, with no negative margins. */
 .kqquickactions {
   position: relative;
   width: 100%;
@@ -38,14 +37,14 @@
   font-size: 12px;
   line-height: 1.4;
   font-weight: 600;
-  letter-spacing: .03em;
+  letter-spacing: 0.03em;
 }
 
 .welcomeDivider {
   width: 1px;
   height: 20px;
   flex-shrink: 0;
-  background: #333;
+  background: #333333;
 }
 
 .kqLogo {
@@ -58,16 +57,12 @@
 .greeting,
 .heroTitle {
   margin: 0 0 20px;
-
   font-family: "Lucida Sans", "Lucida Grande", sans-serif;
   font-size: 22px;
   font-weight: 600;
   font-style: italic;
-  line-height: 100%;
+  line-height: 1.2;
   letter-spacing: 0;
-
-  vertical-align: middle;
-  color: #ff1616;
 }
 
 .greeting {
@@ -76,7 +71,7 @@
 
 .welcomeText {
   margin: 12px 0 0;
-  color: #777;
+  color: #777777;
   font-size: 14px;
   line-height: 1.5;
 }
@@ -90,7 +85,17 @@
   padding: 30px 32px 32px;
   overflow: hidden;
   border-radius: 12px;
-  background: #d8ecf5 url("../assets/quick-actions-bg.svg") center right / cover no-repeat;
+  background: #d8ecf5;
+}
+
+.quickActionsHero::before {
+  content: "";
+  position: absolute;
+  inset: -24px;
+  background:
+    url("../assets/quick-actions-bg.svg")
+    center / cover no-repeat;
+  pointer-events: none;
 }
 
 .heroContent {
@@ -106,45 +111,61 @@
   font-size: 12px;
   line-height: 1.4;
   font-weight: 700;
-  letter-spacing: .04em;
+  letter-spacing: 0.04em;
 }
 
 .heroTitle {
-  color: #111;
+  color: #111111;
 }
 
 .quickActionsGrid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 14px;
+  gap: 10px;
   width: 100%;
-  margin-top: 24px;
+  min-width: 0;
+  margin-top: 20px;
 }
 
 .quickActionCard {
   --action-accent: #21c26a;
+
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 20px;
+  gap: 14px;
+
   width: 100%;
   min-width: 0;
-  min-height: 160px;
-  padding: 14px;
+  min-height: 135px;
+  margin: 0;
+  padding: 10px;
+
   color: #292929;
+  font-family: inherit;
+  text-align: left;
   text-decoration: none;
-  background: #fff;
-  border: 1px solid rgba(0, 0, 0, .13);
-  border-radius: 12px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, .11);
-  transition: background-color 180ms ease, transform 180ms ease;
+
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.13);
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.11);
+
+  cursor: pointer;
+
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
 }
 
 .quickActionCard:hover,
 .quickActionCard:focus-visible {
-  color: #fff;
+  color: #ffffff;
   background: var(--action-accent);
   border-color: var(--action-accent);
+  text-decoration: none;
   transform: translateY(-2px);
 }
 
@@ -161,23 +182,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  margin-bottom: 12px;
+
+  width: 32px;
+  height: 32px;
+  margin-bottom: 10px;
   flex-shrink: 0;
+
   border-radius: 50%;
   background: var(--action-accent);
 }
 
 .cardIcon {
-  width: 18px;
-  height: 18px;
-  color: #fff;
+  display: block;
+  width: 16px;
+  height: 16px;
+  color: #ffffff;
 }
 
 .quickActionCard:hover .iconCircle,
 .quickActionCard:focus-visible .iconCircle {
-  background: #fff;
+  background: #ffffff;
 }
 
 .quickActionCard:hover .cardIcon,
@@ -187,31 +211,37 @@
 
 .cardTitle {
   color: inherit;
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1.35;
   font-weight: 400;
-  overflow-wrap: anywhere;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 .cardFooter {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 6px;
+
+  width: 100%;
+  min-width: 0;
+
   color: var(--action-accent);
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1.4;
   font-weight: 500;
 }
 
 .quickActionCard:hover .cardFooter,
 .quickActionCard:focus-visible .cardFooter {
-  color: #fff;
+  color: #ffffff;
 }
 
 .arrowIcon {
-  width: 16px;
-  height: 16px;
+  display: block;
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
 }
 
@@ -249,22 +279,22 @@
 }
 
 .statusMessage {
-  color: #333;
-  background: rgba(255, 255, 255, .7);
+  color: #333333;
+  background: rgba(255, 255, 255, 0.7);
 }
 
 .errorMessage {
   color: #b42318;
-  background: rgba(255, 255, 255, .85);
+  background: rgba(255, 255, 255, 0.85);
 }
 
 .darkMode .welcomeLabel,
 .darkMode .greeting {
-  color: #fff;
+  color: #ffffff;
 }
 
 .darkMode .welcomeDivider {
-  background: rgba(255, 255, 255, .65);
+  background: rgba(255, 255, 255, 0.65);
 }
 
 .darkMode .kqLogo {
@@ -276,35 +306,38 @@
 }
 
 .darkMode .quickActionCard {
-  color: #fff;
+  color: #ffffff;
   background: #262f3d;
-  border-color: rgba(255, 255, 255, .08);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .darkMode .cardFooter {
-  color: #fff;
+  color: #ffffff;
 }
 
 .darkMode .quickActionCard:hover,
 .darkMode .quickActionCard:focus-visible {
+  color: #ffffff;
   background: var(--action-accent);
   border-color: var(--action-accent);
 }
 
-.darkMode .statusMessage {
-  color: #fff;
-  background: rgba(38, 47, 61, .9);
+.darkMode .quickActionCard:focus-visible {
+  outline-color: #ffffff;
 }
 
-/* Respond to the column width, including SharePoint's edit pane. */
-@container (max-width: 960px) {
+.darkMode .statusMessage {
+  color: #ffffff;
+  background: rgba(38, 47, 61, 0.9);
+}
+
+@container (max-width: 699px) {
   .quickActionsGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @container (max-width: 560px) {
-
   .greeting,
   .heroTitle {
     font-size: 20px;
@@ -316,7 +349,7 @@
 
   .quickActionsGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 12px;
+    gap: 10px;
   }
 }
 

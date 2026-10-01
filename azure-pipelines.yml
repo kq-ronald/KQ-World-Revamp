@@ -1,6 +1,3 @@
-# KQ World: Heft-based SPFx build and package pipeline.
-# Assumes package.json and package-lock.json are in the repository root.
-# Node 22 matches the supplied local build environment; confirm package.json engines.
 trigger:
   batch: true
   branches:

@@ -1,50 +1,41 @@
 import * as React from 'react';
-
 import {
   IKqVideoHubProps
 } from './IKqVideoHubProps';
-
 import {
   IKqVideo,
   KqVideoCategory
 } from '../models/IKqVideo';
-
-import KqVideoService
+import KqVideoService, { corporateFolderUrl }
   from '../services/KqVideoService';
-
 import styles
   from './KqVideoHub.module.scss';
-
 interface IKqVideoHubState {
+  previewUrl: string;
+  previewLoading: boolean;
+  previewError: string;
   videos:
     IKqVideo[];
-
   selectedVideo?:
     IKqVideo;
-
   activeCategory:
     KqVideoCategory;
-
   isLoading:
     boolean;
-
   errorMessage:
     string;
-
   isDarkMode:
     boolean;
 }
-
 export default class KqVideoHub
   extends React.Component<
     IKqVideoHubProps,
     IKqVideoHubState
   > {
-
   private readonly rootRef = React.createRef<HTMLElement>();
   private layoutCleanup?: () => void;
   private disposed = false;
-
+  private previewRequest = 0;
   private setupLayout(): void {
     const root = this.rootRef.current;
     const zone = root?.closest<HTMLElement>('[data-automation-id="CanvasZone"]');
@@ -58,8 +49,8 @@ export default class KqVideoHub
     mark(zone, 'data-kq-video-zone');
     // Remove width caps on wrappers belonging only to this standalone section.
     const canvas = zone.closest<HTMLElement>('[data-automation-id="CanvasLayout"]');
-    let outer = zone.parentElement;
-    while (outer && outer !== canvas && canvas &&
+    let outer = canvas ? zone.parentElement : null;
+    while (outer && outer !== canvas &&
            outer.querySelectorAll('[data-automation-id="CanvasZone"]').length === 1 &&
            !outer.querySelector('.kqWorldNavigationHost')) {
       mark(outer, 'data-kq-video-wrapper');
@@ -75,10 +66,8 @@ export default class KqVideoHub
       else element.setAttribute(attribute, previous);
     });
   }
-
   private readonly _videoService:
     KqVideoService;
-
   public constructor(
     props:
       IKqVideoHubProps
@@ -86,12 +75,10 @@ export default class KqVideoHub
     super(
       props
     );
-
     this._videoService =
       new KqVideoService(
         this.props.context
       );
-
     const currentTheme =
       typeof document !==
       'undefined'
@@ -101,99 +88,80 @@ export default class KqVideoHub
               'data-kq-theme'
             )
         : 'light';
-
     this.state = {
+      previewUrl: '',
+      previewLoading: false,
+      previewError: '',
       videos:
         [],
-
       selectedVideo:
         undefined,
-
       activeCategory:
         'beyond-terminal',
-
       isLoading:
         true,
-
       errorMessage:
         '',
-
       isDarkMode:
         currentTheme ===
         'dark'
     };
   }
-
   public async componentDidMount():
     Promise<void> {
-
     window.addEventListener(
       'kqworld-theme-change',
       this._handleThemeChange as EventListener
     );
-
     const currentTheme =
       document
         .documentElement
         .getAttribute(
           'data-kq-theme'
         );
-
     this.setState({
       isDarkMode:
         currentTheme ===
         'dark'
     });
-
     this.setupLayout();
     await this._loadVideos();
   }
-
   public componentWillUnmount():
     void {
     this.disposed = true;
     this.layoutCleanup?.();
-
     window.removeEventListener(
       'kqworld-theme-change',
       this._handleThemeChange as EventListener
     );
   }
-
   private _handleThemeChange = (
     event:
       CustomEvent
   ): void => {
-
     const theme =
       event.detail?.theme;
-
     this.setState({
       isDarkMode:
         theme ===
         'dark'
     });
   };
-
   private async _loadVideos():
     Promise<void> {
-
     try {
       this.setState({
         isLoading:
           true,
-
         errorMessage:
           ''
       });
-
       const videos =
         await this
           ._videoService
           .getVideos();
-
       if (this.disposed) return;
-
       const beyondTerminalVideos =
         videos.filter(
           (
@@ -203,45 +171,35 @@ export default class KqVideoHub
             video.category ===
             'beyond-terminal'
         );
-
       const selectedVideo =
         beyondTerminalVideos.length > 0
           ? beyondTerminalVideos[0]
           : videos.length > 0
             ? videos[0]
             : undefined;
-
       const activeCategory:
         KqVideoCategory =
           selectedVideo?.category ||
           'beyond-terminal';
-
       this.setState({
         videos,
         errorMessage: this._videoService.getCorporateError(),
-
         selectedVideo,
-
         activeCategory,
-
         isLoading:
           false
       });
-
     } catch (
       error
     ) {
-
       if (this.disposed) return;
       console.error(
         'KQ video hub error:',
         error
       );
-
       this.setState({
         isLoading:
           false,
-
         errorMessage:
           error instanceof Error
             ? error.message
@@ -249,49 +207,50 @@ export default class KqVideoHub
       });
     }
   }
-
-  private _selectVideo(
-    video:
-      IKqVideo
-  ): void {
-
+  private _selectVideo(video: IKqVideo): void {
+    const request = ++this.previewRequest;
     this.setState({
-      selectedVideo:
-        video
+      selectedVideo: video,
+      previewUrl: '',
+      previewError: '',
+      previewLoading: video.category === 'corporate-stories'
     });
+    if (video.category === 'corporate-stories') {
+      this._loadPreview(video, request).catch(() => {
+        if (!this.disposed && request === this.previewRequest) {
+          this.setState({ previewLoading: false, previewError: 'Unable to prepare this video.' });
+        }
+      });
+    }
   }
 
-  private _setCategory(
-    category:
-      KqVideoCategory
-  ): void {
+  private async _loadPreview(video: IKqVideo, request: number): Promise<void> {
+    try {
+      const previewUrl = await this._videoService.getPreviewUrl(video);
+      if (this.disposed || request !== this.previewRequest) return;
+      this.setState({ previewUrl, previewLoading: false, previewError: '' });
+    } catch {
+      if (this.disposed || request !== this.previewRequest) return;
+      this.setState({
+        previewLoading: false,
+        previewError: 'The embedded preview is unavailable. You can open the video in a new tab.'
+      });
+    }
+  }
 
-    const categoryVideos =
-      this.state
-        .videos
-        .filter(
-          (
-            video:
-              IKqVideo
-          ) =>
-            video.category ===
-            category
-        );
-
-    this.setState({
-      activeCategory:
-        category,
-
-      selectedVideo:
-        categoryVideos.length > 0
-          ? categoryVideos[0]
-          : undefined
-    });
+  private _setCategory(category: KqVideoCategory): void {
+    const first = this.state.videos.find((video) => video.category === category);
+    this.setState({ activeCategory: category });
+    if (first) {
+      this._selectVideo(first);
+    } else {
+      ++this.previewRequest;
+      this.setState({ selectedVideo: undefined, previewUrl: '', previewError: '', previewLoading: false });
+    }
   }
 
   private _getVisibleVideos():
     IKqVideo[] {
-
     return this.state
       .videos
       .filter(
@@ -304,7 +263,6 @@ export default class KqVideoHub
             .activeCategory
       );
   }
-
   private _getVideoEmbedUrl(value: string): string {
     try {
       const url = new URL(value, this.props.context.pageContext.web.absoluteUrl + '/');
@@ -322,15 +280,12 @@ export default class KqVideoHub
       return url.href;
     } catch { return ''; }
   }
-
   private _renderPlayer():
     React.ReactElement {
-
     const {
       selectedVideo
     } =
       this.state;
-
     if (
       !selectedVideo
     ) {
@@ -344,62 +299,35 @@ export default class KqVideoHub
         </div>
       );
     }
-
-    const embedUrl =
-      this._getVideoEmbedUrl(
-        selectedVideo.videoUrl
-      );
+    const corporate = selectedVideo.category === 'corporate-stories';
+    const embedUrl = corporate
+      ? this.state.previewUrl
+      : this._getVideoEmbedUrl(selectedVideo.videoUrl);
 
     return (
-      <div
-        className={
-          styles.player
-        }
-      >
-        {/\.(mp4|webm|ogg)(?:[?#]|$)/i.test(embedUrl) ? (
-          <video key={embedUrl} src={embedUrl} controls playsInline
-            poster={selectedVideo.thumbnailUrl || undefined}
-            className={styles.playerFrame} />
-        ) : (
-        <iframe
-          key={
-            embedUrl
-          }
-          src={
-            embedUrl
-          }
-          title={
-            selectedVideo.title
-          }
-          allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-          allowFullScreen
-          frameBorder="0"
-          className={
-            styles.playerFrame
-          }
-        />
+      <div className={styles.player}>
+        {corporate && this.state.previewLoading && (
+          <div className={styles.playerEmpty} role="status">Loading video preview...</div>
         )}
-
-        <div
-          className={
-            styles.playerOverlay
-          }
-        >
-          <div
-            className={
-              styles.nowPlaying
-            }
-          >
-            NOW PLAYING
+        {corporate && this.state.previewError && (
+          <div className={styles.playerEmpty} role="status">
+            <p>{this.state.previewError}</p>
+            <button type="button" onClick={() => this._selectVideo(selectedVideo)}>Retry preview</button>
           </div>
-
-          <div
-            className={
-              styles.playerTitle
-            }
-          >
-            {selectedVideo.title}
-          </div>
+        )}
+        {embedUrl && (
+          !corporate && /\.(mp4|webm|ogg)(?:[?#]|$)/i.test(embedUrl) ? (
+            <video key={embedUrl} src={embedUrl} controls playsInline
+              poster={selectedVideo.thumbnailUrl || undefined} className={styles.playerFrame} />
+          ) : (
+            <iframe key={embedUrl} src={embedUrl} title={selectedVideo.title}
+              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+              allowFullScreen frameBorder="0" className={styles.playerFrame} />
+          )
+        )}
+        <div className={styles.playerOverlay} style={{ pointerEvents: 'none' }}>
+          <div className={styles.nowPlaying}>SELECTED VIDEO</div>
+          <div className={styles.playerTitle}>{selectedVideo.title}</div>
         </div>
       </div>
     );
@@ -409,7 +337,6 @@ export default class KqVideoHub
     video:
       IKqVideo
   ): React.ReactElement {
-
     const isSelected =
       !!this.state
         .selectedVideo &&
@@ -417,7 +344,6 @@ export default class KqVideoHub
         .selectedVideo
         .id ===
       video.id;
-
     return (
       <button
         key={
@@ -432,7 +358,6 @@ export default class KqVideoHub
         }
         className={[
           styles.videoItem,
-
           isSelected
             ? styles
                 .videoItemSelected
@@ -463,7 +388,6 @@ export default class KqVideoHub
                 }
               />
             )}
-
           <div
             className={
               styles.thumbnailPlayOverlay
@@ -478,7 +402,6 @@ export default class KqVideoHub
             </div>
           </div>
         </div>
-
         <div
           className={
             styles.videoItemContent
@@ -487,7 +410,6 @@ export default class KqVideoHub
           <div
             className={[
               styles.videoItemTitle,
-
               isSelected
                 ? styles
                     .videoItemTitleSelected
@@ -496,7 +418,6 @@ export default class KqVideoHub
           >
             {video.title}
           </div>
-
           <div
             className={
               styles.videoItemMeta
@@ -510,12 +431,10 @@ export default class KqVideoHub
       </button>
     );
   }
-
   public render():
     React.ReactElement<
       IKqVideoHubProps
     > {
-
     const {
       isLoading,
       errorMessage,
@@ -523,27 +442,14 @@ export default class KqVideoHub
       isDarkMode
     } =
       this.state;
-
     const videos =
       this._getVisibleVideos();
-
-    const webUrl =
-      this.props
-        .context
-        .pageContext
-        .web
-        .absoluteUrl;
-
-    const videoLibraryUrl =
-      `${webUrl}` +
-      `/Lists/KQ%20Videos%20Dev/AllItems.aspx`;
-
+    const videoLibraryUrl = corporateFolderUrl;
     return (
       <section
         ref={this.rootRef}
         className={[
           styles.kqVideoHub,
-
           isDarkMode
             ? styles.darkMode
             : ''
@@ -562,7 +468,6 @@ export default class KqVideoHub
             >
               WATCH
             </div>
-
             <h2
               className={
                 styles.sectionTitle
@@ -571,7 +476,6 @@ export default class KqVideoHub
               Videos... Watch what&apos;s happening
             </h2>
           </div>
-
           <a
             href={
               activeCategory === 'beyond-terminal'
@@ -585,13 +489,11 @@ export default class KqVideoHub
             }
           >
             Full Video Library
-
             <span>
               →
             </span>
           </a>
         </div>
-
         {isLoading && (
           <div
             className={
@@ -601,7 +503,6 @@ export default class KqVideoHub
             Loading videos...
           </div>
         )}
-
         {!isLoading &&
           activeCategory === 'corporate-stories' && errorMessage && (
             <div
@@ -612,7 +513,6 @@ export default class KqVideoHub
               {errorMessage}
             </div>
           )}
-
         {!isLoading && (
             <div
               className={
@@ -625,8 +525,13 @@ export default class KqVideoHub
                 }
               >
                 {this._renderPlayer()}
+                {this.state.selectedVideo?.category === 'corporate-stories' && (
+                  <a href={this.state.selectedVideo.videoUrl} target="_blank" rel="noopener noreferrer"
+                    className={styles.libraryLink} style={{ marginTop: 8 }}>
+                    Open video in a new tab ↗
+                  </a>
+                )}
               </div>
-
               <div
                 className={
                   styles.playlistColumn
@@ -647,7 +552,6 @@ export default class KqVideoHub
                     }
                     className={[
                       styles.tab,
-
                       activeCategory ===
                         'beyond-terminal'
                         ? styles.tabActive
@@ -656,7 +560,6 @@ export default class KqVideoHub
                   >
                     ✈&nbsp;&nbsp;Beyond The Terminal
                   </button>
-
                   <button
                     type="button"
                     onClick={
@@ -667,7 +570,6 @@ export default class KqVideoHub
                     }
                     className={[
                       styles.tab,
-
                       activeCategory ===
                         'corporate-stories'
                         ? styles.tabActive
@@ -677,7 +579,6 @@ export default class KqVideoHub
                     ♫&nbsp;&nbsp;Corporate Stories
                   </button>
                 </div>
-
                 <div
                   className={
                     styles.videoList
@@ -685,10 +586,6 @@ export default class KqVideoHub
                 >
                   {videos.length > 0
                     ? videos
-                        .slice(
-                          0,
-                          4
-                        )
                         .map(
                           (
                             video:
@@ -704,7 +601,7 @@ export default class KqVideoHub
                           styles.message
                         }
                       >
-                        No published videos in this category.
+                        No videos found in this category.
                       </div>
                     )}
                 </div>

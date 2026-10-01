@@ -80,13 +80,12 @@ export default class KqVivaExchangeService {
       await this._context
         .aadHttpClientFactory
         .getClient(
-          'https://www.yammer.com'
+          'https://api.yammer.com'
         );
 
     const url =
-      'https://www.yammer.com' +
-      '/api/v1/messages/in_group/' +
-      `${this._communityGroupId}.json`;
+  'https://api.yammer.com/api/v1/messages/in_group/' +
+  `${this._communityGroupId}.json`;
 
     const response:
       HttpClientResponse =
@@ -204,7 +203,7 @@ export default class KqVivaExchangeService {
       await this._context
         .aadHttpClientFactory
         .getClient(
-          'https://www.yammer.com'
+          'https://api.yammer.com'
         );
 
     const formData =
@@ -222,7 +221,7 @@ export default class KqVivaExchangeService {
 
     const response =
       await client.post(
-        'https://www.yammer.com/api/v1/messages.json',
+        'https://api.yammer.com/api/v1/messages.json',
         AadHttpClient
           .configurations
           .v1,

@@ -1,6 +1,4 @@
-export type KqVideoCategory =
-  | 'beyond-terminal'
-  | 'corporate-stories';
+export type KqVideoCategory = 'beyond-terminal' | 'corporate-stories';
 
 export interface IKqVideo {
   id: number;
@@ -9,4 +7,6 @@ export interface IKqVideo {
   thumbnailUrl: string;
   category: KqVideoCategory;
   duration?: string;
+  driveId?: string;
+  driveItemId?: string;
 }

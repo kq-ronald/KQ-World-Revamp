@@ -37,7 +37,7 @@ export const socialCommunityLinks:
       type: 'external',
       title: 'Facebook',
       subtitle: '@KenyaAirways',
-      url: 'https://www.facebook.com/KenyaAirways',
+      url: 'https://www.facebook.com/officialkenyaairways/',
       iconType: 'facebook'
     },
 
@@ -55,7 +55,7 @@ export const socialCommunityLinks:
       type: 'external',
       title: 'YouTube',
       subtitle: 'Kenya Airways',
-      url: 'https://www.youtube.com/@KenyaAirways',
+      url: 'https://www.youtube.com/@officialkenyaairways',
       iconType: 'youtube'
     },
 
@@ -64,7 +64,7 @@ export const socialCommunityLinks:
       type: 'external',
       title: 'kenya-airways.com',
       subtitle: 'Corporate site',
-      url: 'https://www.kenya-airways.com/',
+      url: 'https://corporate.kenya-airways.com/',
       iconType: 'website'
     },
 
@@ -73,7 +73,7 @@ export const socialCommunityLinks:
       type: 'external',
       title: 'Newsroom WhatsApp',
       subtitle: 'External media',
-      url: '',
+      url: 'https://www.whatsapp.com/channel/0029VaCQcoC2Jl8JFUt6r83A',
       iconType: 'whatsapp'
     },
 
@@ -82,7 +82,7 @@ export const socialCommunityLinks:
       type: 'external',
       title: 'LinkedIn',
       subtitle: 'Kenya Airways plc',
-      url: 'https://www.linkedin.com/company/kenya-airways/',
+      url: 'https://www.linkedin.com/company/kenya-airways',
       iconType: 'linkedin'
     }
   ];

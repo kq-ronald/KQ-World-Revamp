@@ -842,9 +842,13 @@
 }
 
 @container (max-width: 850px) {
-
-  .standardGrid,
   .prideGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (max-width: 650px) {
+  .standardGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -888,4 +892,34 @@
 .prideCard:focus-within {
   outline: 2px solid #d71920;
   outline-offset: 3px;
+}
+
+/* Blog fallback colours when an image is missing or fails */
+.kqCompanyNews .newsGrid > .newsCard .blogFallback {
+  width: 100%;
+  height: 100%;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-family: "Montserrat", Arial, sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 3px;
+}
+
+/* First card: KQ red */
+.kqCompanyNews .newsGrid > .newsCard:nth-child(3n + 1) .blogFallback {
+  background: linear-gradient(135deg, #b5121b, #761019);
+}
+
+/* Second card: charcoal */
+.kqCompanyNews .newsGrid > .newsCard:nth-child(3n + 2) .blogFallback {
+  background: linear-gradient(135deg, #414141, #191919);
+}
+
+/* Third card: blue */
+.kqCompanyNews .newsGrid > .newsCard:nth-child(3n) .blogFallback {
+  background: linear-gradient(135deg, #24577d, #112d47);
 }
