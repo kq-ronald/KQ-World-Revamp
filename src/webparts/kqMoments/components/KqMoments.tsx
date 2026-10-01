@@ -42,7 +42,7 @@ export default class KqMoments
     const root = this.rootRef.current;
     const zone = root?.closest<HTMLElement>('[data-automation-id="CanvasZone"]');
     if (!root || !zone || zone.querySelector('.kqWorldNavigationHost') ||
-        zone.querySelectorAll('[data-automation-id="CanvasControl"]').length !== 1) return;
+      zone.querySelectorAll('[data-automation-id="CanvasControl"]').length !== 1) return;
     const marked: Array<{ element: HTMLElement; attribute: string; previous: string | null }> = [];
     const mark = (element: HTMLElement, attribute: string): void => {
       marked.push({ element, attribute, previous: element.getAttribute(attribute) });
@@ -53,8 +53,8 @@ export default class KqMoments
     const canvas = zone.closest<HTMLElement>('[data-automation-id="CanvasLayout"]');
     let outer = zone.parentElement;
     while (outer && outer !== canvas && canvas &&
-           outer.querySelectorAll('[data-automation-id="CanvasZone"]').length === 1 &&
-           !outer.querySelector('.kqWorldNavigationHost')) {
+      outer.querySelectorAll('[data-automation-id="CanvasZone"]').length === 1 &&
+      !outer.querySelector('.kqWorldNavigationHost')) {
       mark(outer, 'data-kq-video-wrapper');
       outer = outer.parentElement;
     }
@@ -235,9 +235,7 @@ export default class KqMoments
       <button
         key={item.id}
         type="button"
-        aria-label={
-          item.title
-        }
+        aria-label={`${item.title}. Visit, View, or Download Resource. Opens in a new tab.`}
         onClick={() =>
           this._openMoment(
             item
@@ -292,33 +290,24 @@ export default class KqMoments
         />
 
 
-        <div
-          className={[
-            styles.momentInfo,
-            isHovered
-              ? styles.momentInfoVisible
-              : ''
-          ].join(' ')}
-        >
+        <div className={styles.momentInfo}>
+          <span className={styles.momentText}>
+            <span className={styles.momentTitle}>
+              {item.title}
+            </span>
 
-          <span
-            className={
-              styles.momentTitle
-            }
-          >
-            {item.title}
+            <span className={styles.momentSubtext}>
+              Visit, View, or Download Resource
+            </span>
           </span>
 
           <span
-            className={
-              styles.momentArrow
-            }
+            className={styles.momentArrow}
+            aria-hidden="true"
           >
             →
           </span>
-
         </div>
-
       </button>
     );
   }
