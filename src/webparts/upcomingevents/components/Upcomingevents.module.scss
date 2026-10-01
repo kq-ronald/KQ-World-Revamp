@@ -1,19 +1,26 @@
 .upcomingevents {
     --event-text: #202020;
     --event-muted: #777;
+
     width: 100%;
     max-width: 100%;
     min-width: 0;
     min-height: 400px;
     height: auto;
+
     margin: 0;
     padding: 24px 20px;
+
     box-sizing: border-box;
+
     color: var(--event-text);
     background: #fff;
+
     border: 1px solid #ddd;
     border-radius: 12px;
+
     box-shadow: 0 3px 12px rgba(0, 0, 0, .08);
+
     font-family: "Montserrat", Arial, Helvetica, sans-serif;
     font-size: 14px;
     line-height: 1.5;
@@ -173,12 +180,27 @@
 /* Matches the banner/calendar section: 4.5% gutters, 20px gap, 3:1 columns.
    These markers are applied only to the section holding these two web parts. */
 @media (min-width: 1101px) {
+
+    /*
+     * Figma desktop proportions.
+     *
+     * Upcoming Events deliberately extends farther down
+     * beside Quick Actions. This creates the taller first
+     * right-column card seen in the design.
+     */
+    .upcomingevents {
+        min-height: 510px;
+        height: 560px;
+    }
+
     :global([data-kq-content-zone]) {
         width: 100% !important;
         max-width: none !important;
         box-sizing: border-box !important;
+
         margin-left: 0 !important;
         margin-right: 0 !important;
+
         padding-left: 4.5% !important;
         padding-right: 4.5% !important;
     }
@@ -188,34 +210,50 @@
         width: 100% !important;
         max-width: none !important;
         min-width: 0 !important;
+
         box-sizing: border-box !important;
+
         margin-left: 0 !important;
         margin-right: 0 !important;
+
         padding-left: 0 !important;
         padding-right: 0 !important;
     }
 
     :global([data-kq-content-row]) {
         display: grid !important;
-        grid-template-columns: minmax(0, 3fr) minmax(260px, 1fr) !important;
+
+        grid-template-columns:
+            minmax(0, 3fr)
+            minmax(260px, 1fr) !important;
+
         gap: 20px !important;
+
+        /*
+         * Important:
+         * Don't stretch Quick Actions to match the taller
+         * Upcoming Events card.
+         */
         align-items: start !important;
     }
 
     :global([data-kq-content-left]) {
         grid-column: 1 !important;
         grid-row: 1 !important;
+        align-self: start !important;
     }
 
     :global([data-kq-content-right]) {
         grid-column: 2 !important;
         grid-row: 1 !important;
+        align-self: start !important;
     }
 }
 
 @media (max-width: 600px) {
     .upcomingevents {
-        min-height: 0;
+        min-height: 510px;
         padding: 20px 16px;
+        height: 510px;
     }
 }
