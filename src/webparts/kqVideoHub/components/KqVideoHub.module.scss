@@ -57,6 +57,13 @@
   font-size: 12px;
 }
 
+.libraryLink:hover {
+  background: #e30613;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+
 .videoHubCard {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
