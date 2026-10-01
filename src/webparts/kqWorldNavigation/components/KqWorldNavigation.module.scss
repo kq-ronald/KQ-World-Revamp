@@ -34,6 +34,9 @@
 .navigationRoot span,
 .navigationRoot label {
   font-family: "Montserrat", Arial, Helvetica, sans-serif;
+  hover: {
+    text-decoration: none;
+  }
 }
 .navigationRoot h1,
 .navigationRoot h2,
@@ -230,6 +233,28 @@
 }
 .chevronUp {
   transform: rotate(225deg);
+}
+
+/* Ticket 16409: highlight dropdown links */
+.dropdown a,
+.mobileSubmenu a {
+  cursor: pointer;
+}
+
+.dropdown a:hover,
+.dropdown a:focus-visible,
+.mobileSubmenu a:hover,
+.mobileSubmenu a:focus-visible {
+  color: #d71920 !important;
+  text-decoration: none;
+}
+
+/* Override colours applied directly to text inside links */
+.dropdown a:hover span,
+.dropdown a:focus-visible span,
+.mobileSubmenu a:hover span,
+.mobileSubmenu a:focus-visible span {
+  color: #d71920 !important;
 }
 /* =========================================================
    DESKTOP ACTIONS
