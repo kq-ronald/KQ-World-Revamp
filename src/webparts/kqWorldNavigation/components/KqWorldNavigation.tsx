@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { SPHttpClient } from '@microsoft/sp-http';
 import KqSearch from './KqSearch';
 import styles from './KqWorldNavigation.module.scss';
 import type { IKqWorldNavigationProps } from './IKqWorldNavigationProps';
@@ -39,6 +40,41 @@ import {
   WeatherSunny24Regular,
   WeatherMoon24Regular
 } from '@fluentui/react-icons';
+/* =========================================================
+   LINK HELPERS
+========================================================= */
+// Fixes malformed absolute URLs such as "https\://..." (stray backslash),
+// which browsers otherwise treat as a relative path on the current page.
+const normalizeUrl = (url?: string): string => {
+  if (!url) {
+    return '#';
+  }
+  return url.trim().replace(/^(https?)\\+:/i, '$1:');
+};
+
+// Only open a new tab when there is a real destination.
+const hasRealUrl = (url?: string): boolean => {
+  const normalized = normalizeUrl(url);
+  return normalized !== '#' && normalized !== '';
+};
+
+// SharePoint's modern page router can hijack link clicks and navigate in the
+// same tab. Opening explicitly in a new tab avoids that.
+const openInNewTab = (
+  event: React.MouseEvent<HTMLAnchorElement>,
+  url?: string
+): void => {
+  event.preventDefault();
+  event.stopPropagation();
+  if (!hasRealUrl(url)) {
+    return;
+  }
+  window.open(normalizeUrl(url), '_blank', 'noopener,noreferrer');
+};
+
+const IT_SUPPORT_URL =
+  'https://apps.powerapps.com/play/e/f32fe21b-3ac3-e27d-acb4-6c9bf2899443/a/b2e72ec1-f122-47d5-a66c-fb73d6142766?tenantId=dd74aad9-c569-463a-bc17-0ba25a8fa388&hint=6c48ccc0-3685-4d7c-86b1-4f14f6e3bce7&sourcetime=1725444731619&hidenavbar=true';
+
 /* =========================================================
    ICON MAPPING
 ========================================================= */
@@ -202,6 +238,156 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
     React.useState<string | null>(null);
   const [contactOpen, setContactOpen] = React.useState(false);
   const [attachmentName, setAttachmentName] = React.useState('');
+  const [feedbackEmail, setFeedbackEmail] = React.useState(props.context.pageContext.user.email || '');
+  const [feedbackMessage, setFeedbackMessage] = React.useState('');
+  const [feedbackFile, setFeedbackFile] = React.useState<File | null>(null);
+  const [feedbackSending, setFeedbackSending] = React.useState(false);
+  const [feedbackError, setFeedbackError] = React.useState('');
+  const [feedbackSuccess, setFeedbackSuccess] = React.useState('');
+  const [attachmentDragActive, setAttachmentDragActive] = React.useState(false);
+  const feedbackBusyRef = React.useRef(false);
+  const feedbackFileRef = React.useRef<HTMLInputElement | null>(null);
+
+  // All three input methods share the same validation and selected-file state.
+  const selectFeedbackFile = (file: File): void => {
+    if (feedbackBusyRef.current) return;
+    setFeedbackSuccess('');
+    if (file.size > 10 * 1024 * 1024) {
+      setFeedbackError('Please choose an attachment no larger than 10 MB.');
+      return;
+    }
+    setFeedbackFile(file);
+    setAttachmentName(file.name);
+    setFeedbackError('');
+  };
+
+  const pasteFeedbackAttachment = (event: React.ClipboardEvent<HTMLFormElement>): void => {
+    if (feedbackBusyRef.current) return;
+    const files = event.clipboardData.files;
+    if (files.length > 1) {
+      event.preventDefault();
+      setFeedbackError('Please paste one attachment at a time.');
+      return;
+    }
+    let file: File | null = files.length === 1 ? files[0] : null;
+    if (!file) {
+      const items = event.clipboardData.items;
+      for (let index = 0; index < items.length; index++) {
+        if (items[index].kind === 'file') {
+          file = items[index].getAsFile();
+          if (file) break;
+        }
+      }
+    }
+    // Leave normal text paste unchanged in the email and message inputs.
+    if (file) {
+      event.preventDefault();
+      selectFeedbackFile(file);
+    }
+  };
+
+  React.useEffect(() => {
+    if (!feedbackSuccess) return;
+    const timer = window.setTimeout(() => setFeedbackSuccess(''), 6000);
+    return () => window.clearTimeout(timer);
+  }, [feedbackSuccess]);
+  const releaseFeedbackLock = (): void => {
+    feedbackBusyRef.current = false;
+    setFeedbackSending(false);
+  };
+
+  const submitFeedback = async (): Promise<void> => {
+    if (feedbackBusyRef.current) return;
+    setFeedbackError('');
+    setFeedbackSuccess('');
+    if (!feedbackEmail.trim() || !feedbackMessage.trim()) {
+      setFeedbackError('Please enter your email address and message.');
+      return;
+    }
+    if (feedbackFile && feedbackFile.size > 10 * 1024 * 1024) {
+      setFeedbackError('Please choose an attachment smaller than 10 MB.');
+      return;
+    }
+    feedbackBusyRef.current = true;
+    setFeedbackSending(true);
+    let createdId: number | undefined;
+    let stage = 'save';
+    try {
+      // The list must be in the same SharePoint web as this web part.
+      const webUrl = props.context.pageContext.web.absoluteUrl.replace(/\/$/, '');
+      const listUrl = `${webUrl}/_api/web/lists/getbytitle('KQ Feedback Dev')`;
+      const headers = {
+        Accept: 'application/json;odata=nometadata',
+        'Content-Type': 'application/json;odata=nometadata',
+        'odata-version': ''
+      };
+      const created = await props.context.spHttpClient.post(
+        `${listUrl}/items`, SPHttpClient.configurations.v1,
+        {
+          headers,
+          body: JSON.stringify({
+            Title: 'KQ World Feedback',
+            SenderEmail: feedbackEmail.trim(),
+            Message: feedbackMessage.trim(),
+            ReadyToSend: false
+          })
+        }
+      );
+      if (!created.ok) throw new Error(`Saving feedback failed (${created.status}).`);
+      const item: { Id: number } = await created.json();
+      createdId = item.Id;
+      if (!createdId) throw new Error('SharePoint did not return a feedback ID.');
+
+      if (feedbackFile) {
+        stage = 'upload';
+        const fileContent = await new Promise<ArrayBuffer>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as ArrayBuffer);
+          reader.onerror = () => reject(new Error('Unable to read the attachment.'));
+          reader.onabort = () => reject(new Error('Reading the attachment was cancelled.'));
+          reader.readAsArrayBuffer(feedbackFile);
+        });
+        const fileName = encodeURIComponent(feedbackFile.name.replace(/'/g, "''"))
+          .replace(/'/g, '%27');
+        const upload = await props.context.spHttpClient.post(
+          `${listUrl}/items(${createdId})/AttachmentFiles/add(FileName='${fileName}')`,
+          SPHttpClient.configurations.v1,
+          {
+            headers: { ...headers, 'Content-Type': 'application/octet-stream' },
+            body: fileContent
+          }
+        );
+        if (!upload.ok) throw new Error(`Attachment upload failed (${upload.status}).`);
+      }
+
+      stage = 'queue';
+      const queued = await props.context.spHttpClient.post(
+        `${listUrl}/items(${createdId})`, SPHttpClient.configurations.v1,
+        {
+          headers: { ...headers, 'IF-MATCH': '*', 'X-HTTP-Method': 'MERGE' },
+          body: JSON.stringify({ ReadyToSend: true })
+        }
+      );
+      if (!queued.ok) throw new Error(`Queueing feedback failed (${queued.status}).`);
+      setContactOpen(false);
+      setAttachmentDragActive(false);
+      setFeedbackSuccess('Thank you! Your feedback has been submitted.');
+      setFeedbackMessage('');
+      setFeedbackFile(null);
+      setAttachmentName('');
+      if (feedbackFileRef.current) feedbackFileRef.current.value = '';
+    } catch (error) {
+      console.error('KQ feedback submission failed:', error);
+      setFeedbackError(stage === 'queue'
+        ? `Feedback #${createdId} was saved, but submission could not be confirmed. Please ask support to check this item before resubmitting.`
+        : createdId
+          ? `Feedback #${createdId} was saved, but the attachment failed. It has not been queued for email. Please contact support or submit again.`
+          : 'Feedback could not be confirmed. Please check your connection and list permissions before trying again.');
+    } finally {
+      releaseFeedbackLock();
+    }
+  };
+
   const [notifications, setNotifications] = React.useState<IKqNotification[]>([]);
   const [notificationsOpen, setNotificationsOpen] = React.useState(false);
   const [notificationsLoading, setNotificationsLoading] = React.useState(true);
@@ -310,7 +496,6 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
       nextTheme ? 'dark' : 'light'
     );
   };
-
   // Publish the active theme so the other KQ World web parts can respond to it.
   React.useEffect(() => {
     const theme = isDarkMode ? 'dark' : 'light';
@@ -343,7 +528,7 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
         setMobileOpen(false);
         setMobileExpanded(null);
         setNotificationsOpen(false);
-        setContactOpen(false);
+        if (!feedbackBusyRef.current) { setContactOpen(false); setFeedbackFile(null); setAttachmentName(''); }
       }
     };
     document.addEventListener('keydown', handleKeyDown);
@@ -484,7 +669,7 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
                 Feedback
               </button>
               <a
-                href="https://kenyaairwaysplc.sharepoint.com/sites/isr/workflows/Pages/request.aspx"
+                href={IT_SUPPORT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -554,8 +739,8 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
                     }
                   }}
                   onClick={() => {
-                    if (item.url && item.url !== '#') {
-                      window.location.href = item.url;
+                    if (hasRealUrl(item.url)) {
+                      window.open(normalizeUrl(item.url), '_blank', 'noopener,noreferrer');
                       return;
                     }
                     if (item.children?.length) {
@@ -591,10 +776,8 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
                 marginLeft: '8px'
               }}
             >
-
               {/* SEARCH */}
               <KqSearch variant="desktop" context={props.context} />
-
               {/* Notifications */}
               <button
                 type="button"
@@ -735,7 +918,11 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
                         activeItem.description}
                     </div>
                     <a
-                      href={activeItem.url || '#'}
+                      href={normalizeUrl(activeItem.url)}
+ data-interception="off"
+ onClick={(event) => openInNewTab(event, activeItem.url)}
+                      target={hasRealUrl(activeItem.url) ? '_blank' : undefined}
+                      rel={hasRealUrl(activeItem.url) ? 'noopener noreferrer' : undefined}
                       style={{
                         display: 'inline-block',
                         width: 'fit-content',
@@ -766,9 +953,11 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
                     return (
                       <a
                         key={child.title}
-                        href={child.url || '#'}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href={normalizeUrl(child.url)}
+ data-interception="off"
+ onClick={(event) => openInNewTab(event, child.url)}
+                        target={hasRealUrl(child.url) ? '_blank' : undefined}
+                        rel={hasRealUrl(child.url) ? 'noopener noreferrer' : undefined}
                         style={{
                           display: 'flex',
                           alignItems: 'center',
@@ -849,7 +1038,6 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
             context={props.context}
             onFocus={() => setMobileOpen(false)}
           />
-
           {/* Theme */}
           <button
             type="button"
@@ -898,9 +1086,8 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
                           ? null
                           : item.title
                       );
-                    } else if (item.url) {
-                      window.location.href =
-                        item.url;
+                    } else if (hasRealUrl(item.url)) {
+                      window.open(normalizeUrl(item.url), '_blank', 'noopener,noreferrer');
                     }
                   }}
                 >
@@ -929,9 +1116,11 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
                       return (
                         <a
                           key={child.title}
-                          href={child.url || '#'}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          href={normalizeUrl(child.url)}
+ data-interception="off"
+ onClick={(event) => openInNewTab(event, child.url)}
+                          target={hasRealUrl(child.url) ? '_blank' : undefined}
+                          rel={hasRealUrl(child.url) ? 'noopener noreferrer' : undefined}
                           style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -1055,8 +1244,8 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
                 ) : notifications.length === 0 ? (
                   <div className={styles.notificationState}>
                     <Alert24Regular />
-                    <h3>You&apos;re all caught up</h3>
-                    <p>Share your feedback with us and we&apos;ll get back.</p>
+                    <h3>You're all caught up</h3>
+                    <p>Share your thoughts on the content presented, and we'll get back to you as soon as possible.</p>
                   </div>
                 ) : (
                   <>
@@ -1066,7 +1255,7 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
                         {todayNotifications.map((notification) => (
                           <a
                             key={notification.id}
-                            href={notification.link || '#'}
+                            href={notification.link ? normalizeUrl(notification.link) : '#'}
                             target={
                               notification.link ? '_blank' : undefined
                             }
@@ -1113,7 +1302,7 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
                         {yesterdayNotifications.map((notification) => (
                           <a
                             key={notification.id}
-                            href={notification.link || '#'}
+                            href={notification.link ? normalizeUrl(notification.link) : '#'}
                             target={
                               notification.link ? '_blank' : undefined
                             }
@@ -1160,7 +1349,7 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
                         {earlierNotifications.map((notification) => (
                           <a
                             key={notification.id}
-                            href={notification.link || '#'}
+                            href={notification.link ? normalizeUrl(notification.link) : '#'}
                             target={
                               notification.link ? '_blank' : undefined
                             }
@@ -1207,13 +1396,21 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
             </aside>
           </div>
         ) : null}
+        {feedbackSuccess && (
+          <div role="status" style={{
+            position: 'fixed', bottom: 24, right: 24, zIndex: 2147483647,
+            maxWidth: 'calc(100vw - 48px)', padding: '16px 20px',
+            borderRadius: 12, background: '#17633b', color: '#fff',
+            boxShadow: '0 8px 28px rgba(0,0,0,0.2)', fontFamily: 'Montserrat, Arial, sans-serif'
+          }}>{feedbackSuccess}</div>
+        )}
         {contactOpen ? (
           <div
             className={`${styles.contactOverlay} ${isDarkMode ? styles.darkMode : ''}`}
             role="presentation"
             onMouseDown={(event) => {
               if (event.target === event.currentTarget) {
-                setContactOpen(false);
+                if (!feedbackBusyRef.current) { setContactOpen(false); setFeedbackFile(null); setAttachmentName(''); }
               }
             }}
           >
@@ -1222,6 +1419,8 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
               role="dialog"
               aria-modal="true"
               aria-labelledby="kq-contact-title"
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={(event) => { event.preventDefault(); setAttachmentDragActive(false); }}
             >
               <div className={styles.contactModalHeader}>
                 <div className={styles.contactHeaderIcon} aria-hidden="true" />
@@ -1235,7 +1434,7 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
                 <button
                   type="button"
                   className={styles.contactCloseButton}
-                  onClick={() => setContactOpen(false)}
+                  onClick={() => { if (!feedbackBusyRef.current) { setContactOpen(false); setFeedbackFile(null); setAttachmentName(''); } }}
                   aria-label="Close contact form"
                 >
                   ×
@@ -1243,45 +1442,116 @@ const KqWorldNavigation: React.FC<IKqWorldNavigationProps> = (props) => {
               </div>
               <form
                 className={styles.contactForm}
-                onSubmit={(event) => event.preventDefault()}
+                onPaste={pasteFeedbackAttachment}
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  submitFeedback().catch((error: unknown) => console.error(error));
+                }}
               >
                 <label className={styles.contactField}>
                   <span>Email Address <strong>*</strong></span>
                   <input
                     type="email"
+                    name="feedbackEmail"
+                    value={feedbackEmail}
+                    disabled={feedbackSending}
+                    onChange={(event) => { setFeedbackEmail(event.currentTarget.value); setFeedbackSuccess(''); }}
                     placeholder="Enter your email address"
                     required
                   />
                 </label>
-                
                 <label className={styles.contactField}>
                   <span>Message <strong>*</strong></span>
                   <textarea
+                    name="feedbackMessage"
+                    value={feedbackMessage}
+                    disabled={feedbackSending}
+                    onChange={(event) => { setFeedbackMessage(event.currentTarget.value); setFeedbackSuccess(''); }}
                     placeholder="Enter your message"
                     rows={5}
                     required
                   />
                 </label>
-                <label className={styles.contactField}>
-                  <span>Attachments (Optional)</span>
-                  <span className={styles.attachmentDropzone}>
-                    <input
-                      type="file"
-                      onChange={(event) => {
-                        const file = event.currentTarget.files?.[0];
-                        setAttachmentName(file ? file.name : '');
-                      }}
-                    />
-                    <span className={styles.attachmentIcon} aria-hidden="true">⌕</span>
-                    <span>{attachmentName || 'Click to attach files'}</span>
-                  </span>
-                </label>
+                <div className={styles.contactField}>
+                  <span>Attachment (optional)</span>
+                  <input
+                    type="file"
+                    name="feedbackAttachment"
+                    ref={feedbackFileRef}
+                    disabled={feedbackSending}
+                    style={{ display: 'none' }}
+                    tabIndex={-1}
+                    onChange={(event) => {
+                      const file = event.currentTarget.files?.[0];
+                      if (file) selectFeedbackFile(file);
+                      // Allow selecting the same file again after removing it.
+                      event.currentTarget.value = '';
+                    }}
+                  />
+                  <button
+                    type="button"
+                    disabled={feedbackSending}
+                    onClick={() => feedbackFileRef.current?.click()}
+                    onDragEnter={(event) => {
+                      event.preventDefault();
+                      if (!feedbackBusyRef.current) setAttachmentDragActive(true);
+                    }}
+                    onDragOver={(event) => {
+                      event.preventDefault();
+                      event.dataTransfer.dropEffect = feedbackBusyRef.current ? 'none' : 'copy';
+                    }}
+                    onDragLeave={(event) => {
+                      if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                        setAttachmentDragActive(false);
+                      }
+                    }}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      setAttachmentDragActive(false);
+                      if (feedbackBusyRef.current) return;
+                      if (event.dataTransfer.files.length !== 1) {
+                        setFeedbackError('Please drop one file at a time.');
+                        return;
+                      }
+                      selectFeedbackFile(event.dataTransfer.files[0]);
+                    }}
+                    style={{
+                      width: '100%', minHeight: 110, padding: '20px 16px',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+                      border: `2px dashed ${attachmentDragActive ? '#d71920' : '#999'}`,
+                      borderRadius: 12, fontFamily: 'inherit',
+                      color: 'inherit', background: attachmentDragActive ? 'rgba(215,25,32,0.08)' : 'transparent',
+                      cursor: feedbackSending ? 'wait' : 'pointer'
+                    }}
+                  >
+                    <strong>{attachmentDragActive ? 'Drop your file here' : attachmentName ? 'Replace attachment' : 'Choose a file'}</strong>
+                    <span style={{ fontSize: 12 }}>or drag and drop here · paste with Ctrl+V / ⌘V</span>
+                    <span style={{ fontSize: 12 }}>One file, up to 10 MB</span>
+                  </button>
+                  {feedbackFile && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 10 }}>
+                      <span role="status" style={{ flex: 1, minWidth: 0, overflowWrap: 'break-word', fontSize: 13 }}>
+                        {attachmentName} · {Math.max(1, Math.round(feedbackFile.size / 1024))} KB
+                      </span>
+                      <button
+                        type="button"
+                        disabled={feedbackSending}
+                        aria-label="Remove attachment"
+                        onClick={() => { setFeedbackFile(null); setAttachmentName(''); setFeedbackError(''); }}
+                        style={{ border: 0, background: 'transparent', color: '#d71920', cursor: 'pointer', fontFamily: 'inherit' }}
+                      >Remove</button>
+                    </div>
+                  )}
+                </div>
+                {feedbackError && <p role="alert" style={{ color: '#d71920', margin: '12px 0' }}>{feedbackError}</p>}
                 <div className={styles.contactFormActions}>
                   <button
                     type="submit"
                     className={styles.contactSubmitButton}
+                    disabled={feedbackSending}
                   >
-                    Send Message
+                    {feedbackSending ? 'Submitting...' : 'Send Message'}
                   </button>
                 </div>
               </form>
