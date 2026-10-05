@@ -4,9 +4,7 @@ import {
   SPHttpClient,
   SPHttpClientResponse
 } from '@microsoft/sp-http';
-
 import { IIntranetBannerProps } from './IIntranetBannerProps';
-
 interface ISharePointBanner {
   Id: number;
   Title?: string;
@@ -26,7 +24,6 @@ interface ISharePointBanner {
     ServerRelativeUrl: string;
   };
 }
-
 interface IHomepageBanner {
   id: number;
   image: string;
@@ -35,6 +32,7 @@ interface IHomepageBanner {
   url: string;
   ctaText: string;
 }
+const AUTO_SCROLL_INTERVAL = 5000;
 
 const IntranetBanner: React.FC<IIntranetBannerProps> = ({
   context
@@ -47,18 +45,23 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
         ) === 'dark'
       );
     });
-
   const [banners, setBanners] =
     React.useState<IHomepageBanner[]>([]);
-
   const [activeIndex, setActiveIndex] =
     React.useState<number>(0);
-
   const [isLoading, setIsLoading] =
     React.useState<boolean>(true);
-
   const [hasError, setHasError] =
     React.useState<boolean>(false);
+  const shouldAutoScroll = banners.length > 1 && !isLoading && !hasError;
+
+  React.useEffect(() => {
+    if (!shouldAutoScroll) return;
+    const timer = window.setTimeout(() => {
+      setActiveIndex((current) => (current + 1) % banners.length);
+    }, AUTO_SCROLL_INTERVAL);
+    return () => window.clearTimeout(timer);
+  }, [shouldAutoScroll, activeIndex, banners.length]);
 
   React.useEffect(() => {
     const handleThemeChange = (
@@ -68,17 +71,14 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
         event as CustomEvent<{
           theme: 'light' | 'dark';
         }>;
-
       setIsDarkMode(
         customEvent.detail.theme === 'dark'
       );
     };
-
     window.addEventListener(
       'kqworld-theme-change',
       handleThemeChange
     );
-
     return () => {
       window.removeEventListener(
         'kqworld-theme-change',
@@ -86,22 +86,17 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
       );
     };
   }, []);
-
   React.useEffect(() => {
     let isMounted = true;
-
     const loadBanners =
       async (): Promise<void> => {
         try {
           setIsLoading(true);
           setHasError(false);
-
           const webUrl =
             context.pageContext.web.absoluteUrl;
-
           const libraryName =
             'KQ Intranet Banners Dev';
-
           const endpoint =
             `${webUrl}/_api/web/lists/getbytitle('${libraryName}')/items` +
             `?$select=Id,Title,IsPublished,DisplayOrder,StartDate,EndDate,CTAText,CTAUrl,File/Name,File/ServerRelativeUrl` +
@@ -109,30 +104,24 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
             `&$filter=IsPublished eq 1` +
             `&$orderby=DisplayOrder asc` +
             `&$top=10`;
-
           const response: SPHttpClientResponse =
             await context.spHttpClient.get(
               endpoint,
               SPHttpClient.configurations.v1
             );
-
           if (!response.ok) {
             const errorText =
               await response.text();
-
             throw new Error(
               `Unable to load banners. ` +
               `SharePoint returned ${response.status}. ` +
               errorText
             );
           }
-
           const data: {
             value: ISharePointBanner[];
           } = await response.json();
-
           const now = new Date();
-
           const imageExtensions = [
             '.jpg',
             '.jpeg',
@@ -141,17 +130,14 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
             '.gif',
             '.svg'
           ];
-
           const items: IHomepageBanner[] =
             data.value
               .filter((item) => {
                 if (!item.File) {
                   return false;
                 }
-
                 const fileName =
                   item.File.Name.toLowerCase();
-
                 const isImage =
                   imageExtensions.some(
                     (extension) =>
@@ -159,33 +145,27 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
                         extension
                       )
                   );
-
                 if (!isImage) {
                   return false;
                 }
-
                 const startDate =
                   item.StartDate
                     ? new Date(
                       item.StartDate
                     )
                     : undefined;
-
                 const endDate =
                   item.EndDate
                     ? new Date(
                       item.EndDate
                     )
                     : undefined;
-
                 const hasStarted =
                   !startDate ||
                   startDate <= now;
-
                 const hasNotEnded =
                   !endDate ||
                   endDate >= now;
-
                 return (
                   hasStarted &&
                   hasNotEnded
@@ -195,9 +175,7 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
                 const fileUrl =
                   `${window.location.origin}` +
                   `${item.File?.ServerRelativeUrl}`;
-
                 let ctaUrl = '';
-
                 if (
                   typeof item.CTAUrl ===
                   'string'
@@ -210,26 +188,19 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
                   ctaUrl =
                     item.CTAUrl.Url;
                 }
-
                 return {
                   id: item.Id,
-
                   image: fileUrl,
-
                   headline:
                     item.Title ||
                     item.File?.Name ||
                     'KQ Intranet Banner',
-
                   description: '',
-
                   url: ctaUrl,
-
                   ctaText:
                     item.CTAText || ''
                 };
               });
-
           if (isMounted) {
             setBanners(items);
             setActiveIndex(0);
@@ -239,7 +210,6 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
             'Error loading KQ Intranet banners:',
             error
           );
-
           if (isMounted) {
             setHasError(true);
             setBanners([]);
@@ -250,38 +220,31 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
           }
         }
       };
-
     loadBanners().catch((error: unknown) => {
       console.error('Unexpected banner loading error:', error);
     });
-
     return () => {
       isMounted = false;
     };
   }, [context]);
-
   const activeBanner =
     banners[activeIndex];
-
   const goPrevious = (
     event: React.MouseEvent<HTMLButtonElement>
   ): void => {
     event.preventDefault();
     event.stopPropagation();
-
     setActiveIndex((current) =>
       current === 0
         ? banners.length - 1
         : current - 1
     );
   };
-
   const goNext = (
     event: React.MouseEvent<HTMLButtonElement>
   ): void => {
     event.preventDefault();
     event.stopPropagation();
-
     setActiveIndex((current) =>
       current ===
         banners.length - 1
@@ -289,22 +252,18 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
         : current + 1
     );
   };
-
   const goToSlide = (
     index: number,
     event: React.MouseEvent<HTMLButtonElement>
   ): void => {
     event.preventDefault();
     event.stopPropagation();
-
     setActiveIndex(index);
   };
-
   const rootClassName = [
     styles.intranetBanner,
     isDarkMode ? styles.darkMode : styles.lightMode
   ].join(' ');
-
   if (isLoading || hasError) {
     return (
       <section data-kq-banner="true" className={rootClassName} aria-busy={isLoading}>
@@ -314,17 +273,16 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
       </section>
     );
   }
-
   if (!activeBanner) {
     return null;
   }
-
   return (
     <section
       data-kq-banner="true"
       className={rootClassName}
       aria-label="KQ World announcements"
       aria-roledescription="carousel"
+
     >
       <div className={styles.bannerFrame}>
         <img
@@ -351,7 +309,8 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
             )}
             {banners.length > 1 && (
               <div className={styles.bannerControls}>
-                <div className={styles.bannerIndicators}>
+                
+              <div className={styles.bannerIndicators}>
                   {banners.map((banner, index) => (
                     <button
                       key={banner.id}
@@ -366,7 +325,7 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
                     />
                   ))}
                 </div>
-                <span className={styles.slideCount} aria-live="polite">
+                <span className={styles.slideCount} aria-live={shouldAutoScroll ? 'off' : 'polite'}>
                   {activeIndex + 1} / {banners.length}
                 </span>
                 <button type="button" className={styles.bannerArrow}
@@ -389,5 +348,4 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
     </section>
   );
 };
-
 export default IntranetBanner;

@@ -9,7 +9,8 @@
     "isDomainIsolated": false,
     "webApiPermissionRequests": [
       { "resource": "Viva Engage", "scope": "access_as_user" },
-      { "resource": "Microsoft Graph", "scope": "Files.Read.All" }
+      { "resource": "Microsoft Graph", "scope": "Files.Read.All" },
+      { "resource": "Microsoft Graph", "scope": "Calendars.Read.Shared"}
     ],
     "developer": {
       "name": "",

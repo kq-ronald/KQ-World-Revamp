@@ -1,7 +1,3 @@
-export type SocialCommunityType =
-  | 'internal'
-  | 'external';
-
 export type SocialCommunityIcon =
   | 'viva'
   | 'whatsapp'
@@ -14,7 +10,6 @@ export type SocialCommunityIcon =
 
 export interface ISocialCommunityLink {
   id: string;
-  type: SocialCommunityType;
   title: string;
   subtitle: string;
   url: string;

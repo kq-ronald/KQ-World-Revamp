@@ -1,6 +1,9 @@
 import * as React from 'react';
 import { IKqSocialsProps } from './IKqSocialsProps';
-import { ISocialCommunityLink, SocialCommunityType, SocialCommunityIcon } from '../models/ISocialCommunityLink';
+import {
+  ISocialCommunityLink,
+  SocialCommunityIcon
+} from '../models/ISocialCommunityLink';
 import { socialCommunityLinks } from '../data/socialCommunityLinks';
 import styles from './KqSocials.module.scss';
 
@@ -45,7 +48,6 @@ function renderIcon(icon: SocialCommunityIcon): React.ReactElement {
 }
 
 const KqSocials: React.FC<IKqSocialsProps> = () => {
-  const [activeTab, setActiveTab] = React.useState<SocialCommunityType>('internal');
   const [isDarkMode, setDarkMode] = React.useState(false);
   React.useEffect(() => {
     const update = (): void => setDarkMode(document.documentElement.getAttribute('data-kq-theme') === 'dark');
@@ -135,26 +137,78 @@ const KqSocials: React.FC<IKqSocialsProps> = () => {
   }, []);
 
 
-  const filteredLinks = socialCommunityLinks.filter((item: ISocialCommunityLink) => item.type === activeTab);
+    const filteredLinks = socialCommunityLinks.filter(
+    (item: ISocialCommunityLink): boolean => {
+      const title = item.title
+        .trim()
+        .replace(/\s+/g, ' ')
+        .toLowerCase();
+
+      return (
+        title !== 'official kq whatsapp' &&
+        title !== 'kq yammer broadcasts'
+      );
+    }
+  );
+
   return (
-    <section ref={rootRef} className={`${styles.kqSocials} ${isDarkMode ? styles.darkMode : ''}`}>
+    <section
+      ref={rootRef}
+      className={`${styles.kqSocials} ${
+        isDarkMode ? styles.darkMode : ''
+      }`}
+    >
       <div className={styles.header}>
-        <div><div className={styles.eyebrow}>SOCIAL &amp; COMMUNITY</div><h2 className={styles.title}>Stay connected</h2></div>
-        <div className={styles.tabBar} role="group" aria-label="Community category">
-          <button type="button" aria-pressed={activeTab === 'internal'} onClick={() => setActiveTab('internal')} className={`${styles.tab} ${activeTab === 'internal' ? styles.tabActive : ''}`}>Internal</button>
-          <button type="button" aria-pressed={activeTab === 'external'} onClick={() => setActiveTab('external')} className={`${styles.tab} ${activeTab === 'external' ? styles.tabActive : ''}`}>External</button>
+        <div>
+          <div className={styles.eyebrow}>
+            SOCIAL &amp; COMMUNITY
+          </div>
+
+          <h2 className={styles.title}>
+            Stay connected
+          </h2>
         </div>
       </div>
-      <div className={`${styles.linksList} ${activeTab === 'external' ? styles.externalList : ''}`}>
-        {filteredLinks.map(item => (
-          <a key={item.id} href={item.url || undefined} target="_blank" rel="noopener noreferrer" className={activeTab === 'internal' ? styles.internalItem : styles.externalItem}>
+
+      <div className={styles.linksList}>
+        {filteredLinks.map((item) => (
+          <a
+            key={item.id}
+            href={item.url || undefined}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-interception="off"
+            className={styles.internalItem}
+          >
             {renderIcon(item.iconType)}
-            <span className={styles.itemContent}><span className={styles.itemTitle}>{item.title}</span><span className={styles.itemSubtitle}>{item.subtitle}</span></span>
-            <svg className={styles.itemArrow} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12" /></svg>
+
+            <span className={styles.itemContent}>
+              <span className={styles.itemTitle}>
+                {item.title}
+              </span>
+
+              {item.subtitle && (
+                <span className={styles.itemSubtitle}>
+                  {item.subtitle}
+                </span>
+              )}
+            </span>
+
+            <svg
+              className={styles.itemArrow}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.7"
+              aria-hidden="true"
+            >
+              <path d="M6 18 18 6M6 6h12v12" />
+            </svg>
           </a>
         ))}
       </div>
     </section>
   );
 };
+
 export default KqSocials;

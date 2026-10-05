@@ -85,7 +85,7 @@ export default class KqVivaExchangeService {
 
     const url =
   'https://api.yammer.com/api/v1/messages/in_group/' +
-  `${this._communityGroupId}.json`;
+  `${this._communityGroupId}.json?threaded=true`;
 
     const response:
       HttpClientResponse =

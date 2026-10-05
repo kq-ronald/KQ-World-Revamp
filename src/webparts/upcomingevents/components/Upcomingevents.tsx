@@ -1,274 +1,167 @@
 import * as React from 'react';
 import styles from './Upcomingevents.module.scss';
-
 import {
   Clock16Regular,
   Location16Regular
 } from '@fluentui/react-icons';
-
 import {
   IUpcomingeventsProps
 } from './IUpcomingeventsProps';
-
 import {
   IKqEvent
 } from '../../../shared/models/IKqEvent';
-
 import KqEventsService
   from '../../../shared/services/KqEventsService';
-
 import {
   UpcomingEventCategory
 } from '../data/upcomingeventsData';
-
-
 const FILTERS: UpcomingEventCategory[] = [
   'All',
   'Ops',
   'People',
   'Tech'
 ];
-
-
 const Upcomingevents: React.FC<IUpcomingeventsProps> = ({
   context
 }) => {
-
   const [events, setEvents] =
     React.useState<IKqEvent[]>([]);
-
   const [isLoading, setIsLoading] =
     React.useState<boolean>(true);
-
   const [loadError, setLoadError] =
     React.useState<string>('');
-
   const [activeFilter, setActiveFilter] =
     React.useState<UpcomingEventCategory>('All');
-
   const [isDarkMode, setIsDarkMode] =
     React.useState<boolean>(() => {
-
       if (typeof document === 'undefined') {
         return false;
       }
-
       return (
         document.documentElement.getAttribute(
           'data-kq-theme'
         ) === 'dark'
       );
     });
-
-
   React.useEffect(() => {
-
     let isMounted = true;
-
+    let loading = false;
+    const releaseLoad = (): void => { loading = false; };
     const loadEvents = async (): Promise<void> => {
-
+      if (loading) return;
+      loading = true;
       try {
-
         const eventsService =
           new KqEventsService(context);
-
-        const loadedEvents =
-          await eventsService.getEvents();
-
-        const today =
-          new Date();
-
-        today.setHours(
-          0,
-          0,
-          0,
-          0
+        const start = new Date();
+        const end = new Date(start.getTime() + 30 * 24 * 60 * 60 * 1000);
+        const loadedEvents = await eventsService.getEvents(start, end);
+        const upcoming = loadedEvents.filter((event) =>
+          (event.endDate || event.date).getTime() > start.getTime() &&
+          event.date.getTime() < end.getTime()
         );
-
-        const thirtyDaysFromToday =
-          new Date(today);
-
-        thirtyDaysFromToday.setDate(
-          thirtyDaysFromToday.getDate() + 30
-        );
-
-        thirtyDaysFromToday.setHours(
-          23,
-          59,
-          59,
-          999
-        );
-
-        const upcoming =
-          loadedEvents
-            .filter(
-              (event: IKqEvent): boolean => {
-
-                const eventDate =
-                  new Date(event.date);
-
-                return (
-                  eventDate.getTime() >=
-                    today.getTime() &&
-                  eventDate.getTime() <=
-                    thirtyDaysFromToday.getTime()
-                );
-
-              }
-            )
-            .sort(
-              (
-                first: IKqEvent,
-                second: IKqEvent
-              ): number =>
-                first.date.getTime() -
-                second.date.getTime()
-            )
-            .slice(0, 5);
-
         if (isMounted) {
-
           setEvents(upcoming);
           setLoadError('');
           setIsLoading(false);
-
         }
-
       } catch (error) {
-
         console.error(
           'Failed loading Upcoming Events:',
           error
         );
-
         if (isMounted) {
-
           setEvents([]);
-
           setLoadError(
-            'Unable to load upcoming events.'
+            error instanceof Error ? error.message : 'Unable to load upcoming events.'
           );
-
           setIsLoading(false);
-
         }
-
+      } finally {
+        releaseLoad();
       }
-
     };
-
-
     loadEvents().catch(
       (error: Error) => {
-
         console.error(
           'Upcoming Events initialization failed:',
           error
         );
-
       }
     );
-
-
+    const refresh = (): void => { loadEvents().catch((error: unknown) => console.error(error)); };
+    const timer = window.setInterval(refresh, 5 * 60 * 1000);
+    window.addEventListener('focus', refresh);
     return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('focus', refresh);
       isMounted = false;
     };
-
   }, [context]);
-
-
   React.useEffect(() => {
-
     const handleThemeChange =
       (event: Event): void => {
-
         const customEvent =
           event as CustomEvent<{
             theme?: string;
           }>;
-
         setIsDarkMode(
           customEvent.detail?.theme === 'dark'
         );
       };
-
-
     const currentTheme =
       document.documentElement.getAttribute(
         'data-kq-theme'
       );
-
     setIsDarkMode(
       currentTheme === 'dark'
     );
-
-
     window.addEventListener(
       'kqworld-theme-change',
       handleThemeChange
     );
-
-
     return () => {
-
       window.removeEventListener(
         'kqworld-theme-change',
         handleThemeChange
       );
-
     };
-
   }, []);
-
-
   const filteredEvents: IKqEvent[] =
     React.useMemo(() => {
-
       if (activeFilter === 'All') {
-        return events;
+        return events.slice(0, 5);
       }
-
       return events.filter(
         (event: IKqEvent): boolean =>
-          event.category === activeFilter
-      );
-
+          (event.categories || [event.category]).some((category) => category.toLowerCase() === activeFilter.toLowerCase())
+      ).slice(0, 5);
     }, [
       activeFilter,
       events
     ]);
-
-
   const formatDateParts = (
     date: Date
   ): {
     month: string;
     day: string;
   } => {
-
     return {
-
       month: date
         .toLocaleString(
           'en-US',
           {
-            month: 'short'
+            month: 'short', timeZone: 'Africa/Nairobi'
           }
         )
         .toUpperCase(),
-
       day:
-        ('0' + date.getDate()).slice(-2)
-
+        date.toLocaleDateString('en-GB', { day: '2-digit', timeZone: 'Africa/Nairobi' })
     };
-
   };
-
-
   const formatEventTime = (
     date: Date
   ): string => {
-
     return date.toLocaleTimeString(
       'en-KE',
       {
@@ -278,12 +171,8 @@ const Upcomingevents: React.FC<IUpcomingeventsProps> = ({
         timeZone: 'Africa/Nairobi'
       }
     ) + ' EAT';
-
   };
-
-
   const rootRef = React.useRef<HTMLElement>(null);
-
   React.useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
@@ -362,7 +251,6 @@ const Upcomingevents: React.FC<IUpcomingeventsProps> = ({
       clear();
     };
   }, []);
-
   return (
     <section
       ref={rootRef}
@@ -402,9 +290,11 @@ const Upcomingevents: React.FC<IUpcomingeventsProps> = ({
                 <span className={styles.day}>{dateParts.day}</span>
               </div>
               <div className={styles.eventInformation}>
-                <h3 className={styles.eventTitle}>{event.title}</h3>
+                <h3 className={styles.eventTitle}>{event.webLink ? (
+                  <a href={event.webLink} target="_blank" rel="noopener noreferrer" data-interception="off" style={{ color: 'inherit', textDecoration: 'none' }}>{event.title}</a>
+                ) : event.title}</h3>
                 <div className={styles.eventMeta}>
-                  <span><Clock16Regular aria-hidden="true" />{formatEventTime(event.date)}</span>
+                  <span><Clock16Regular aria-hidden="true" />{event.isAllDay ? 'All day' : formatEventTime(event.date)}</span>
                   <span><Location16Regular aria-hidden="true" />{event.location}</span>
                 </div>
               </div>
@@ -415,5 +305,4 @@ const Upcomingevents: React.FC<IUpcomingeventsProps> = ({
     </section>
   );
 };
-
 export default Upcomingevents;
