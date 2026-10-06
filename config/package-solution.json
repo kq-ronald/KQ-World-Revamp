@@ -8,9 +8,22 @@
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
     "webApiPermissionRequests": [
-      { "resource": "Viva Engage", "scope": "access_as_user" },
-      { "resource": "Microsoft Graph", "scope": "Files.Read.All" },
-      { "resource": "Microsoft Graph", "scope": "Calendars.Read.Shared"}
+      {
+        "resource": "Viva Engage",
+        "scope": "access_as_user"
+      },
+      {
+        "resource": "Microsoft Graph",
+        "scope": "Files.Read.All"
+      },
+      {
+        "resource": "Microsoft Graph",
+        "scope": "Calendars.Read.Shared"
+      },
+      {
+        "resource": "Microsoft Graph",
+        "scope": "Files.ReadWrite.All"
+      }
     ],
     "developer": {
       "name": "",
@@ -20,8 +33,12 @@
       "mpnId": "Undefined-1.23.2"
     },
     "metadata": {
-      "shortDescription": { "default": "kq-world description" },
-      "longDescription": { "default": "kq-world description" },
+      "shortDescription": {
+        "default": "kq-world description"
+      },
+      "longDescription": {
+        "default": "kq-world description"
+      },
       "screenshotPaths": [],
       "videoUrl": "",
       "categories": []
@@ -35,5 +52,7 @@
       }
     ]
   },
-  "paths": { "zippedPackage": "solution/kq-world.sppkg" }
+  "paths": {
+    "zippedPackage": "solution/kq-world.sppkg"
+  }
 }

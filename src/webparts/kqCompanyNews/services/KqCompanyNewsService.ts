@@ -8,18 +8,37 @@ import {
 } from '@microsoft/sp-webpart-base';
 
 import {
-  IKqCompanyNewsItem
+  IKqCompanyNewsItem,
+  KqCompanyNewsType
 } from '../models/IKqCompanyNewsItem';
 
 
+/**
+ * Lightweight SharePoint Site Page record.
+ *
+ * Used for:
+ * - Homepage cards
+ * - News library
+ *
+ * CanvasContent1 is optional because we only request it
+ * when a user opens an individual story.
+ */
 interface ISitePageItem {
   Id: number;
+
   Title?: string;
+
   Description?: string;
+
   FileLeafRef?: string;
+
   FileRef?: string;
+
   Created?: string;
+
   Modified?: string;
+
+  CanvasContent1?: string;
 
   BannerImageUrl?:
     | string
@@ -30,9 +49,18 @@ interface ISitePageItem {
 }
 
 
+/**
+ * Shape returned by SharePoint for list queries.
+ */
+interface ISitePageCollectionResponse {
+  value: ISitePageItem[];
+}
+
+
 export default class KqCompanyNewsService {
 
   private readonly _context: WebPartContext;
+
 
   /*
    * ==========================================================
@@ -49,20 +77,19 @@ export default class KqCompanyNewsService {
   private readonly _blogLandingUrl =
     'https://corporate.kenya-airways.com/en/press-room/kq-blog/';
 
-  private readonly _sitePagesLandingUrl =
-    'https://kenyaairwaysplc.sharepoint.com/homepage/SitePages/Forms/AllPages.aspx';
-
 
   public constructor(
     context: WebPartContext
   ) {
+
     this._context = context;
+
   }
 
 
   /*
    * ==========================================================
-   * LOAD EVERYTHING
+   * LOAD ALL COMPANY NEWS
    * ==========================================================
    */
 
@@ -74,20 +101,33 @@ export default class KqCompanyNewsService {
     }> {
 
     /*
-     * Site Pages only needs to be requested once.
-     * Take 3 and The Pride are then extracted from it.
+     * Site Pages is requested once.
+     *
+     * Take 3 and The Pride are then extracted from the
+     * same response.
+     *
+     * IMPORTANT:
+     *
+     * We deliberately do NOT request CanvasContent1 here.
+     * Homepage cards and the News Library do not need the
+     * entire story body.
      */
 
     const sitePages =
       await this._getSitePages();
 
     const take3 =
-      this._getTake3FromPages(sitePages);
+      this._getTake3FromPages(
+        sitePages
+      );
 
     const pride =
-      this._getPrideFromPages(sitePages);
+      this._getPrideFromPages(
+        sitePages
+      );
 
-    const blogs = await this.getBlogItems();
+    const blogs =
+      await this.getBlogItems();
 
     console.log(
       'KQ Company News loaded:',
@@ -103,12 +143,13 @@ export default class KqCompanyNewsService {
       blogs,
       pride
     };
+
   }
 
 
   /*
    * ==========================================================
-   * PUBLIC METHODS
+   * PUBLIC COLLECTION METHODS
    * ==========================================================
    */
 
@@ -121,59 +162,7 @@ export default class KqCompanyNewsService {
     return this._getTake3FromPages(
       pages
     );
-  }
 
-
-  public async getBlogItems():
-    Promise<IKqCompanyNewsItem[]> {
-
-    // Curated real articles verified on 22 September 2026.
-    // This is NOT an automatically refreshed corporate-site feed.
-    // Update these records, or replace this method with an approved feed later.
-    return [
-      {
-        id: 20260826,
-        type: 'blog',
-        title: 'The Hidden Cost of Running an Airline',
-        moreInfo: 'An overview of the costs and financial pressures behind airline operations.',
-        publishedDate: new Date('2026-08-26T00:00:00+03:00'),
-        authorName: 'Mary Mwenga',
-        category: 'BLOG',
-        imageUrl: 'https://corporate.kenya-airways.com/contentassets/a4c003e4bfa3410b9ee0c37d56ecb86f/whatsapp-image-2026-08-20-at-14.32.41.jpeg',
-        itemUrl: this._blogLandingUrl + '2026/august/the-hidden-cost-of-running-an-airline/',
-        fileName: '',
-        readTimeMinutes: undefined,
-        issueNumber: undefined
-      },
-      {
-        id: 20260819,
-        type: 'blog',
-        title: "What Kenya Airways' Resilience Reveals About Aviation as Economic Infrastructure",
-        moreInfo: 'How air connectivity supports trade, tourism and resilience during disruption.',
-        publishedDate: new Date('2026-08-19T00:00:00+03:00'),
-        authorName: '',
-        category: 'BLOG',
-        imageUrl: 'https://corporate.kenya-airways.com/contentassets/1f4d7de0a1b94584b1bd970753cea580/kq-boeing-777---er_mombasa-flight-9965.jpg',
-        itemUrl: this._blogLandingUrl + '2026/august/kenya-airways-aviation-as-ecnomic-infrastructure/',
-        fileName: '',
-        readTimeMinutes: undefined,
-        issueNumber: undefined
-      },
-      {
-        id: 20260708,
-        type: 'blog',
-        title: 'From Cabin to Couture',
-        moreInfo: 'Meet Caroline Karimi, who combines her cabin crew career with a passion for fashion.',
-        publishedDate: new Date('2026-07-08T00:00:00+03:00'),
-        authorName: 'Sharon Kiende',
-        category: 'BLOG',
-        imageUrl: 'https://corporate.kenya-airways.com/globalassets/corporate/press-room/kq-blog/carolyne-karimi.jpg',
-        itemUrl: this._blogLandingUrl + '2026/july/from-cabin-to-couture/',
-        fileName: '',
-        readTimeMinutes: undefined,
-        issueNumber: undefined
-      }
-    ];
   }
 
 
@@ -186,26 +175,280 @@ export default class KqCompanyNewsService {
     return this._getPrideFromPages(
       pages
     );
-  }
 
-
-  public getBlogLandingUrl():
-    string {
-
-    return this._blogLandingUrl;
-  }
-
-
-  public getSitePagesLandingUrl():
-    string {
-
-    return this._sitePagesLandingUrl;
   }
 
 
   /*
    * ==========================================================
-   * SHAREPOINT SITE PAGES
+   * BLOGS
+   * ==========================================================
+   *
+   * These are currently curated corporate-site articles.
+   *
+   * They can appear:
+   * - on the homepage;
+   * - inside the full KQ News Library.
+   *
+   * Their full article body is NOT currently stored inside
+   * KQ World/SharePoint, so getStoryById() cannot yet return
+   * internal contentHtml for them.
+   *
+   * Later this can be replaced with the KQ World CMS source.
+   * ==========================================================
+   */
+
+  public async getBlogItems():
+    Promise<IKqCompanyNewsItem[]> {
+
+    return [
+
+      {
+        id: 20260826,
+
+        type: 'blog',
+
+        title:
+          'The Hidden Cost of Running an Airline',
+
+        moreInfo:
+          'An overview of the costs and financial pressures behind airline operations.',
+
+        publishedDate:
+          new Date(
+            '2026-08-26T00:00:00+03:00'
+          ),
+
+        authorName:
+          'Mary Mwenga',
+
+        category:
+          'BLOG',
+
+        imageUrl:
+          'https://corporate.kenya-airways.com/contentassets/a4c003e4bfa3410b9ee0c37d56ecb86f/whatsapp-image-2026-08-20-at-14.32.41.jpeg',
+
+        itemUrl:
+          this._blogLandingUrl +
+          '2026/august/the-hidden-cost-of-running-an-airline/',
+
+        fileName:
+          '',
+
+        readTimeMinutes:
+          undefined,
+
+        issueNumber:
+          undefined,
+
+        contentHtml:
+          undefined
+      },
+
+      {
+        id: 20260819,
+
+        type:
+          'blog',
+
+        title:
+          "What Kenya Airways' Resilience Reveals About Aviation as Economic Infrastructure",
+
+        moreInfo:
+          'How air connectivity supports trade, tourism and resilience during disruption.',
+
+        publishedDate:
+          new Date(
+            '2026-08-19T00:00:00+03:00'
+          ),
+
+        authorName:
+          '',
+
+        category:
+          'BLOG',
+
+        imageUrl:
+          'https://corporate.kenya-airways.com/contentassets/1f4d7de0a1b94584b1bd970753cea580/kq-boeing-777---er_mombasa-flight-9965.jpg',
+
+        itemUrl:
+          this._blogLandingUrl +
+          '2026/august/kenya-airways-aviation-as-ecnomic-infrastructure/',
+
+        fileName:
+          '',
+
+        readTimeMinutes:
+          undefined,
+
+        issueNumber:
+          undefined,
+
+        contentHtml:
+          undefined
+      },
+
+      {
+        id:
+          20260708,
+
+        type:
+          'blog',
+
+        title:
+          'From Cabin to Couture',
+
+        moreInfo:
+          'Meet Caroline Karimi, who combines her cabin crew career with a passion for fashion.',
+
+        publishedDate:
+          new Date(
+            '2026-07-08T00:00:00+03:00'
+          ),
+
+        authorName:
+          'Sharon Kiende',
+
+        category:
+          'BLOG',
+
+        imageUrl:
+          'https://corporate.kenya-airways.com/globalassets/corporate/press-room/kq-blog/carolyne-karimi.jpg',
+
+        itemUrl:
+          this._blogLandingUrl +
+          '2026/july/from-cabin-to-couture/',
+
+        fileName:
+          '',
+
+        readTimeMinutes:
+          undefined,
+
+        issueNumber:
+          undefined,
+
+        contentHtml:
+          undefined
+      }
+
+    ];
+
+  }
+
+
+  /*
+   * ==========================================================
+   * GET ONE FULL STORY
+   * ==========================================================
+   *
+   * This method is used by the KQ Story Viewer.
+   *
+   * The homepage does NOT call this.
+   *
+   * CanvasContent1 is only requested when somebody actually
+   * opens a story.
+   * ==========================================================
+   */
+
+  public async getStoryById(
+  id: number,
+  type: KqCompanyNewsType
+): Promise<IKqCompanyNewsItem | undefined>{
+
+
+    if (type === 'blog') {
+
+      const blogs =
+        await this.getBlogItems();
+
+      const blog =
+        blogs.find(
+          (item) =>
+            item.id === id
+        );
+
+      if (!blog) {
+
+        throw new Error(
+          'The requested blog story could not be found.'
+        );
+
+      }
+
+      return blog;
+
+    }
+
+
+    /*
+     * Take 3 / The Pride are SharePoint Site Pages.
+     */
+
+    const page =
+      await this._getSitePageById(
+        id
+      );
+
+
+    /*
+     * Protect against somebody manually changing the URL
+     * and requesting a Take 3 page as Pride or vice versa.
+     */
+
+    const normalisedTitle =
+      this._normaliseText(
+        page.Title
+      );
+
+    if (
+      type === 'take3' &&
+      !normalisedTitle.includes(
+        'take 3'
+      )
+    ) {
+
+      throw new Error(
+        'The requested page is not a Take 3 story.'
+      );
+
+    }
+
+
+    if (
+      type === 'pride' &&
+      !normalisedTitle.includes(
+        'the pride'
+      )
+    ) {
+
+      throw new Error(
+        'The requested page is not a Pride story.'
+      );
+
+    }
+
+
+    const story =
+      this._mapSitePage(
+        page,
+        type
+      );
+
+
+    return {
+      ...story,
+
+      contentHtml:
+        page.CanvasContent1 || ''
+    };
+
+  }
+
+
+  /*
+   * ==========================================================
+   * LOAD SITE PAGE METADATA
    * ==========================================================
    */
 
@@ -213,13 +456,9 @@ export default class KqCompanyNewsService {
     Promise<ISitePageItem[]> {
 
     /*
-     * We query the Site Pages library itself.
+     * This request intentionally remains lightweight.
      *
-     * Do NOT query:
-     *
-     * /SitePages/Forms/AllPages.aspx
-     *
-     * That URL is only SharePoint's visual library view.
+     * CanvasContent1 is NOT included here.
      */
 
     const url =
@@ -237,12 +476,14 @@ export default class KqCompanyNewsService {
         'BannerImageUrl'
       ].join(',') +
       `&$orderby=Modified desc` +
-      `&$top=100`;
+      `&$top=500`;
+
 
     console.log(
       'Loading KQ Site Pages:',
       url
     );
+
 
     const response:
       SPHttpClientResponse =
@@ -276,13 +517,12 @@ export default class KqCompanyNewsService {
         `Unable to load Company News from Site Pages. ` +
         `SharePoint returned ${response.status}.`
       );
+
     }
 
 
     const data:
-      {
-        value: ISitePageItem[];
-      } =
+      ISitePageCollectionResponse =
       await response.json();
 
 
@@ -295,6 +535,86 @@ export default class KqCompanyNewsService {
     return (
       data.value || []
     );
+
+  }
+
+
+  /*
+   * ==========================================================
+   * LOAD ONE FULL SITE PAGE
+   * ==========================================================
+   */
+
+  private async _getSitePageById(
+    id: number
+  ): Promise<ISitePageItem> {
+
+    const url =
+      `${this._homepageWebUrl}` +
+      `/_api/web/lists/getbytitle('${this._sitePagesLibrary}')/items(${id})` +
+      `?$select=` +
+      [
+        'Id',
+        'Title',
+        'Description',
+        'FileLeafRef',
+        'FileRef',
+        'Created',
+        'Modified',
+        'BannerImageUrl',
+        'CanvasContent1'
+      ].join(',');
+
+
+    console.log(
+      'Loading full KQ story:',
+      id
+    );
+
+
+    const response:
+      SPHttpClientResponse =
+      await this._context
+        .spHttpClient
+        .get(
+          url,
+          SPHttpClient.configurations.v1,
+          {
+            headers: {
+              Accept:
+                'application/json;odata=nometadata'
+            }
+          }
+        );
+
+
+    if (!response.ok) {
+
+      const errorText =
+        await response.text();
+
+      console.error(
+        'Unable to load KQ story:',
+        response.status,
+        response.statusText,
+        errorText
+      );
+
+      throw new Error(
+        `Unable to load this story. ` +
+        `SharePoint returned ${response.status}.`
+      );
+
+    }
+
+
+    const page:
+      ISitePageItem =
+      await response.json();
+
+
+    return page;
+
   }
 
 
@@ -308,17 +628,9 @@ export default class KqCompanyNewsService {
     pages: ISitePageItem[]
   ): IKqCompanyNewsItem[] {
 
-    return pages
+    
 
-      /*
-       * Title contains TAKE 3.
-       *
-       * Examples:
-       *
-       * TAKE 3 - September 2026
-       * Take 3 Issue 21
-       * KQ TAKE 3
-       */
+    return pages
 
       .filter(
         (page) =>
@@ -329,21 +641,8 @@ export default class KqCompanyNewsService {
           )
       )
 
-      /*
-       * Most recently modified first.
-       */
-
       .sort(
         this._sortPagesNewestFirst
-      )
-
-      /*
-       * Home screen shows maximum 6.
-       */
-
-      .slice(
-        0,
-        6
       )
 
       .map(
@@ -353,6 +652,7 @@ export default class KqCompanyNewsService {
             'take3'
           )
       );
+
   }
 
 
@@ -366,11 +666,14 @@ export default class KqCompanyNewsService {
     pages: ISitePageItem[]
   ): IKqCompanyNewsItem[] {
 
-    return pages
+    /*
+     * Same principle as Take 3:
+     *
+     * return everything here;
+     * limit to three only inside the homepage component.
+     */
 
-      /*
-       * Title contains THE PRIDE.
-       */
+    return pages
 
       .filter(
         (page) =>
@@ -385,15 +688,6 @@ export default class KqCompanyNewsService {
         this._sortPagesNewestFirst
       )
 
-      /*
-       * Home screen shows maximum 4.
-       */
-
-      .slice(
-        0,
-        4
-      )
-
       .map(
         (page) =>
           this._mapSitePage(
@@ -401,18 +695,18 @@ export default class KqCompanyNewsService {
             'pride'
           )
       );
+
   }
 
 
   /*
    * ==========================================================
-   * MAP SHAREPOINT PAGE -> UI MODEL
+   * MAP SHAREPOINT PAGE -> KQ NEWS ITEM
    * ==========================================================
    */
 
   private _mapSitePage(
     page: ISitePageItem,
-
     type:
       'take3' |
       'pride'
@@ -423,6 +717,7 @@ export default class KqCompanyNewsService {
 
     const description =
       page.Description || '';
+
 
     return {
 
@@ -455,14 +750,6 @@ export default class KqCompanyNewsService {
           page.BannerImageUrl
         ),
 
-      /*
-       * FileRef is normally something such as:
-       *
-       * /homepage/SitePages/TAKE-3.aspx
-       *
-       * We turn that into an absolute URL.
-       */
-
       itemUrl:
         this._makeAbsoluteUrl(
           page.FileRef || ''
@@ -479,8 +766,21 @@ export default class KqCompanyNewsService {
           ? this._extractIssueNumber(
               title
             )
-          : undefined
+          : undefined,
+
+      /*
+       * If this object came from getStoryById(),
+       * CanvasContent1 will exist.
+       *
+       * For homepage/library objects it will remain
+       * undefined.
+       */
+      contentHtml:
+        page.CanvasContent1 ||
+        undefined
+
     };
+
   }
 
 
@@ -495,98 +795,115 @@ export default class KqCompanyNewsService {
   ): string {
 
     if (!value) {
+
       return '';
+
     }
 
 
     /*
-     * Some SharePoint REST responses return
-     * hyperlink/image fields as plain strings.
+     * Some SharePoint REST responses return image/hyperlink
+     * fields as JSON strings.
      */
 
     if (
       typeof value === 'string'
     ) {
 
-      /*
-       * Sometimes SharePoint sends JSON encoded
-       * image information.
-       */
-
       try {
 
-        const parsed =
+        const parsed:
+          unknown =
           JSON.parse(
             value
           );
+
 
         if (
           parsed &&
           typeof parsed === 'object'
         ) {
 
+          const imageData =
+            parsed as {
+              serverUrl?: unknown;
+              serverRelativeUrl?: unknown;
+              Url?: unknown;
+              url?: unknown;
+            };
+
+
           if (
-            typeof parsed.serverUrl ===
+            typeof imageData.serverUrl ===
               'string' &&
-            typeof parsed.serverRelativeUrl ===
+            typeof imageData.serverRelativeUrl ===
               'string'
           ) {
 
             return (
-              parsed.serverUrl +
-              parsed.serverRelativeUrl
+              imageData.serverUrl +
+              imageData.serverRelativeUrl
             );
+
           }
 
 
           if (
-            typeof parsed.serverRelativeUrl ===
+            typeof imageData.serverRelativeUrl ===
               'string'
           ) {
 
             return (
               window.location.origin +
-              parsed.serverRelativeUrl
+              imageData.serverRelativeUrl
             );
+
           }
 
 
           if (
-            typeof parsed.Url ===
+            typeof imageData.Url ===
               'string'
           ) {
 
-            return parsed.Url;
+            return imageData.Url;
+
           }
 
 
           if (
-            typeof parsed.url ===
+            typeof imageData.url ===
               'string'
           ) {
 
-            return parsed.url;
+            return imageData.url;
+
           }
+
         }
 
       } catch {
 
         /*
-         * It wasn't JSON.
-         * Treat it as a normal URL.
+         * Not JSON.
+         *
+         * Treat it as a regular URL.
          */
 
         return this._makeAbsoluteUrl(
           value
         );
+
       }
 
+
       return '';
+
     }
 
 
     /*
-     * Hyperlink object.
+     * SharePoint hyperlink object.
      */
 
     if (
@@ -597,10 +914,12 @@ export default class KqCompanyNewsService {
       return this._makeAbsoluteUrl(
         value.Url
       );
+
     }
 
 
     return '';
+
   }
 
 
@@ -619,6 +938,7 @@ export default class KqCompanyNewsService {
     )
       .trim()
       .toLowerCase();
+
   }
 
 
@@ -634,6 +954,7 @@ export default class KqCompanyNewsService {
         0
       ).getTime();
 
+
     const secondDate =
       new Date(
         second.Modified ||
@@ -641,10 +962,12 @@ export default class KqCompanyNewsService {
         0
       ).getTime();
 
+
     return (
       secondDate -
       firstDate
     );
+
   };
 
 
@@ -653,7 +976,9 @@ export default class KqCompanyNewsService {
   ): string {
 
     if (!value) {
+
       return '';
+
     }
 
 
@@ -667,6 +992,7 @@ export default class KqCompanyNewsService {
     ) {
 
       return value;
+
     }
 
 
@@ -678,6 +1004,7 @@ export default class KqCompanyNewsService {
         window.location.origin +
         value
       );
+
     }
 
 
@@ -688,6 +1015,7 @@ export default class KqCompanyNewsService {
         ''
       )
     );
+
   }
 
 
@@ -696,7 +1024,9 @@ export default class KqCompanyNewsService {
   ): Date {
 
     if (!value) {
+
       return new Date();
+
     }
 
 
@@ -713,10 +1043,12 @@ export default class KqCompanyNewsService {
     ) {
 
       return new Date();
+
     }
 
 
     return date;
+
   }
 
 
@@ -725,7 +1057,9 @@ export default class KqCompanyNewsService {
   ): string {
 
     if (!value) {
+
       return '';
+
     }
 
 
@@ -738,5 +1072,7 @@ export default class KqCompanyNewsService {
     return match
       ? match[1]
       : '';
+
   }
+
 }

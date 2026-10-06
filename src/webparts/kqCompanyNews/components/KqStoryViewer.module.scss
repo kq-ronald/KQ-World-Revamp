@@ -1,0 +1,718 @@
+.storyViewer {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+
+  background: #ffffff;
+  color: #171717;
+
+  font-family:
+    "Montserrat",
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  box-sizing: border-box;
+}
+
+.storyViewer *,
+.storyViewer *::before,
+.storyViewer *::after {
+  box-sizing: border-box;
+}
+
+
+/* ==========================================================
+   MAIN ARTICLE CONTAINER
+   ========================================================== */
+
+.storyContainer {
+  width: 100%;
+  max-width: 1180px;
+
+  margin: 0 auto;
+
+  padding:
+    32px
+    40px
+    72px;
+
+  box-sizing: border-box;
+}
+
+
+/* ==========================================================
+   BACK
+   ========================================================== */
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  margin: 0 0 32px;
+  padding: 10px 16px;
+
+  border: 1px solid #dedede;
+  border-radius: 999px;
+
+  background: #ffffff;
+  color: #171717;
+
+  font-family:
+    "Montserrat",
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    background 160ms ease;
+}
+
+.backButton:hover {
+  border-color: #d71920;
+  color: #d71920;
+}
+
+.backButton:focus-visible {
+  outline: 2px solid #d71920;
+  outline-offset: 3px;
+}
+
+
+/* ==========================================================
+   HEADER
+   ========================================================== */
+
+.storyHeader {
+  width: 100%;
+  max-width: 900px;
+
+  margin: 0 auto 34px;
+}
+
+.storyCategory {
+  margin-bottom: 14px;
+
+  color: #d71920;
+
+  font-size: 13px;
+  line-height: 1.3;
+
+  font-weight: 700;
+  letter-spacing: 0.08em;
+
+  text-transform: uppercase;
+}
+
+.storyTitle {
+  margin:
+    0
+    0
+    18px;
+
+  color: #171717;
+
+  font-family:
+    "Lucida Sans",
+    "Lucida Grande",
+    sans-serif;
+
+  font-size:
+    clamp(
+      30px,
+      4vw,
+      48px
+    );
+
+  line-height: 1.12;
+
+  font-weight: 600;
+}
+
+.storyIntro {
+  max-width: 820px;
+
+  margin:
+    0
+    0
+    20px;
+
+  color: #555555;
+
+  font-size: 18px;
+  line-height: 1.65;
+}
+
+.storyMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 8px 18px;
+
+  color: #737373;
+
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.storyMeta span {
+  position: relative;
+}
+
+.storyMeta span:not(:last-child)::after {
+  content: "•";
+
+  margin-left: 18px;
+
+  color: #b5b5b5;
+}
+
+
+/* ==========================================================
+   HERO
+   ========================================================== */
+
+.hero {
+  width: 100%;
+  max-width: 1040px;
+
+  margin:
+    0
+    auto
+    42px;
+
+  overflow: hidden;
+
+  border-radius: 18px;
+
+  background: #eeeeee;
+}
+
+.hero img {
+  display: block;
+
+  width: 100%;
+  height: auto;
+
+  max-height: 560px;
+
+  object-fit: cover;
+}
+
+
+/* ==========================================================
+   STORY BODY
+   ========================================================== */
+
+.storyBody {
+  width: 100%;
+  max-width: 900px;
+
+  margin: 0 auto;
+}
+
+
+/* ==========================================================
+   SHAREPOINT ARTICLE
+   ========================================================== */
+
+.sharePointContent {
+  width: 100%;
+
+  color: #262626;
+
+  font-size: 16px;
+  line-height: 1.8;
+
+  overflow-wrap: anywhere;
+}
+
+.sharePointContent > *:first-child {
+  margin-top: 0;
+}
+
+.sharePointContent > *:last-child {
+  margin-bottom: 0;
+}
+
+.sharePointContent p {
+  margin:
+    0
+    0
+    22px;
+}
+
+.sharePointContent h1,
+.sharePointContent h2,
+.sharePointContent h3,
+.sharePointContent h4,
+.sharePointContent h5,
+.sharePointContent h6 {
+  margin:
+    38px
+    0
+    16px;
+
+  color: #171717;
+
+  font-family:
+    "Lucida Sans",
+    "Lucida Grande",
+    sans-serif;
+
+  line-height: 1.3;
+}
+
+.sharePointContent h1 {
+  font-size: 32px;
+}
+
+.sharePointContent h2 {
+  font-size: 26px;
+}
+
+.sharePointContent h3 {
+  font-size: 21px;
+}
+
+.sharePointContent h4,
+.sharePointContent h5,
+.sharePointContent h6 {
+  font-size: 18px;
+}
+
+.sharePointContent ul,
+.sharePointContent ol {
+  margin:
+    0
+    0
+    24px;
+
+  padding-left: 28px;
+}
+
+.sharePointContent li {
+  margin-bottom: 8px;
+}
+
+.sharePointContent a {
+  color: #d71920;
+
+  font-weight: 600;
+
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sharePointContent img {
+  display: block;
+
+  width: auto;
+  max-width: 100%;
+  height: auto;
+
+  margin:
+    30px
+    auto;
+
+  border-radius: 12px;
+}
+
+.sharePointContent figure {
+  width: 100%;
+
+  margin:
+    30px
+    0;
+}
+
+.sharePointContent figure img {
+  margin: 0 auto;
+}
+
+.sharePointContent figcaption {
+  margin-top: 10px;
+
+  color: #777777;
+
+  font-size: 13px;
+  line-height: 1.5;
+
+  text-align: center;
+}
+
+.sharePointContent blockquote {
+  margin:
+    30px
+    0;
+
+  padding:
+    4px
+    0
+    4px
+    22px;
+
+  border-left:
+    4px solid
+    #d71920;
+
+  color: #4a4a4a;
+
+  font-size: 19px;
+  line-height: 1.7;
+}
+
+.sharePointContent table {
+  width: 100%;
+
+  margin:
+    30px
+    0;
+
+  border-collapse: collapse;
+}
+
+.sharePointContent th,
+.sharePointContent td {
+  padding: 12px;
+
+  border:
+    1px solid
+    #dddddd;
+
+  text-align: left;
+  vertical-align: top;
+}
+
+.sharePointContent th {
+  background: #f5f5f5;
+
+  font-weight: 700;
+}
+
+
+/* SharePoint sometimes nests content deeply.
+   Do not allow those wrappers to introduce
+   their own artificial page widths. */
+
+.sharePointContent div {
+  max-width: 100%;
+}
+
+.sharePointContent section {
+  max-width: 100%;
+}
+
+
+/* ==========================================================
+   BLOG FALLBACK
+   ========================================================== */
+
+.blogNotice,
+.emptyContent {
+  width: 100%;
+
+  padding: 32px;
+
+  border:
+    1px solid
+    #e5e5e5;
+
+  border-radius: 16px;
+
+  background: #f8f8f8;
+}
+
+.blogNotice h2,
+.emptyContent h2 {
+  margin:
+    0
+    0
+    12px;
+
+  color: #171717;
+
+  font-family:
+    "Lucida Sans",
+    "Lucida Grande",
+    sans-serif;
+
+  font-size: 22px;
+}
+
+.blogNotice p,
+.emptyContent p {
+  margin:
+    0
+    0
+    22px;
+
+  color: #555555;
+
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.sourceButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding:
+    11px
+    18px;
+
+  border-radius: 999px;
+
+  background: #d71920;
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  text-decoration: none;
+}
+
+.sourceButton:hover {
+  background: #b81319;
+  color: #ffffff;
+}
+
+
+/* ==========================================================
+   LOADING / ERROR
+   ========================================================== */
+
+.loadingState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  min-height: 320px;
+
+  color: #666666;
+
+  font-size: 15px;
+}
+
+.loadingSpinner {
+  width: 24px;
+  height: 24px;
+
+  border:
+    3px solid
+    #dddddd;
+
+  border-top-color:
+    #d71920;
+
+  border-radius: 50%;
+
+  animation:
+    kqStorySpin
+    700ms
+    linear
+    infinite;
+}
+
+@keyframes kqStorySpin {
+  to {
+    transform:
+      rotate(360deg);
+  }
+}
+
+.errorState {
+  width: 100%;
+
+  padding: 28px;
+
+  border:
+    1px solid
+    #f0c4c6;
+
+  border-radius: 14px;
+
+  background: #fff4f4;
+  color: #9d161b;
+
+  font-size: 15px;
+}
+
+
+/* ==========================================================
+   DARK MODE
+   ========================================================== */
+
+.darkMode {
+  background: #171b21;
+  color: #ffffff;
+}
+
+.darkMode .storyTitle,
+.darkMode
+.sharePointContent h1,
+.darkMode
+.sharePointContent h2,
+.darkMode
+.sharePointContent h3,
+.darkMode
+.sharePointContent h4,
+.darkMode
+.sharePointContent h5,
+.darkMode
+.sharePointContent h6,
+.darkMode
+.blogNotice h2,
+.darkMode
+.emptyContent h2 {
+  color: #ffffff;
+}
+
+.darkMode .storyIntro,
+.darkMode .storyMeta,
+.darkMode .sharePointContent,
+.darkMode .blogNotice p,
+.darkMode .emptyContent p {
+  color: #d8d8d8;
+}
+
+.darkMode .backButton {
+  border-color: #4a4f57;
+
+  background: #20252c;
+  color: #ffffff;
+}
+
+.darkMode .backButton:hover {
+  border-color: #ff3a40;
+  color: #ff3a40;
+}
+
+.darkMode .blogNotice,
+.darkMode .emptyContent {
+  border-color: #353b43;
+
+  background: #20252c;
+}
+
+.darkMode
+.sharePointContent blockquote {
+  color: #dddddd;
+}
+
+.darkMode
+.sharePointContent th,
+.darkMode
+.sharePointContent td {
+  border-color: #414750;
+}
+
+.darkMode
+.sharePointContent th {
+  background: #242a31;
+}
+
+
+/* ==========================================================
+   TABLET
+   ========================================================== */
+
+@media (
+  max-width: 900px
+) {
+
+  .storyContainer {
+    padding:
+      26px
+      24px
+      60px;
+  }
+
+  .storyHeader,
+  .storyBody {
+    max-width: 100%;
+  }
+
+  .hero {
+    border-radius: 12px;
+  }
+}
+
+
+/* ==========================================================
+   MOBILE
+   ========================================================== */
+
+@media (
+  max-width: 600px
+) {
+
+  .storyContainer {
+    padding:
+      20px
+      16px
+      48px;
+  }
+
+  .backButton {
+    margin-bottom: 24px;
+  }
+
+  .storyTitle {
+    font-size: 30px;
+  }
+
+  .storyIntro {
+    font-size: 16px;
+  }
+
+  .storyMeta {
+    gap: 6px 10px;
+  }
+
+  .storyMeta
+  span:not(:last-child)::after {
+    margin-left: 10px;
+  }
+
+  .hero {
+    margin-bottom: 30px;
+
+    border-radius: 10px;
+  }
+
+  .sharePointContent {
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  .sharePointContent h1 {
+    font-size: 28px;
+  }
+
+  .sharePointContent h2 {
+    font-size: 23px;
+  }
+
+  .sharePointContent h3 {
+    font-size: 19px;
+  }
+
+  .blogNotice,
+  .emptyContent {
+    padding: 22px;
+  }
+}
