@@ -1672,3 +1672,29 @@
   .searchCategory { display: none; } /* keep rows readable on phones */
   .searchDropdown { max-height: 60vh; }
 }
+
+/* ============================================================
+   HIDE SHAREPOINT LEFT APP BAR COMPLETELY
+   ============================================================ */
+
+:global(#sp-appBar),
+:global(.sp-appBar),
+:global([data-automation-id="sp-appBar"]) {
+  display: none !important;
+}
+
+
+/* Remove any space SharePoint leaves for the app bar */
+:global(body),
+:global(#spPageCanvasContent),
+:global([data-automation-id="pageContent"]) {
+  margin-left: 0 !important;
+}
+
+
+/* Keep KQ World using the full available width */
+:global(.SPCanvas),
+:global(.CanvasZoneContainer),
+:global([data-automation-id="CanvasLayout"]) {
+  left: 0 !important;
+}
