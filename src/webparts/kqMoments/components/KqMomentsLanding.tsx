@@ -290,10 +290,7 @@ export default class KqMomentsLanding
                   styles.description
                 }
               >
-                Discover moments from
-                across Kenya Airways,
-                celebrating our people,
-                culture and experiences.
+                Browse and download your favourite photos to keep and share! .
               </p>
             </div>
 

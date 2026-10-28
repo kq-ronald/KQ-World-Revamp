@@ -38,14 +38,15 @@ interface ISitePageItem {
 
   Modified?: string;
 
+
   CanvasContent1?: string;
 
   BannerImageUrl?:
-    | string
-    | {
-        Url?: string;
-        Description?: string;
-      };
+  | string
+  | {
+    Url?: string;
+    Description?: string;
+  };
 }
 
 
@@ -60,6 +61,13 @@ interface ISitePageCollectionResponse {
 export default class KqCompanyNewsService {
 
   private readonly _context: WebPartContext;
+
+  private static _pagesCache?: {
+    expiresAt: number;
+    pages: ISitePageItem[];
+  };
+
+  private static _pagesRequest?: Promise<ISitePageItem[]>;
 
 
   /*
@@ -100,50 +108,18 @@ export default class KqCompanyNewsService {
       pride: IKqCompanyNewsItem[];
     }> {
 
-    /*
-     * Site Pages is requested once.
-     *
-     * Take 3 and The Pride are then extracted from the
-     * same response.
-     *
-     * IMPORTANT:
-     *
-     * We deliberately do NOT request CanvasContent1 here.
-     * Homepage cards and the News Library do not need the
-     * entire story body.
-     */
-
-    const sitePages =
-      await this._getSitePages();
-
-    const take3 =
-      this._getTake3FromPages(
-        sitePages
-      );
-
-    const pride =
-      this._getPrideFromPages(
-        sitePages
-      );
-
-    const blogs =
-      await this.getBlogItems();
-
-    console.log(
-      'KQ Company News loaded:',
-      {
-        take3,
-        blogs,
-        pride
-      }
-    );
+    // Load independent sources concurrently. The SharePoint request
+    // still determines when Take 3 and Pride are available.
+    const [sitePages, blogs] = await Promise.all([
+      this._getSitePages(),
+      this.getBlogItems()
+    ]);
 
     return {
-      take3,
+      take3: this._getTake3FromPages(sitePages),
       blogs,
-      pride
+      pride: this._getPrideFromPages(sitePages)
     };
-
   }
 
 
@@ -352,9 +328,9 @@ export default class KqCompanyNewsService {
    */
 
   public async getStoryById(
-  id: number,
-  type: KqCompanyNewsType
-): Promise<IKqCompanyNewsItem | undefined>{
+    id: number,
+    type: KqCompanyNewsType
+  ): Promise<IKqCompanyNewsItem | undefined> {
 
 
     if (type === 'blog') {
@@ -446,14 +422,96 @@ export default class KqCompanyNewsService {
   }
 
 
+  /** Load the second embedded image for requested Take 3 pages.
+   * Keeps full CanvasContent1 out of the homepage metadata request.
+   */
+  public async getTake3CoverImages(
+    items: IKqCompanyNewsItem[]
+  ): Promise<{ [id: number]: string }> {
+    const covers: { [id: number]: string } = {};
+    // Limit concurrent requests to avoid flooding SharePoint.
+    for (let index = 0; index < items.length; index += 3) {
+      const batch = items.slice(index, index + 3);
+      await Promise.all(batch.map(async item => {
+        try {
+          const page = await this._getSitePageById(item.id);
+          const image = this._secondEmbeddedImage(page.CanvasContent1 || '', item.itemUrl);
+          if (image) covers[item.id] = image;
+        } catch (error) {
+          console.warn('Could not load Take 3 cover', item.id, error);
+        }
+      }));
+    }
+    return covers;
+  }
+
+  private _secondEmbeddedImage(content: string, pageUrl: string): string {
+    if (!content || typeof DOMParser === 'undefined') return '';
+    const documentNode = new DOMParser().parseFromString(content, 'text/html');
+    const images = Array.from(documentNode.querySelectorAll('img'));
+    const validUrls: string[] = [];
+
+    for (const image of images) {
+      const raw = image.getAttribute('src') || image.getAttribute('data-src') || '';
+      if (!raw) continue;
+      try {
+        const resolved = new URL(raw, pageUrl || this._homepageWebUrl);
+        if (resolved.protocol === 'https:' || resolved.protocol === 'http:') {
+          validUrls.push(resolved.href);
+        }
+      } catch { /* Ignore malformed image URLs. */ }
+    }
+
+    // Use the second embedded image; fall back to the first if only one exists.
+    // If there are no embedded images, the card keeps its existing banner image.
+    return validUrls[1] || validUrls[0] || '';
+  }
+
   /*
    * ==========================================================
    * LOAD SITE PAGE METADATA
    * ==========================================================
    */
 
-  private async _getSitePages():
-    Promise<ISitePageItem[]> {
+  private _getSitePages(): Promise<ISitePageItem[]> {
+    const cached = KqCompanyNewsService._pagesCache;
+
+    if (cached && cached.expiresAt > Date.now()) {
+      return Promise.resolve(cached.pages);
+    }
+
+    const existingRequest = KqCompanyNewsService._pagesRequest;
+    if (existingRequest) {
+      return existingRequest;
+    }
+
+    const request = this._fetchSitePages().then((pages: ISitePageItem[]) => {
+      KqCompanyNewsService._pagesCache = {
+        pages,
+        expiresAt: Date.now() + 2 * 60 * 1000
+      };
+      return pages;
+    });
+
+    KqCompanyNewsService._pagesRequest = request;
+
+    void request.then(
+      () => {
+        if (KqCompanyNewsService._pagesRequest === request) {
+          KqCompanyNewsService._pagesRequest = undefined;
+        }
+      },
+      () => {
+        if (KqCompanyNewsService._pagesRequest === request) {
+          KqCompanyNewsService._pagesRequest = undefined;
+        }
+      }
+    );
+
+    return request;
+  }
+
+  private async _fetchSitePages(): Promise<ISitePageItem[]> {
 
     /*
      * This request intentionally remains lightweight.
@@ -628,7 +686,7 @@ export default class KqCompanyNewsService {
     pages: ISitePageItem[]
   ): IKqCompanyNewsItem[] {
 
-    
+
 
     return pages
 
@@ -712,8 +770,17 @@ export default class KqCompanyNewsService {
       'pride'
   ): IKqCompanyNewsItem {
 
+    const fileName = page.FileLeafRef || '';
+
+    const displayName = fileName
+      .replace(/\.aspx$/i, '')
+      .replace(/-/g, ' ')
+      .replace(/\(/g, ' (')
+      .replace(/\s+/g, ' ')
+      .trim();
+
     const title =
-      page.Title || '';
+      displayName || page.Title || '';
 
     const description =
       page.Description || '';
@@ -764,8 +831,8 @@ export default class KqCompanyNewsService {
       issueNumber:
         type === 'pride'
           ? this._extractIssueNumber(
-              title
-            )
+            title
+          )
           : undefined,
 
       /*
@@ -835,9 +902,9 @@ export default class KqCompanyNewsService {
 
           if (
             typeof imageData.serverUrl ===
-              'string' &&
+            'string' &&
             typeof imageData.serverRelativeUrl ===
-              'string'
+            'string'
           ) {
 
             return (
@@ -850,7 +917,7 @@ export default class KqCompanyNewsService {
 
           if (
             typeof imageData.serverRelativeUrl ===
-              'string'
+            'string'
           ) {
 
             return (
@@ -863,7 +930,7 @@ export default class KqCompanyNewsService {
 
           if (
             typeof imageData.Url ===
-              'string'
+            'string'
           ) {
 
             return imageData.Url;
@@ -873,7 +940,7 @@ export default class KqCompanyNewsService {
 
           if (
             typeof imageData.url ===
-              'string'
+            'string'
           ) {
 
             return imageData.url;
@@ -908,7 +975,7 @@ export default class KqCompanyNewsService {
 
     if (
       typeof value.Url ===
-        'string'
+      'string'
     ) {
 
       return this._makeAbsoluteUrl(

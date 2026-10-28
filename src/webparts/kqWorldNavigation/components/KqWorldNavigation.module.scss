@@ -2,6 +2,7 @@
 :global(body:has(.kqWorldNavigationHost) #SuiteNavWrapper) {
   display: none !important;
 }
+
 .navigationRoot {
   --kq-nav-gutter: 4.5%;
   position: relative;
@@ -11,12 +12,14 @@
   padding: 0;
   box-sizing: border-box;
 }
+
 :global(.kqWorldNavigationStickyHost) {
   position: sticky !important;
   top: 0 !important;
   z-index: 10000 !important;
   overflow: visible !important;
 }
+
 :global(.kqWorldNavigationStickyZone) {
   overflow: visible !important;
   margin-top: 0 !important;
@@ -24,6 +27,7 @@
   padding-top: 0 !important;
   padding-bottom: 0 !important;
 }
+
 .navigationRoot,
 .navigationRoot button,
 .navigationRoot input,
@@ -34,10 +38,8 @@
 .navigationRoot span,
 .navigationRoot label {
   font-family: "Montserrat", Arial, Helvetica, sans-serif;
-  hover: {
-    text-decoration: none;
-  }
 }
+
 .navigationRoot h1,
 .navigationRoot h2,
 .navigationRoot h3,
@@ -47,6 +49,7 @@
 .megaMenuTagline {
   font-family: "Lucida Sans", "Lucida Grande", sans-serif;
 }
+
 /* =========================================================
    TOP RED HEADER
 ========================================================= */
@@ -60,6 +63,7 @@
   color: #ffffff;
   box-sizing: border-box;
 }
+
 .ankaraBackground {
   position: absolute;
   inset: 0;
@@ -71,6 +75,7 @@
   user-select: none;
   z-index: 0;
 }
+
 .topBarInner {
   position: relative;
   z-index: 2;
@@ -82,28 +87,33 @@
   justify-content: space-between;
   box-sizing: border-box;
 }
+
 .brandArea {
   display: flex;
   align-items: center;
   gap: 16px;
 }
+
 .logo {
   width: 135px;
   height: auto;
   display: block;
 }
+
 .internalLabel {
   font-family: "Montserrat", Arial, Helvetica, sans-serif;
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
 }
+
 .dateText {
   font-family: "Montserrat", Arial, Helvetica, sans-serif;
   font-size: 11px;
   font-weight: 400;
   white-space: nowrap;
 }
+
 .utilityLinks {
   display: flex;
   align-items: center;
@@ -112,17 +122,20 @@
   font-size: 11px;
   font-weight: 400;
 }
+
 .utilityLinks a {
   color: #ffffff;
   text-decoration: none;
   white-space: nowrap;
 }
+
 .utilityLinks a:hover,
 .utilityLinks a:focus-visible,
 .utilityAction:hover,
 .utilityAction:focus-visible {
   color: #ffffff;
 }
+
 .utilityAction {
   border: 0;
   padding: 0;
@@ -133,28 +146,33 @@
   white-space: nowrap;
   cursor: pointer;
 }
+
 .utilityAction:hover,
 .utilityAction:focus-visible {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
 .utilityAction:focus-visible {
   outline: 2px solid rgba(255, 255, 255, 0.9);
   outline-offset: 4px;
   border-radius: 3px;
 }
+
 .systemStatus {
   display: flex;
   align-items: center;
   gap: 8px;
   white-space: nowrap;
 }
+
 .statusDot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
   background: #16b364;
 }
+
 /* =========================================================
    DESKTOP NAVIGATION
 ========================================================= */
@@ -167,6 +185,7 @@
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
   box-sizing: border-box;
 }
+
 .desktopNavInner {
   width: 100%;
   height: 70px;
@@ -177,12 +196,14 @@
   gap: 24px;
   box-sizing: border-box;
 }
+
 .navLinks {
   display: flex;
   align-items: center;
   flex: 1;
   min-width: 0;
 }
+
 .navButton {
   height: 70px;
   border: 0;
@@ -205,19 +226,23 @@
   box-sizing: border-box;
   transition: color 0.2s ease;
 }
+
 .navButton>span:first-child {
   white-space: nowrap;
 }
+
 .navButton:hover,
 .navButton:focus-visible,
 .activeNavButton {
   color: #d71920;
 }
+
 .navButton:hover .chevron,
 .navButton:focus-visible .chevron,
 .activeNavButton .chevron {
   border-color: #d71920;
 }
+
 /* =========================================================
    NAVIGATION CHEVRON
 ========================================================= */
@@ -231,6 +256,7 @@
   position: relative;
   top: -2px;
 }
+
 .chevronUp {
   transform: rotate(225deg);
 }
@@ -265,6 +291,7 @@
   align-items: center;
   gap: 10px;
 }
+
 .searchBox,
 .mobileSearch {
   background: #eeeeee;
@@ -273,12 +300,14 @@
   align-items: center;
   box-sizing: border-box;
 }
+
 /* =========================================================
    SEARCH DROPDOWN
 ========================================================= */
 .searchBox {
   position: relative;
 }
+
 .searchDropdown {
   position: absolute;
   top: calc(100% + 7px);
@@ -292,18 +321,22 @@
   box-sizing: border-box;
   z-index: 3000;
 }
+
 .searchDropdownTitle {
   margin: 2px 4px 12px;
+  font-family: "Lucida Sans", "Lucida Sans Unicode", Arial, sans-serif;
   font-size: 13px;
-  line-height: 1.3;
-  font-weight: 400;
+  line-height: 1.4;
+  font-weight: 600;
   color: #171717;
 }
+
 .searchSuggestionList {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
+
 .searchSuggestion {
   width: 100%;
   height: 40px;
@@ -316,14 +349,19 @@
   align-items: center;
   gap: 10px;
   box-sizing: border-box;
-  font-family: inherit;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #171717;
   cursor: pointer;
   transition: background 0.15s ease;
 }
+
 .searchSuggestion:hover,
 .searchSuggestionActive {
   background: #f3f3f3;
 }
+
 .searchSuggestionIcon {
   width: 16px;
   height: 16px;
@@ -335,6 +373,7 @@
   line-height: 1;
   color: #171717;
 }
+
 .searchSuggestionText {
   flex: 1;
   min-width: 0;
@@ -342,22 +381,25 @@
   font-size: 12px;
   line-height: 1.2;
   font-weight: 400;
-  color: #777777;
+  color: #444444;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .searchSuggestionArrow {
   flex-shrink: 0;
   font-size: 18px;
   line-height: 1;
   color: #171717;
 }
+
 .noSearchResults {
   padding: 12px 8px;
   font-size: 12px;
   color: #777777;
 }
+
 .searchBox {
   height: 38px;
   /*
@@ -366,6 +408,7 @@
   */
   padding: 0 13px;
 }
+
 .searchBox input,
 .mobileSearch input {
   width: 100%;
@@ -375,13 +418,16 @@
   background: transparent;
   font-family: "Montserrat", Arial, Helvetica, sans-serif;
   font-size: 12px;
-  font-weight: 200;
+  font-weight: 400;
+  line-height: 1.45;
 }
+
 .searchIcon {
   margin-right: 8px;
   font-size: 18px;
   line-height: 1;
 }
+
 .iconButton {
   width: 38px;
   height: 38px;
@@ -395,17 +441,20 @@
   flex-shrink: 0;
   cursor: pointer;
 }
+
 .actionIcon {
   width: 20px;
   height: 20px;
   display: block;
   color: #ffffff;
 }
+
 .iconButton img {
   width: 19px;
   height: 19px;
   display: block;
 }
+
 /* =========================================================
    DESKTOP DROPDOWN
 ========================================================= */
@@ -421,6 +470,7 @@
   z-index: 100;
   box-sizing: border-box;
 }
+
 .dropdown::before {
   content: "";
   position: absolute;
@@ -429,6 +479,7 @@
   top: -10px;
   height: 10px;
 }
+
 .dropdownInner {
   width: 100%;
   height: 100%;
@@ -440,6 +491,7 @@
   align-items: center;
   box-sizing: border-box;
 }
+
 .dropdownItem {
   color: #222222;
   text-decoration: none;
@@ -449,10 +501,12 @@
     color 0.2s ease,
     background 0.2s ease;
 }
+
 .dropdownItem:hover {
   color: #d71920;
   background: #f5f5f5;
 }
+
 /* =========================================================
    MEGA MENU TYPOGRAPHY
 ========================================================= */
@@ -466,6 +520,7 @@
   color: #171717;
   margin: 0 0 14px;
 }
+
 /* =========================================================
    CONTACT / IT SUPPORT MODAL
 ========================================================= */
@@ -480,6 +535,7 @@
   background: rgba(0, 0, 0, 0.58);
   box-sizing: border-box;
 }
+
 .contactModal {
   width: min(560px, 100%);
   max-height: calc(100vh - 48px);
@@ -489,6 +545,7 @@
   border-radius: 8px;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.3);
 }
+
 .contactModalHeader {
   display: grid;
   grid-template-columns: 26px minmax(0, 1fr) auto;
@@ -499,6 +556,7 @@
   color: #ffffff;
   border-radius: 8px 8px 0 0;
 }
+
 .contactHeaderIcon {
   width: 22px;
   height: 18px;
@@ -508,6 +566,7 @@
   position: relative;
   box-sizing: border-box;
 }
+
 .contactHeaderIcon::after {
   content: "";
   position: absolute;
@@ -520,9 +579,11 @@
   transform: skewY(-35deg);
   background: #d71920;
 }
+
 .contactHeaderCopy {
   min-width: 0;
 }
+
 .contactHeaderCopy h2 {
   margin: 0 0 5px;
   color: inherit;
@@ -532,12 +593,14 @@
   font-weight: 700;
   font-style: italic;
 }
+
 .contactHeaderCopy p {
   margin: 0;
   color: inherit;
   font-size: 11px;
   line-height: 1.5;
 }
+
 .contactCloseButton {
   width: 30px;
   height: 30px;
@@ -554,10 +617,12 @@
   line-height: 1;
   cursor: pointer;
 }
+
 .contactCloseButton:hover,
 .contactCloseButton:focus-visible {
   background: rgba(255, 255, 255, 0.14);
 }
+
 .contactForm {
   display: flex;
   flex-direction: column;
@@ -565,6 +630,7 @@
   padding: 20px 22px 16px;
   background: #ffffff;
 }
+
 .contactField {
   display: flex;
   flex-direction: column;
@@ -575,10 +641,12 @@
   line-height: 1.3;
   font-weight: 600;
 }
+
 .contactField strong {
   color: #d71920;
   font-weight: 700;
 }
+
 .contactField input,
 .contactField select,
 .contactField textarea {
@@ -593,21 +661,25 @@
   outline: none;
   box-sizing: border-box;
 }
+
 .contactField input,
 .contactField select {
   min-height: 36px;
 }
+
 .contactField textarea {
   min-height: 112px;
   resize: vertical;
   line-height: 1.45;
 }
+
 .contactField input:focus,
 .contactField select:focus,
 .contactField textarea:focus {
   border-color: #d71920;
   box-shadow: 0 0 0 2px rgba(215, 25, 32, 0.08);
 }
+
 .attachmentDropzone {
   position: relative;
   min-height: 62px;
@@ -624,6 +696,7 @@
   cursor: pointer;
   box-sizing: border-box;
 }
+
 .attachmentDropzone input[type="file"] {
   position: absolute;
   inset: 0;
@@ -632,14 +705,17 @@
   opacity: 0;
   cursor: pointer;
 }
+
 .attachmentIcon {
   font-size: 18px;
   line-height: 1;
 }
+
 .contactFormActions {
   display: flex;
   justify-content: flex-end;
 }
+
 .contactSubmitButton {
   min-width: 110px;
   min-height: 36px;
@@ -653,10 +729,12 @@
   font-weight: 600;
   cursor: pointer;
 }
+
 .contactSubmitButton:hover,
 .contactSubmitButton:focus-visible {
   background: #d71920;
 }
+
 .contactModalFooter {
   padding: 12px 22px 14px;
   border-top: 1px solid #edf0f3;
@@ -666,419 +744,223 @@
   line-height: 1.4;
   border-radius: 0 0 8px 8px;
 }
+
 .contactModalFooter a {
   color: #ef233c;
   text-decoration: none;
 }
+
 .contactModalFooter a:hover {
   text-decoration: underline;
 }
-/* =========================================================
-   MOBILE DEFAULT
-========================================================= */
-.mobileHeader,
-.mobileMenu {
-  display: none;
-}
-/* =========================================================
-   TABLET + MOBILE
-========================================================= */
-@media (max-width: 1100px) {
-  /*
-    Hide desktop navigation completely.
-  */
-  .desktopNav {
-    display: none;
-  }
-  .utilityLinks {
-    display: none;
-  }
-  /* -------------------------
-     RED MOBILE HEADER
-  ------------------------- */
-  .topBar {
-    height: 60px;
-    min-height: 60px;
-  }
-  .topBarInner {
-    height: 60px;
-    min-height: 60px;
-    padding: 0 var(--kq-nav-gutter);
-  }
-  .brandArea {
-    gap: 12px;
-  }
-  .logo {
-    width: 130px;
-  }
-  .internalLabel {
-    font-size: 11px;
-  }
-  .dateText {
-    font-size: 10px;
-  }
-  /* -------------------------
-     MOBILE WHITE BAR
-  ------------------------- */
-  .mobileHeader {
-    width: 100%;
-    height: 66px;
-    min-height: 66px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 0 var(--kq-nav-gutter);
-    background: #ffffff;
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.10);
-    box-sizing: border-box;
-  }
-  .mobileMenuButton {
-    width: 38px;
-    flex-shrink: 0;
-    border: 0;
-    background: transparent;
-    padding: 0;
-    font-family: "Montserrat", Arial, Helvetica, sans-serif;
-    font-size: 26px;
-    line-height: 1;
-    cursor: pointer;
-  }
-  .mobileSearch {
-    flex: 1;
-    min-width: 0;
-    height: 40px;
-    padding: 0 14px;
-  }
-  .mobileSearch input {
-    font-size: 12px;
-  }
-  .iconButton {
-    width: 40px;
-    height: 40px;
-  }
-  .iconButton img {
-    width: 19px;
-    height: 19px;
-  }
-  /* -------------------------
-     MOBILE MENU
-  ------------------------- */
-  .mobileMenu {
-    display: block;
-    width: 100%;
-    background: #ffffff;
-    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.10);
-    box-sizing: border-box;
-  }
-  .mobileMenuItem>button {
-    width: 100%;
-    border: 0;
-    background: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 28px;
-    font-family: "Montserrat", Arial, Helvetica, sans-serif;
-    font-weight: 400;
-    font-size: 15px;
-    line-height: 1.1;
-    text-align: left;
-    cursor: pointer;
-    box-sizing: border-box;
-  }
-  .mobileMenuItem>button span:first-child {
-    white-space: nowrap;
-  }
-  .mobileSubmenu {
-    background: #fafafa;
-  }
-  .mobileSubmenu a {
-    display: flex;
-    align-items: center;
-    padding: 13px 38px;
-    color: #222222;
-    text-decoration: none;
-    font-family: "Montserrat", Arial, Helvetica, sans-serif;
-    font-weight: 200;
-    font-size: 14px;
-    line-height: 1.2;
-    box-sizing: border-box;
-  }
-  .mobileSubmenu a:hover {
-    background: #eeeeee;
-    color: #d71920;
-  }
-}
-/* =========================================================
-   PHONE
-========================================================= */
-@media (max-width: 600px) {
-  /*
-    Keep the header compact so it doesn't consume
-    too much of the phone viewport.
-  */
-  .topBar {
-    height: 58px;
-    min-height: 58px;
-  }
-  .topBarInner {
-    height: 58px;
-    min-height: 58px;
-    padding: 0 var(--kq-nav-gutter);
-  }
-  /* -------------------------
-     BRAND
-  ------------------------- */
-  .brandArea {
-    display: grid;
-    grid-template-columns: auto auto;
-    grid-template-areas:
-      "logo internal"
-      "logo date";
-    column-gap: 10px;
-    row-gap: 1px;
-    align-items: center;
-  }
-  .logo {
-    grid-area: logo;
-    width: 120px;
-  }
-  .internalLabel {
-    grid-area: internal;
-    align-self: end;
-    font-size: 10px;
-  }
-  .dateText {
-    grid-area: date;
-    align-self: start;
-    font-size: 9px;
-    white-space: nowrap;
-  }
-  /* -------------------------
-     WHITE MOBILE BAR
-  ------------------------- */
-  .mobileHeader {
-    height: 62px;
-    min-height: 62px;
-    padding: 0 var(--kq-nav-gutter);
-    gap: 8px;
-  }
-  .mobileMenuButton {
-    width: 32px;
-    font-size: 24px;
-  }
-  .mobileSearch {
-    height: 38px;
-    padding: 0 11px;
-  }
-  .mobileSearch input {
-    font-size: 11px;
-  }
-  .searchIcon {
-    margin-right: 6px;
-    font-size: 16px;
-  }
-  .iconButton {
-    width: 38px;
-    height: 38px;
-  }
-  .iconButton img {
-    width: 18px;
-    height: 18px;
-  }
-  /* -------------------------
-     PHONE MENU
-  ------------------------- */
-  .mobileMenuItem>button {
-    padding: 16px 22px;
-    font-size: 14px;
-  }
-  .mobileSubmenu a {
-    padding: 12px 30px;
-    font-size: 13px;
-  }
-  .contactOverlay {
-    padding: 12px;
-  }
-  .contactModal {
-    max-height: calc(100vh - 24px);
-  }
-  .contactModalHeader {
-    grid-template-columns: 22px minmax(0, 1fr) auto;
-    gap: 9px;
-    padding: 16px;
-  }
-  .contactForm {
-    padding: 16px;
-  }
-  .contactModalFooter {
-    padding: 11px 16px 13px;
-  }
-}
+
 /* Dark mode */
 .darkMode {
   background: #171B21;
   color: #ffffff;
+
   /* Top utility/header area */
   .topBar {
     background: #171B21;
     color: #ffffff;
   }
+
   .logo {
     filter: brightness(0) invert(1);
   }
+
   .internalLabel,
   .dateText,
   .systemStatus {
     color: #ffffff;
   }
+
   .utilityLinks {
     color: #ffffff;
+
     a {
       color: #ffffff;
     }
   }
+
   /* Main navigation surface */
   .desktopNav,
   .desktopNavInner {
     background: #262F3D;
     color: #ffffff;
   }
+
   .navLinks,
   .navButton {
     color: #ffffff;
   }
+
   .navButton {
     background: transparent;
   }
+
   .navButton:hover,
   .navButton:focus-visible,
   .activeNavButton {
     color: #d71920;
   }
+
   .chevron {
     border-color: #ffffff;
   }
+
   .navButton:hover .chevron,
   .navButton:focus-visible .chevron,
   .activeNavButton .chevron {
     border-color: #d71920;
   }
-  .mobileMenuItem > button:hover,
-  .mobileMenuItem > button:focus-visible,
+
+  .mobileMenuItem>button:hover,
+  .mobileMenuItem>button:focus-visible,
   .mobileSubmenu a:hover,
   .mobileSubmenu a:focus-visible {
     color: #d71920;
   }
+
   /* Search remains white */
   .searchBox,
   .mobileSearch {
     background: #ffffff;
     color: #171B21;
+
     input {
       color: #171B21;
       background: transparent;
     }
+
     input::placeholder {
       color: #666666;
     }
   }
+
   .searchIcon {
     color: #171B21;
   }
+
   /* Notification and theme buttons remain white */
   .iconButton {
     background: #ffffff;
     color: #171B21;
+
     .actionIcon {
       color: #171B21;
     }
+
     img {
       filter: brightness(0);
     }
   }
+
   /* Search suggestions */
   .searchDropdown {
     background: #262F3D;
   }
+
   .searchDropdownTitle {
     color: #ffffff;
   }
+
   .searchSuggestion {
     background: transparent;
   }
+
   .searchSuggestion:hover,
   .searchSuggestionActive {
     background: #313B4B;
   }
+
   .searchSuggestionText {
     color: #d0d0d0;
   }
+
   .searchSuggestionIcon,
   .searchSuggestionArrow {
     color: #ffffff;
   }
+
   .noSearchResults {
     color: #cccccc;
   }
+
   /* Mega menu */
   .dropdown,
   .dropdownInner {
     background: #262F3D;
     color: #ffffff;
   }
+
   .dropdownItem {
     color: #ffffff;
   }
+
   .dropdownItem:hover {
     color: #ffffff;
     background: #313B4B;
   }
+
   .megaMenuTagline {
     color: #ffffff;
   }
+
   /* Mobile navigation */
   .mobileHeader {
     background: #262F3D;
     color: #ffffff;
   }
+
   .mobileMenu {
     background: #262F3D;
     color: #ffffff;
   }
+
   .mobileMenuItem {
     color: #ffffff;
-    > button {
+
+    >button {
       background: #262F3D;
       color: #ffffff;
     }
   }
+
   .mobileSubmenu {
     background: #262F3D;
+
     a {
       color: #ffffff;
     }
+
     a:hover {
       background: #171B21;
       color: #ffffff;
     }
   }
+
   .mobileMenuButton {
     color: #ffffff;
   }
+
   .utilityAction {
     color: #ffffff;
   }
+
   .contactModal {
     background: #262F3D;
     color: #ffffff;
   }
+
   .contactForm {
     background: #262F3D;
   }
+
   .contactField {
     color: #e3e7ec;
   }
+
   .contactField input,
   .contactField select,
   .contactField textarea {
@@ -1086,26 +968,31 @@
     border-color: #46505f;
     color: #ffffff;
   }
+
   .contactField input::placeholder,
   .contactField textarea::placeholder {
     color: #9ca5b1;
   }
+
   .attachmentDropzone {
     background: #171B21;
     border-color: #596575;
     color: #c3cad2;
   }
+
   .contactModalFooter {
     background: #171B21;
     border-top-color: #3a4452;
     color: #c3cad2;
   }
 }
+
 /* GLOBAL PAGE DARK BACKGROUND */
 :global(html[data-kq-theme='dark']),
 :global(html[data-kq-theme='dark'] body) {
   background-color: #171B21 !important;
 }
+
 :global(html[data-kq-theme='dark'] #spPageCanvasContent),
 :global(html[data-kq-theme='dark'] .SPCanvas),
 :global(html[data-kq-theme='dark'] .SPCanvas-canvas),
@@ -1118,11 +1005,13 @@
 :global(html[data-kq-theme='dark'] [data-automation-id='CanvasControl']) {
   background-color: #171B21 !important;
 }
+
 /* GLOBAL PAGE LIGHT BACKGROUND */
 :global(html[data-kq-theme='light']),
 :global(html[data-kq-theme='light'] body) {
   background-color: #ffffff !important;
 }
+
 :global(html[data-kq-theme='light'] #spPageCanvasContent),
 :global(html[data-kq-theme='light'] .SPCanvas),
 :global(html[data-kq-theme='light'] .SPCanvas-canvas),
@@ -1135,6 +1024,7 @@
 :global(html[data-kq-theme='light'] [data-automation-id='CanvasControl']) {
   background-color: #ffffff !important;
 }
+
 /* =========================================================
    NOTIFICATION CENTER
 ========================================================= */
@@ -1150,6 +1040,7 @@
   justify-content: flex-end;
   animation: notificationFadeIn 180ms ease-out;
 }
+
 .notificationDrawer {
   position: relative;
   top: 0;
@@ -1163,6 +1054,7 @@
   box-shadow: -12px 0 40px rgba(0, 0, 0, 0.18);
   animation: notificationSlideIn 240ms ease-out;
 }
+
 .notificationHeader {
   position: relative;
   flex-shrink: 0;
@@ -1173,6 +1065,7 @@
   color: #ffffff;
   background: #d71920;
 }
+
 .notificationHeaderBackground {
   position: absolute;
   top: 0;
@@ -1185,6 +1078,7 @@
   user-select: none;
   z-index: 0;
 }
+
 .notificationHeaderTop {
   position: relative;
   z-index: 1;
@@ -1193,6 +1087,7 @@
   justify-content: space-between;
   gap: 20px;
 }
+
 .notificationBrand {
   margin-bottom: 8px;
   font-size: 10px;
@@ -1202,6 +1097,7 @@
   text-transform: uppercase;
   opacity: 0.82;
 }
+
 .notificationHeader h2 {
   margin: 0 0 7px;
   color: #ffffff;
@@ -1211,12 +1107,14 @@
   font-weight: 600;
   font-style: italic;
 }
+
 .notificationHeader p {
   margin: 0;
   color: rgba(255, 255, 255, 0.84);
   font-size: 12px;
   line-height: 1.4;
 }
+
 .notificationClose {
   position: relative;
   z-index: 2;
@@ -1234,10 +1132,12 @@
     background 160ms ease,
     transform 160ms ease;
 }
+
 .notificationClose:hover {
   background: rgba(255, 255, 255, 0.18);
   transform: rotate(4deg);
 }
+
 .markAllRead {
   position: relative;
   z-index: 1;
@@ -1253,6 +1153,7 @@
   text-underline-offset: 3px;
   cursor: pointer;
 }
+
 .notificationBody {
   flex: 1;
   min-height: 0;
@@ -1262,17 +1163,21 @@
   padding: 28px 30px 40px;
   box-sizing: border-box;
 }
+
 .notificationSection {
   margin-top: 24px;
   margin-bottom: 32px;
 }
+
 .notificationSection:first-child {
   margin-top: 0;
 }
+
 .notificationSection:last-child {
   margin-bottom: 0;
 }
-.notificationSection > h3 {
+
+.notificationSection>h3 {
   margin: 0 0 14px;
   color: #777777;
   font-size: 10px;
@@ -1281,6 +1186,7 @@
   letter-spacing: 1.15px;
   text-transform: uppercase;
 }
+
 .notificationItem {
   position: relative;
   display: grid;
@@ -1294,12 +1200,15 @@
   text-decoration: none;
   box-sizing: border-box;
 }
+
 .notificationItem:first-of-type {
   padding-top: 10px;
 }
+
 .notificationItem:hover {
   text-decoration: none;
 }
+
 .notificationIcon {
   width: 34px;
   height: 34px;
@@ -1310,16 +1219,19 @@
   align-items: center;
   justify-content: center;
 }
+
 .notificationIcon svg {
   width: 17px;
   height: 17px;
 }
+
 .notificationContent {
   min-width: 0;
   display: flex;
   flex-direction: column;
   padding-right: 4px;
 }
+
 .notificationMeta {
   margin-bottom: 5px;
   color: #888888;
@@ -1328,6 +1240,7 @@
   font-weight: 700;
   letter-spacing: 0.45px;
 }
+
 .notificationContent strong {
   margin-bottom: 5px;
   color: #202020;
@@ -1335,12 +1248,14 @@
   line-height: 1.35;
   font-weight: 700;
 }
+
 .notificationMessage {
   color: #666666;
   font-size: 11px;
   line-height: 1.55;
   overflow-wrap: break-word;
 }
+
 .unreadDot {
   position: absolute;
   top: 21px;
@@ -1351,6 +1266,7 @@
   border-radius: 50%;
   background: #d71920;
 }
+
 .notificationState {
   min-height: 260px;
   padding: 50px 20px;
@@ -1362,22 +1278,26 @@
   text-align: center;
   color: #777777;
 }
-.notificationState > svg {
+
+.notificationState>svg {
   width: 28px;
   height: 28px;
   margin-bottom: 12px;
   color: #d71920;
 }
+
 .notificationState h3 {
   margin: 0 0 7px;
   color: #222222;
   font-size: 15px;
 }
+
 .notificationState p {
   margin: 0;
   font-size: 12px;
   line-height: 1.5;
 }
+
 .notificationSpinner {
   width: 26px;
   height: 26px;
@@ -1387,243 +1307,609 @@
   border-radius: 50%;
   animation: notificationSpin 700ms linear infinite;
 }
+
 .notificationDrawerDark {
   background: #262F3D;
   color: #ffffff;
 }
+
 .notificationDrawerDark .notificationBody {
   background: #262F3D;
 }
-.notificationDrawerDark .notificationSection > h3,
+
+.notificationDrawerDark .notificationSection>h3,
 .notificationDrawerDark .notificationMeta {
   color: #969ca5;
 }
+
 .notificationDrawerDark .notificationItem {
   border-bottom-color: #292d33;
 }
+
 .notificationDrawerDark .notificationContent strong,
 .notificationDrawerDark .notificationState h3 {
   color: #ffffff;
 }
+
 .notificationDrawerDark .notificationMessage,
 .notificationDrawerDark .notificationState {
   color: #b6bac1;
 }
+
 .notificationDrawerDark .notificationIcon {
   background: #1d2b3c;
   color: #8db7e9;
 }
+
 @keyframes notificationSlideIn {
   from {
     transform: translateX(100%);
   }
+
   to {
     transform: translateX(0);
   }
 }
+
 @keyframes notificationFadeIn {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
 }
+
 @keyframes notificationSpin {
   to {
     transform: rotate(360deg);
   }
 }
-@media screen and (max-width: 600px) {
+
+
+/* ============================================================
+   KQ WORLD RESPONSIVE NAVIGATION
+   Single source of truth for tablet and phone layouts.
+   Reference: approved mobile navigation screenshot.
+   ============================================================ */
+.navigationRoot {
+  min-width: 0;
+}
+
+/* Mobile navigation is hidden by default on desktop. */
+.mobileHeader,
+.mobileMenu {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .navigationRoot {
+    --kq-nav-gutter: 20px;
+  }
+
+  .desktopNav,
+  .utilityLinks {
+    display: none;
+  }
+
+  .topBar {
+    height: 64px;
+    min-height: 64px;
+  }
+
+  .topBarInner {
+    height: 100%;
+    padding: 0 var(--kq-nav-gutter);
+  }
+
+  .brandArea {
+    min-width: 0;
+    gap: 12px;
+  }
+
+  .logo {
+    width: 130px;
+    flex-shrink: 0;
+  }
+
+  .internalLabel {
+    font-size: 11px;
+  }
+
+  .dateText {
+    font-size: 10px;
+    line-height: 1.3;
+    white-space: normal;
+  }
+
+  .mobileHeader {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 70px;
+    padding: 12px var(--kq-nav-gutter);
+    background: #fff;
+    box-shadow: 0 5px 12px rgba(0, 0, 0, .08);
+    box-sizing: border-box;
+  }
+
+  .mobileMenuButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 36px;
+    width: 36px;
+    height: 40px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    color: #222;
+    font-size: 27px;
+    line-height: 1;
+    font-weight: 300;
+    cursor: pointer;
+  }
+
+  .mobileSearch {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 36px;
+    padding: 0 12px;
+    background: #eee;
+    border-radius: 999px;
+  }
+
+  .mobileSearch input {
+    min-width: 0;
+    font-size: 12px;
+    color: #333;
+  }
+
+  .mobileHeader .iconButton {
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    border: 0;
+    background: #000;
+    color: #fff;
+  }
+
+  .mobileHeader .actionIcon {
+    color: #fff;
+  }
+
+  .mobileMenu {
+    display: block;
+    position: relative;
+    width: 100%;
+    max-height: calc(100dvh - 140px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 0 env(safe-area-inset-bottom, 0px);
+    background: #fff;
+    color: #242424;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, .08);
+    box-sizing: border-box;
+  }
+
+  .mobileMenuItem>button {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 100%;
+    min-height: 58px;
+    padding: 12px var(--kq-nav-gutter);
+    border: 0;
+    border-radius: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    background: #fff;
+    color: #242424;
+    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.4;
+    text-align: left;
+    cursor: pointer;
+    box-sizing: border-box;
+  }
+
+  .mobileMenuItem>button>span:first-child {
+    flex: 0 1 auto;
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .mobileMenuItem>button>span:last-child {
+    flex: 0 0 auto;
+    font-size: 19px;
+    line-height: 1;
+  }
+
+  .mobileMenuItem>button:hover,
+  .mobileMenuItem>button:focus-visible,
+  .mobileMenuItem>button[aria-expanded='true'] {
+    color: #d71920;
+    background: #fff8f8;
+  }
+
+  .mobileSubmenu {
+    background: #fafafa;
+  }
+
+  .mobileSubmenu a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 48px;
+    padding: 9px calc(var(--kq-nav-gutter) + 12px);
+    background: transparent;
+    color: #242424;
+    font-family: 'Montserrat', Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.4;
+    text-decoration: none;
+    box-sizing: border-box;
+  }
+
+  .mobileSubmenu a>span:last-child {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .mobileSubmenu a:hover,
+  .mobileSubmenu a:focus-visible {
+    color: #d71920 !important;
+    background: #f0f0f0;
+  }
+
+  .mobileUtilities {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px var(--kq-nav-gutter);
+    border-top: 1px solid #eee;
+  }
+
+  .mobileUtilities a,
+  .mobileUtilities button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 10px;
+    border: 0;
+    background: transparent;
+    color: #242424;
+    font: inherit;
+    font-size: 13px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .mobileUtilities a:hover,
+  .mobileUtilities button:hover {
+    color: #d71920;
+  }
+
+  .mobileAdminRow {
+    padding: 10px var(--kq-nav-gutter);
+  }
+
+  .adminButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 8px 12px;
+    border: 1px solid currentColor;
+    border-radius: 6px;
+    color: inherit;
+    background: transparent;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    box-sizing: border-box;
+  }
+
+  .mobileAdminRow .adminButton {
+    width: 100%;
+  }
+
+  .adminButton:hover,
+  .adminButton:focus-visible {
+    background: #d71920;
+    border-color: #d71920;
+    color: #fff;
+  }
+
+  /* Explicit mobile dark-mode rules prevent theme-derived blue links. */
+  .darkMode .mobileHeader,
+  .darkMode .mobileMenu {
+    background: #262f3d;
+    color: #fff;
+  }
+
+  .darkMode .mobileMenuButton {
+    color: #fff;
+  }
+
+  .darkMode .mobileMenuItem>button {
+    background: #262f3d;
+    color: #fff;
+  }
+
+  .darkMode .mobileMenuItem>button:hover,
+  .darkMode .mobileMenuItem>button:focus-visible,
+  .darkMode .mobileMenuItem>button[aria-expanded='true'] {
+    color: #ff5a60;
+    background: #171b21;
+  }
+
+  .darkMode .mobileSubmenu {
+    background: #202833;
+  }
+
+  .darkMode .mobileSubmenu a,
+  .darkMode .mobileUtilities a,
+  .darkMode .mobileUtilities button {
+    color: #fff;
+  }
+
+  .darkMode .mobileSubmenu a:hover,
+  .darkMode .mobileUtilities a:hover,
+  .darkMode .mobileUtilities button:hover {
+    color: #ff5a60 !important;
+  }
+
+  .darkMode .mobileUtilities {
+    border-top-color: #46505f;
+  }
+
+  .darkMode .mobileSearch {
+    background: #fff;
+  }
+
+  .darkMode .mobileSearch input {
+    color: #171b21;
+  }
+
+  .darkMode .mobileHeader .iconButton {
+    background: #fff;
+  }
+
+  .darkMode .mobileHeader .actionIcon {
+    color: #171b21;
+  }
+}
+
+@media (max-width: 600px) {
+  .navigationRoot {
+    --kq-nav-gutter: 20px;
+  }
+
+  .topBar {
+    height: 64px;
+    min-height: 64px;
+  }
+
+  .brandArea {
+    display: grid;
+    grid-template-columns: 122px minmax(0, 1fr);
+    grid-template-areas: 'logo internal' 'logo date';
+    column-gap: 10px;
+    row-gap: 2px;
+    align-items: center;
+  }
+
+  .logo {
+    grid-area: logo;
+    width: 122px;
+  }
+
+  .internalLabel {
+    grid-area: internal;
+    align-self: end;
+    font-size: 10px;
+  }
+
+  .dateText {
+    grid-area: date;
+    align-self: start;
+    font-size: 9px;
+  }
+
+  .mobileHeader {
+    gap: 10px;
+    min-height: 70px;
+    padding: 12px var(--kq-nav-gutter);
+  }
+
+  .mobileMenuButton {
+    flex-basis: 36px;
+  }
+
+  .mobileHeader .iconButton {
+    flex-basis: 36px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .mobileSearch {
+    height: 36px;
+  }
+
+  .mobileSearch input {
+    font-size: 16px;
+  }
+
+  .mobileMenuItem>button {
+    min-height: 58px;
+    padding: 12px var(--kq-nav-gutter);
+  }
+
+  .mobileSubmenu a {
+    padding-left: calc(var(--kq-nav-gutter) + 12px);
+  }
+
   .notificationDrawer {
     width: 100%;
     max-width: 100%;
+    height: 100dvh;
   }
+
   .notificationHeader {
     min-height: 165px;
     padding: 24px 20px 20px;
   }
+
   .notificationHeader h2 {
     font-size: 22px;
   }
+
   .notificationBody {
     padding: 22px 20px 32px;
   }
-  .notificationSection {
-    margin-top: 20px;
-    margin-bottom: 28px;
-  }
+
   .notificationItem {
     grid-template-columns: 34px minmax(0, 1fr);
     column-gap: 12px;
-    padding: 15px 20px 15px 0;
   }
-  .unreadDot {
-    top: 20px;
-    right: 2px;
-  }
-  .notificationIcon {
-    width: 31px;
-    height: 31px;
-  }
-}
-/* Shared page alignment; sticky positioning remains unchanged. */
-.desktopNavInner { padding-left: var(--kq-nav-gutter); padding-right: var(--kq-nav-gutter); }
-.navButton:first-child { padding-left: 0; }
-@media (max-width: 1100px) {
-  .navigationRoot { --kq-nav-gutter: 24px; }
-  .mobileMenuItem > button {
-    padding-left: var(--kq-nav-gutter);
-    padding-right: var(--kq-nav-gutter);
-  }
-  .mobileSubmenu a {
-    padding-left: calc(var(--kq-nav-gutter) + 12px);
-    padding-right: var(--kq-nav-gutter);
-  }
-}
-@media (max-width: 600px) {
-  .navigationRoot { --kq-nav-gutter: 16px; }
-}
-/* Keep the Ankara pattern visible over the shared dark surface. */
-.darkMode .ankaraBackground { opacity: 0.18; }
-.notificationDrawerDark .notificationHeader { background: #171B21; }
-.notificationDrawerDark .notificationHeaderBackground { opacity: 0.18; }
-.notificationDrawerDark .notificationItem { border-bottom-color: rgba(255,255,255,0.22); }
-.notificationDrawerDark .notificationIcon { background: #171B21; color: #ffffff; }
-.notificationDrawerDark .notificationSection > h3,
-.notificationDrawerDark .notificationMeta { color: #c7ccd4; }
-.notificationDrawerDark .notificationSpinner {
-  border-color: #46505f;
-  border-top-color: #ed1c24;
-}
-/* The feedback overlay is a sibling of the header, with its own theme class. */
-.contactOverlay.darkMode { background: rgba(0, 0, 0, 0.48); }
-.contactOverlay { font-family: 'Montserrat', Arial, Helvetica, sans-serif; }
 
-/* Responsive layout corrections. Keep this block after existing rules. */
-.navigationRoot { min-width: 0; }
-@media (max-width: 1100px) {
-  .navigationRoot { --kq-nav-gutter: 16px; }
-  .topBar, .topBarInner { height: auto; min-height: 60px; }
-  .topBarInner { padding-top: 8px; padding-bottom: 8px; }
-  .brandArea { min-width: 0; max-width: 100%; }
-  .dateText { white-space: normal; overflow-wrap: anywhere; line-height: 1.4; }
-  .mobileHeader {
-    position: relative;
-    display: grid;
-    grid-template-columns: 44px minmax(0, 1fr) 44px 44px;
-    gap: 8px;
-    height: auto;
-    min-height: 64px;
-    padding: 10px var(--kq-nav-gutter);
+  .contactOverlay {
+    padding: 12px;
   }
-  .mobileMenuButton, .mobileHeader .iconButton {
-    width: 44px; height: 44px; min-height: 44px;
-    display: flex; align-items: center; justify-content: center;
+
+  .contactModal {
+    max-height: calc(100dvh - 24px);
   }
-  .mobileSearch { position: relative; width: 100%; min-width: 0; height: 44px; }
-  .mobileSearch input { font-size: 16px; }
-  .mobileSearch .searchDropdown {
-    width: 100%; max-width: none; left: 0; right: 0;
-    max-height: 50vh; max-height: 50dvh; overflow-y: auto;
+
+  .contactModalHeader,
+  .contactForm {
+    padding: 16px;
   }
-  .mobileSearch .searchSuggestion { height: auto; min-height: 44px; padding: 10px 8px; }
-  .mobileSearch .searchSuggestionText { white-space: normal; overflow-wrap: anywhere; line-height: 1.4; }
-  .mobileMenu {
-    position: absolute; top: 100%; left: 0; right: 0;
-    width: 100%; max-height: calc(100vh - 150px);
-    max-height: calc(100dvh - 150px);
-    overflow-y: auto; overscroll-behavior: contain;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    z-index: 100;
+
+  .contactField input,
+  .contactField select,
+  .contactField textarea {
+    font-size: 16px;
   }
-  .mobileMenuItem > button { min-height: 48px; gap: 12px; line-height: 1.4; }
-  .mobileMenuItem > button span:first-child { white-space: normal; overflow-wrap: anywhere; }
-  .mobileSubmenu a { min-height: 48px; line-height: 1.4; font-weight: 400; }
-  .mobileSubmenu a > span:last-child { min-width: 0; overflow-wrap: anywhere; }
-  .mobileUtilities { display: flex; flex-wrap: wrap; gap: 12px; padding: 12px var(--kq-nav-gutter); border-top: 1px solid #ddd; }
-  .mobileUtilities a, .mobileUtilities button {
-    display: inline-flex; align-items: center; min-height: 44px;
-    padding: 0 12px; border: 0; background: transparent; color: inherit;
-    font: inherit; font-size: 14px; text-decoration: none; cursor: pointer;
-  }
-  .notificationDrawer { height: 100vh; height: 100dvh; }
-  .contactModal { max-height: calc(100dvh - 24px); }
-  .contactField input, .contactField select, .contactField textarea { font-size: 16px; }
-}
-@media (max-width: 600px) {
-  .brandArea {
-    width: 100%; display: grid;
-    grid-template-columns: 104px minmax(0, 1fr);
-    grid-template-areas: "logo internal" "logo date";
-    gap: 2px 12px;
-  }
-  .logo { width: 104px; }
-  .internalLabel { font-size: 10px; }
-  .dateText { font-size: 10px; }
-  .mobileHeader { grid-template-columns: minmax(0, 1fr) 44px 44px; gap: 8px; }
-  .mobileMenuButton { grid-column: 1; grid-row: 1; }
-  .mobileHeader .iconButton { grid-row: 1; }
-  .mobileSearch { grid-row: 2; grid-column: 1 / -1; }
-  .mobileMenu { max-height: calc(100vh - 190px); max-height: calc(100dvh - 190px); }
-  .notificationContent strong, .notificationMeta { overflow-wrap: anywhere; }
 }
 
-
+/* =========================================================
+   SEARCH TYPOGRAPHY AND RESULTS
+   Montserrat: interface text. Lucida Sans: section headings.
+   Scoped to search components; navigation styling is unchanged.
+========================================================= */
 .searchDropdown {
   max-height: min(70vh, 520px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #171717;
 }
 
-.searchResultRow { align-items: flex-start; }
+.searchResultRow {
+  height: auto;
+  min-height: 48px;
+  padding: 9px 8px;
+  align-items: flex-start;
+}
 
 .searchResultBody {
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
   min-width: 0;
+  gap: 3px;
   text-align: left;
 }
 
-.searchResultTitle { font-weight: 600; overflow-wrap: anywhere; }
+.searchResultTitle {
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 600;
+  color: #171717;
+  overflow-wrap: anywhere;
+}
 
 .searchResultDesc {
-  font-size: 12px;
-  opacity: 0.7;
-  white-space: nowrap;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  line-height: 1.45;
+  font-weight: 400;
+  color: #666666;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .searchCategory {
   flex: 0 0 auto;
   max-width: 40%;
-  padding: 2px 8px;
+  padding: 3px 8px;
   border-radius: 999px;
-  font-size: 11px;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
+  font-size: 10px;
+  line-height: 1.5;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   background: #f1f1f1;
-  color: #444;
+  color: #444444;
 }
 
-.searchMark { background: rgba(215, 25, 32, 0.15); color: inherit; border-radius: 2px; padding: 0 1px; }
+.searchMark {
+  background: rgba(215, 25, 32, .15);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
 
-.searchTagsBlock { padding-bottom: 8px; }
-.searchTags { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 16px 8px; }
+.searchTagsBlock {
+  padding-bottom: 8px;
+}
+
+.searchTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px 16px 8px;
+}
 
 .searchTag {
   border: 1px solid #d9d9d9;
-  background: #fff;
-  color: #333;
+  background: #ffffff;
+  color: #333333;
   border-radius: 999px;
-  padding: 4px 12px;
-  font-size: 12px;
+  padding: 6px 12px;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  line-height: 1.4;
+  font-weight: 500;
   cursor: pointer;
-  &:hover, &:focus-visible { border-color: #d71920; color: #d71920; outline: none; }
+}
+
+.searchTag:hover,
+.searchTag:focus-visible {
+  border-color: #d71920;
+  color: #d71920;
+  outline: none;
 }
 
 .searchState {
@@ -1632,69 +1918,113 @@
   align-items: center;
   gap: 8px;
   padding: 20px 16px;
-  font-size: 13px;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
   text-align: center;
 }
-.searchStateHint { font-size: 12px; opacity: 0.7; }
+
+.searchStateHint {
+  font-size: 11px;
+  color: #666666;
+}
 
 .searchSpinner {
   width: 18px;
   height: 18px;
-  border: 2px solid rgba(215, 25, 32, 0.25);
+  border: 2px solid rgba(215, 25, 32, .25);
   border-top-color: #d71920;
   border-radius: 50%;
-  animation: kqSearchSpin 0.8s linear infinite;
+  animation: kqSearchSpin .8s linear infinite;
 }
-@keyframes kqSearchSpin { to { transform: rotate(360deg); } }
+
+@keyframes kqSearchSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 .searchRetry {
   border: 0;
   background: #d71920;
-  color: #fff;
+  color: #ffffff;
   border-radius: 6px;
-  padding: 6px 14px;
+  padding: 7px 14px;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
 }
 
-.searchWarning { padding: 8px 16px; font-size: 12px; opacity: 0.75; }
+.searchWarning {
+  padding: 8px 16px;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #6b4b19;
+}
 
-/* ---------- Dark mode ---------- */
-.darkMode {
-  .searchCategory { background: #232830; color: #d8d8d8; }
-  .searchTag { background: #171B21; border-color: #3a414c; color: #fff; }
-  .searchTag:hover, .searchTag:focus-visible { border-color: #ff5a60; color: #ff5a60; }
-  .searchMark { background: rgba(255, 90, 96, 0.3); }
+.darkMode .searchResultTitle {
+  color: #ffffff;
+}
+
+.darkMode .searchResultDesc,
+.darkMode .searchStateHint {
+  color: #c4cbd4;
+}
+
+.darkMode .searchCategory {
+  background: #232830;
+  color: #d8d8d8;
+}
+
+.darkMode .searchTag {
+  background: #171b21;
+  border-color: #3a414c;
+  color: #ffffff;
+}
+
+.darkMode .searchTag:hover,
+.darkMode .searchTag:focus-visible {
+  border-color: #ff5a60;
+  color: #ff5a60;
+}
+
+.darkMode .searchMark {
+  background: rgba(255, 90, 96, .3);
+}
+
+.darkMode .searchWarning {
+  color: #f3d19b;
 }
 
 @media (max-width: 768px) {
-  .searchCategory { display: none; } /* keep rows readable on phones */
-  .searchDropdown { max-height: 60vh; }
+  .searchCategory {
+    display: none;
+  }
+
+  .searchDropdown {
+    max-height: 60vh;
+  }
 }
 
-/* ============================================================
-   HIDE SHAREPOINT LEFT APP BAR COMPLETELY
-   ============================================================ */
+/* ==========================================
+   KQ WORLD - SHAREPOINT CHROME
+   Hide native SharePoint navigation, header,
+   footer, and page editing toolbar.
+   ========================================== */
 
-:global(#sp-appBar),
-:global(.sp-appBar),
-:global([data-automation-id="sp-appBar"]) {
+:global(body:has(.kqWorldNavigationHost) #sp-appBar),
+:global(body:has(.kqWorldNavigationHost) .sp-appBar),
+:global(body:has(.kqWorldNavigationHost) [data-automation-id='sp-appBar']),
+:global(body:has(.kqWorldNavigationHost) #spSiteHeader),
+:global(body:has(.kqWorldNavigationHost) #spSiteFooter) {
   display: none !important;
 }
 
+/* Hide the SharePoint Edit / Publish toolbar
+   and collapse the space it occupies. */
 
-/* Remove any space SharePoint leaves for the app bar */
-:global(body),
-:global(#spPageCanvasContent),
-:global([data-automation-id="pageContent"]) {
-  margin-left: 0 !important;
-}
-
-
-/* Keep KQ World using the full available width */
-:global(.SPCanvas),
-:global(.CanvasZoneContainer),
-:global([data-automation-id="CanvasLayout"]) {
-  left: 0 !important;
+:global(body:has(.kqWorldNavigationHost) #spCommandBar) {
+  display: none !important;
 }

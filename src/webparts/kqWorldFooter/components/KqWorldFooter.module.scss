@@ -839,3 +839,19 @@
   fill: var(--footer-surface);
   pointer-events: none;
 }
+/* Dark mode: white footer curve */
+:global(html[data-kq-theme='dark']) .footerArtwork {
+  filter: brightness(0) invert(1);
+}
+
+/* Dark mode: white back-to-top button */
+:global(html[data-kq-theme='dark']) .backToTop {
+  background: #ffffff;
+  color: #171b21;
+}
+
+/* Dark mode: ensure arrow is dark and visible */
+:global(html[data-kq-theme='dark']) .backToTop svg {
+  stroke: #171b21;
+  color: #171b21;
+}

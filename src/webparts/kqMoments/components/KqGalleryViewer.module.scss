@@ -29,9 +29,7 @@
   width: 100%;
 
   padding:
-    34px
-    110px
-    80px;
+    34px 110px 80px;
 }
 
 
@@ -47,17 +45,13 @@
   gap: 8px;
 
   margin:
-    0
-    0
-    34px;
+    0 0 34px;
 
   padding:
-    10px
-    17px;
+    10px 17px;
 
   border:
-    1px solid
-    #dddddd;
+    1px solid #dddddd;
 
   border-radius:
     999px;
@@ -122,9 +116,7 @@
 
 .title {
   margin:
-    0
-    0
-    10px;
+    0 0 10px;
 
   font-family:
     "Lucida Sans",
@@ -190,11 +182,9 @@
   inset: 0;
 
   background:
-    linear-gradient(
-      to top,
+    linear-gradient(to top,
       rgba(0, 0, 0, 0.64),
-      rgba(0, 0, 0, 0.02) 55%
-    );
+      rgba(0, 0, 0, 0.02) 55%);
 }
 
 .coverTitle {
@@ -268,10 +258,8 @@
   display: grid;
 
   grid-template-columns:
-    repeat(
-      4,
-      minmax(0, 1fr)
-    );
+    repeat(4,
+      minmax(0, 1fr));
 
   gap: 14px;
 }
@@ -337,15 +325,13 @@
     opacity 180ms ease;
 }
 
-.photoCard:hover
-.photoHover {
+.photoCard:hover .photoHover {
   opacity: 1;
 }
 
 .photoHover span {
   padding:
-    9px
-    16px;
+    9px 16px;
 
   border-radius:
     999px;
@@ -371,8 +357,7 @@
 .message,
 .error {
   padding:
-    60px
-    20px;
+    60px 20px;
 
   text-align: center;
 
@@ -424,12 +409,10 @@
   overflow: hidden;
 
   background:
-    rgba(
+    rgba(0,
       0,
       0,
-      0,
-      0.96
-    );
+      0.96);
 
   font-family:
     "Montserrat",
@@ -447,14 +430,10 @@
   position: relative;
 
   width:
-    calc(
-      100vw - 180px
-    );
+    calc(100vw - 180px);
 
   height:
-    calc(
-      100vh - 80px
-    );
+    calc(100vh - 80px);
 
   display: flex;
 
@@ -476,9 +455,7 @@
   max-width: 100%;
 
   max-height:
-    calc(
-      100vh - 130px
-    );
+    calc(100vh - 130px);
 
   object-fit: contain;
 
@@ -530,12 +507,10 @@
   border: 0;
 
   background:
-    rgba(
+    rgba(255,
       255,
       255,
-      255,
-      0.14
-    );
+      0.14);
 
   color:
     #ffffff;
@@ -593,8 +568,7 @@
 
 .navigationButton:hover {
   transform:
-    translateY(-50%)
-    scale(1.04);
+    translateY(-50%) scale(1.04);
 }
 
 .previousButton {
@@ -614,22 +588,10 @@
  * KQ custom navigation.
  */
 
-:global(
-  html[data-kq-lightbox-open="true"]
-  .kqWorldNavigationStickyHost
-),
-:global(
-  body[data-kq-lightbox-open="true"]
-  .kqWorldNavigationStickyHost
-),
-:global(
-  html[data-kq-lightbox-open="true"]
-  .kqWorldNavigationHost
-),
-:global(
-  body[data-kq-lightbox-open="true"]
-  .kqWorldNavigationHost
-) {
+:global(html[data-kq-lightbox-open="true"] .kqWorldNavigationStickyHost),
+:global(body[data-kq-lightbox-open="true"] .kqWorldNavigationStickyHost),
+:global(html[data-kq-lightbox-open="true"] .kqWorldNavigationHost),
+:global(body[data-kq-lightbox-open="true"] .kqWorldNavigationHost) {
   visibility: hidden !important;
 
   pointer-events: none !important;
@@ -640,14 +602,8 @@
    HIDE SHAREPOINT SUITE NAV DURING LIGHTBOX
    ============================================================ */
 
-:global(
-  html[data-kq-lightbox-open="true"]
-  #SuiteNavWrapper
-),
-:global(
-  body[data-kq-lightbox-open="true"]
-  #SuiteNavWrapper
-) {
+:global(html[data-kq-lightbox-open="true"] #SuiteNavWrapper),
+:global(body[data-kq-lightbox-open="true"] #SuiteNavWrapper) {
   visibility: hidden !important;
 
   pointer-events: none !important;
@@ -658,30 +614,12 @@
    HIDE SHAREPOINT LEFT APP BAR DURING LIGHTBOX
    ============================================================ */
 
-:global(
-  html[data-kq-lightbox-open="true"]
-  #sp-appBar
-),
-:global(
-  body[data-kq-lightbox-open="true"]
-  #sp-appBar
-),
-:global(
-  html[data-kq-lightbox-open="true"]
-  .sp-appBar
-),
-:global(
-  body[data-kq-lightbox-open="true"]
-  .sp-appBar
-),
-:global(
-  html[data-kq-lightbox-open="true"]
-  [data-automation-id="sp-appBar"]
-),
-:global(
-  body[data-kq-lightbox-open="true"]
-  [data-automation-id="sp-appBar"]
-) {
+:global(html[data-kq-lightbox-open="true"] #sp-appBar),
+:global(body[data-kq-lightbox-open="true"] #sp-appBar),
+:global(html[data-kq-lightbox-open="true"] .sp-appBar),
+:global(body[data-kq-lightbox-open="true"] .sp-appBar),
+:global(html[data-kq-lightbox-open="true"] [data-automation-id="sp-appBar"]),
+:global(body[data-kq-lightbox-open="true"] [data-automation-id="sp-appBar"]) {
   visibility: hidden !important;
 
   pointer-events: none !important;
@@ -700,31 +638,24 @@
     #ffffff;
 }
 
-.darkMode
-.backButton {
+.darkMode .backButton {
   border-color:
-    rgba(
+    rgba(255,
       255,
       255,
-      255,
-      0.28
-    );
+      0.28);
 
   color:
     #ffffff;
 }
 
-.darkMode
-.photoCount,
-.darkMode
-.sectionHeader span {
+.darkMode .photoCount,
+.darkMode .sectionHeader span {
   color:
-    rgba(
+    rgba(255,
       255,
       255,
-      255,
-      0.68
-    );
+      0.68);
 }
 
 
@@ -732,23 +663,18 @@
    TABLET
    ============================================================ */
 
-@media screen and
-(max-width: 1100px) {
+@media screen and (max-width: 1100px) {
 
   .pageContent {
     padding:
-      28px
-      24px
-      64px;
+      28px 24px 64px;
   }
 
 
   .photoGrid {
     grid-template-columns:
-      repeat(
-        3,
-        minmax(0, 1fr)
-      );
+      repeat(3,
+        minmax(0, 1fr));
   }
 
 
@@ -760,9 +686,7 @@
 
   .lightboxContent {
     width:
-      calc(
-        100vw - 140px
-      );
+      calc(100vw - 140px);
   }
 }
 
@@ -771,14 +695,11 @@
    MOBILE
    ============================================================ */
 
-@media screen and
-(max-width: 700px) {
+@media screen and (max-width: 700px) {
 
   .pageContent {
     padding:
-      20px
-      16px
-      48px;
+      20px 16px 48px;
   }
 
 
@@ -812,10 +733,8 @@
 
   .photoGrid {
     grid-template-columns:
-      repeat(
-        2,
-        minmax(0, 1fr)
-      );
+      repeat(2,
+        minmax(0, 1fr));
 
     gap: 8px;
   }
@@ -829,22 +748,16 @@
 
   .lightboxContent {
     width:
-      calc(
-        100vw - 28px
-      );
+      calc(100vw - 28px);
 
     height:
-      calc(
-        100vh - 40px
-      );
+      calc(100vh - 40px);
   }
 
 
   .lightboxImage {
     max-height:
-      calc(
-        100vh - 100px
-      );
+      calc(100vh - 100px);
   }
 
 
@@ -878,5 +791,63 @@
   .imageCounter {
     margin-top:
       12px;
+  }
+}
+
+/* Add these styles to KqGalleryViewer.module.scss, or import this CSS globally. */
+:global(.kqMomentsAlbumActions) {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+
+:global(.kqMomentsAlbumActions button) {
+  border: 1px solid #d71920;
+  border-radius: 9px;
+  background: #d71920;
+  color: white;
+  padding: 11px 17px;
+  font: 600 13px Montserrat, Arial, sans-serif;
+  cursor: pointer;
+}
+
+:global(.kqMomentsAlbumActions button:disabled) {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+:global(.kqMomentsAlbumActions button:last-child) {
+  background: transparent;
+  color: #d71920;
+}
+
+:global(.kqMomentsActionStatus) {
+  font: 500 13px Montserrat, Arial, sans-serif;
+  margin: 10px 0;
+}
+
+:global(.kqMomentsLightboxActions) {
+  position: fixed;
+  z-index: 100001;
+  top: 20px;
+  right: 80px;
+  display: flex;
+  gap: 8px;
+}
+
+:global(.kqMomentsLightboxActions button) {
+  border: 1px solid rgba(255, 255, 255, .6);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, .72);
+  color: #fff;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+@media(max-width:600px) {
+  :global(.kqMomentsLightboxActions) {
+    top: 70px;
+    right: 12px;
   }
 }

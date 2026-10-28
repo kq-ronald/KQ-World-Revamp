@@ -1,15 +1,6 @@
 import * as React from 'react';
-
-import {
-  IKqCompanyNewsItem
-} from '../models/IKqCompanyNewsItem';
-
-import KqCompanyNewsService
-  from '../services/KqCompanyNewsService';
-
-import styles
-  from './KqStoryViewer.module.scss';
-
+import KqCompanyNewsService from '../services/KqCompanyNewsService';
+import { IKqCompanyNewsItem } from '../models/IKqCompanyNewsItem';
 
 export interface IKqStoryViewerProps {
   item: IKqCompanyNewsItem;
@@ -18,817 +9,251 @@ export interface IKqStoryViewerProps {
   onBack: () => void;
 }
 
-
 interface IKqStoryViewerState {
   story?: IKqCompanyNewsItem;
-  isLoading: boolean;
-  errorMessage: string;
+  loading: boolean;
+  error: string;
+  isFullscreen: boolean;
 }
 
-
-export default class KqStoryViewer
-  extends React.Component<
-    IKqStoryViewerProps,
-    IKqStoryViewerState
-  > {
-
-  public constructor(
-    props: IKqStoryViewerProps
-  ) {
-    super(props);
-
-    this.state = {
-      story: undefined,
-      isLoading: true,
-      errorMessage: ''
-    };
+/** Extract a SharePoint-hosted PDF URL from page canvas or embedded web-part metadata. */
+function findMagazinePdf(source: string, pageUrl: string): string {
+  if (!source) return '';
+  const decoded = document.createElement('textarea');
+  decoded.innerHTML = source;
+  const candidates = [
+    source,
+    decoded.value,
+    source.replace(/\\u002[fF]/g, '/').replace(/\\\//g, '/')
+      .replace(/&amp;/g, '&').replace(/%2[fF]/g, '/')
+  ];
+  // SharePoint's file viewer may store the file URL in a JSON-escaped string.
+  const pattern = /(?:https?:\/\/[^\s"'<>\\]+|\/(?:sites|teams|homepage|SiteAssets|Shared%20Documents|Shared Documents)[^\s"'<>\\]*|[^"'<>\\\s]{1,300})\.pdf(?:\?[^"'<>\\\s]*)?/gi;
+  for (const value of candidates) {
+    const matches = value.match(pattern) || [];
+    for (const candidate of matches) {
+      try {
+        const cleaned = candidate.replace(/&quot;.*$/, '').replace(/&amp;/g, '&');
+        const url = new URL(cleaned, pageUrl);
+        if (url.protocol === 'https:' &&
+            url.hostname.toLowerCase() === 'kenyaairwaysplc.sharepoint.com' &&
+            /\.pdf$/i.test(url.pathname)) {
+          return url.href;
+        }
+      } catch { /* Skip invalid URLs */ }
+    }
   }
+  return '';
+}
 
+/** Render supported story markup without executing SharePoint web parts or scripts. */
+function safeStoryHtml(source: string, pageUrl: string): string {
+  if (!source || typeof DOMParser === 'undefined') return '';
+  const doc = new DOMParser().parseFromString(source, 'text/html');
+  const output = doc.createElement('div');
+  const allowed = new Set([
+    'p', 'div', 'span', 'strong', 'b', 'em', 'i', 'u', 's', 'blockquote',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'br', 'hr', 'ul', 'ol', 'li',
+    'a', 'img', 'figure', 'figcaption', 'table', 'thead', 'tbody', 'tfoot',
+    'tr', 'th', 'td', 'pre', 'code', 'sup', 'sub'
+  ]);
+  const blocked = new Set([
+    'script', 'style', 'iframe', 'object', 'embed', 'form', 'input', 'button',
+    'textarea', 'select', 'svg', 'math', 'template', 'noscript', 'video', 'audio'
+  ]);
+  const safeUrl = (raw: string): string => {
+    try {
+      const parsed = new URL(raw, pageUrl || window.location.origin);
+      return parsed.protocol === 'https:' || parsed.protocol === 'http:'
+        ? parsed.href : '';
+    } catch { return ''; }
+  };
+  const copy = (node: Node, target: Node): void => {
+    if (node.nodeType === 3) {
+      target.appendChild(doc.createTextNode(node.textContent || ''));
+      return;
+    }
+    if (node.nodeType !== 1) return;
+    const element = node as Element;
+    const tag = element.tagName.toLowerCase();
+    if (blocked.has(tag)) return;
+    const container: Node = allowed.has(tag) ? doc.createElement(tag) : target;
+    if (container !== target && container instanceof Element) {
+      if (tag === 'a') {
+        const href = safeUrl(element.getAttribute('href') || '');
+        if (href) {
+          container.setAttribute('href', href);
+          container.setAttribute('target', '_blank');
+          container.setAttribute('rel', 'noopener noreferrer');
+        }
+      }
+      if (tag === 'img') {
+        const src = safeUrl(element.getAttribute('src') || '');
+        if (!src) return;
+        container.setAttribute('src', src);
+        container.setAttribute('alt', element.getAttribute('alt') || 'Story image');
+        container.setAttribute('loading', 'lazy');
+        container.setAttribute('style', 'max-width:100%;height:auto;border-radius:8px;');
+      }
+      if (tag === 'th' || tag === 'td') {
+        for (const attr of ['colspan', 'rowspan']) {
+          const val = element.getAttribute(attr);
+          if (val && /^\d{1,2}$/.test(val)) container.setAttribute(attr, val);
+        }
+      }
+      target.appendChild(container);
+    }
+    if (tag !== 'img') {
+      Array.from(element.childNodes).forEach(child => copy(child, container));
+    }
+  };
+  Array.from(doc.body.childNodes).forEach(node => copy(node, output));
+  return output.innerHTML;
+}
+
+export default class KqStoryViewer extends React.Component<IKqStoryViewerProps, IKqStoryViewerState> {
+  private readonly _pdfContainerRef = React.createRef<HTMLDivElement>();
+
+  private _syncFullscreen = (): void => {
+    this.setState({ isFullscreen: document.fullscreenElement === this._pdfContainerRef.current });
+  };
+
+  private _toggleFullscreen = async (): Promise<void> => {
+    try {
+      if (document.fullscreenElement === this._pdfContainerRef.current) {
+        await document.exitFullscreen();
+      } else if (this._pdfContainerRef.current) {
+        await this._pdfContainerRef.current.requestFullscreen();
+      }
+    } catch {
+      // Browser or tenant policy may block fullscreen.
+      this.setState({ error: 'Fullscreen is blocked by your browser or SharePoint page settings.' });
+    }
+  };
+
+  public constructor(props: IKqStoryViewerProps) {
+    super(props);
+    this.state = { loading: false, error: '', isFullscreen: false };
+  }
 
   public componentDidMount(): void {
-    this._loadStory().catch(
-      (error: unknown) => {
-        console.error(
-          'Unable to load KQ Company News story:',
-          error
-        );
-      }
-    );
+    document.addEventListener('fullscreenchange', this._syncFullscreen);
+    void this._loadStory();
   }
 
+  public componentWillUnmount(): void {
+    document.removeEventListener('fullscreenchange', this._syncFullscreen);
+  }
 
-  public componentDidUpdate(
-    previousProps: IKqStoryViewerProps
-  ): void {
-
-    if (
-      previousProps.item.id !==
-        this.props.item.id ||
-      previousProps.item.type !==
-        this.props.item.type
-    ) {
-      this.setState(
-        {
-          story: undefined,
-          isLoading: true,
-          errorMessage: ''
-        },
-        () => {
-          this._loadStory().catch(
-            (error: unknown) => {
-              console.error(
-                'Unable to reload KQ Company News story:',
-                error
-              );
-            }
-          );
-        }
-      );
+  public componentDidUpdate(previousProps: IKqStoryViewerProps): void {
+    if (previousProps.item.id !== this.props.item.id ||
+        previousProps.item.type !== this.props.item.type) {
+      this.setState({ story: undefined, error: '' }, () => { void this._loadStory(); });
     }
   }
 
-
-  private async _loadStory():
-    Promise<void> {
-
-    const {
-      item,
-      service
-    } = this.props;
-
+  private async _loadStory(): Promise<void> {
+    const { item, service } = this.props;
+    if (item.type === 'blog') return;
+    this.setState({ loading: true, error: '' });
     try {
-
-      const story =
-        await service.getStoryById(
-          item.id,
-          item.type
-        );
-
-      if (!story) {
-        throw new Error(
-          'The requested story could not be found.'
-        );
+      const story = await service.getStoryById(item.id, item.type);
+      if (this.props.item.id === item.id && this.props.item.type === item.type) {
+        this.setState({ story, loading: false });
       }
-
-      this.setState({
-        story,
-        isLoading: false,
-        errorMessage: ''
-      });
-
     } catch (error) {
-
-      console.error(
-        'Unable to load KQ story:',
-        error
-      );
-
-      this.setState({
-        story: undefined,
-        isLoading: false,
-        errorMessage:
-          'We could not load this story.'
-      });
-    }
-  }
-
-
-  private _formatDate(
-    value: Date
-  ): string {
-
-    if (!value) {
-      return '';
-    }
-
-    return value.toLocaleDateString(
-      'en-GB',
-      {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
+      if (this.props.item.id === item.id && this.props.item.type === item.type) {
+        this.setState({
+          loading: false,
+          error: error instanceof Error ? error.message : 'Unable to load the story.'
+        });
       }
-    );
-  }
-
-
-  private _getTypeName(): string {
-
-    switch (
-      this.props.item.type
-    ) {
-      case 'blog':
-        return 'Blogs';
-
-      case 'pride':
-        return 'The Pride';
-
-      case 'take3':
-        return 'Take 3';
-
-      default:
-        return 'Take 3';
     }
   }
 
+  public render(): React.ReactElement {
+    const item = this.state.story || this.props.item;
+    const dark = this.props.isDarkMode;
+    const foreground = dark ? '#fff' : '#171717';
+    const muted = dark ? '#c7ccd4' : '#666';
+    const html = item.contentHtml ? safeStoryHtml(item.contentHtml, item.itemUrl) : '';
+    const isPride = item.type === 'pride';
+    const pdfUrl = isPride ? findMagazinePdf(item.contentHtml || '', item.itemUrl) : '';
 
-  /*
-   * SharePoint CanvasContent1 contains the content of a
-   * modern Site Page together with SharePoint canvas metadata.
-   *
-   * We do NOT inject the raw value directly.
-   *
-   * Instead:
-   * 1. Parse it in an isolated document.
-   * 2. Remove scripts / styles / SharePoint control metadata.
-   * 3. Keep normal article text, headings, lists, links,
-   *    images, tables and quotes.
-   * 4. Return clean HTML for the KQ reader.
-   */
-  private _prepareSharePointContent(
-    content: string
-  ): string {
-
-    if (!content) {
-      return '';
-    }
-
-    try {
-
-      const parser =
-        new DOMParser();
-
-      const documentValue =
-        parser.parseFromString(
-          `<div id="kq-reader-root">${content}</div>`,
-          'text/html'
-        );
-
-      const root =
-        documentValue.getElementById(
-          'kq-reader-root'
-        );
-
-      if (!root) {
-        return '';
-      }
-
-
-      /*
-       * Remove content that should never appear
-       * inside the KQ reader.
-       */
-      const unwantedSelectors = [
-        'script',
-        'style',
-        'noscript',
-        'iframe',
-        'object',
-        'embed',
-        'form',
-        'input',
-        'button',
-        'textarea',
-        'select'
-      ];
-
-      unwantedSelectors.forEach(
-        (selector) => {
-
-          const elements =
-            root.querySelectorAll(
-              selector
-            );
-
-          Array.prototype.forEach.call(
-            elements,
-            (element: Element) => {
-              if (
-                element.parentNode
-              ) {
-                element.parentNode
-                  .removeChild(
-                    element
-                  );
-              }
-            }
-          );
-        }
-      );
-
-
-      /*
-       * Remove SharePoint control metadata attributes.
-       * They are useful to SharePoint's page renderer,
-       * but not to our KQ reader.
-       */
-      const allElements =
-        root.querySelectorAll('*');
-
-      Array.prototype.forEach.call(
-        allElements,
-        (element: Element) => {
-
-          const attributes =
-            Array.prototype.slice.call(
-              element.attributes
-            ) as Attr[];
-
-          attributes.forEach(
-            (attribute: Attr) => {
-
-              const name =
-                attribute.name
-                  .toLowerCase();
-
-              if (
-                name.indexOf(
-                  'data-sp-'
-                ) === 0 ||
-                name === 'contenteditable' ||
-                name === 'role' ||
-                name === 'tabindex'
-              ) {
-                element.removeAttribute(
-                  attribute.name
-                );
-              }
-
-              if (
-                name.indexOf('on') === 0
-              ) {
-                element.removeAttribute(
-                  attribute.name
-                );
-              }
-            }
-          );
-        }
-      );
-
-
-      /*
-       * Make relative SharePoint URLs absolute.
-       */
-      const links =
-        root.querySelectorAll('a');
-
-      Array.prototype.forEach.call(
-        links,
-        (link: HTMLAnchorElement) => {
-
-          const href =
-            link.getAttribute(
-              'href'
-            );
-
-          if (
-            href &&
-            href.indexOf('/') === 0
-          ) {
-            link.setAttribute(
-              'href',
-              `${window.location.origin}${href}`
-            );
-          }
-
-          link.setAttribute(
-            'target',
-            '_blank'
-          );
-
-          link.setAttribute(
-            'rel',
-            'noopener noreferrer'
-          );
-        }
-      );
-
-
-      const images =
-        root.querySelectorAll('img');
-
-      Array.prototype.forEach.call(
-        images,
-        (image: HTMLImageElement) => {
-
-          const src =
-            image.getAttribute(
-              'src'
-            );
-
-          if (
-            src &&
-            src.indexOf('/') === 0
-          ) {
-            image.setAttribute(
-              'src',
-              `${window.location.origin}${src}`
-            );
-          }
-
-          image.removeAttribute(
-            'width'
-          );
-
-          image.removeAttribute(
-            'height'
-          );
-
-          image.setAttribute(
-            'loading',
-            'lazy'
-          );
-        }
-      );
-
-
-      /*
-       * SharePoint often leaves empty canvas wrappers.
-       * Remove wrappers that contain no visible content.
-       */
-      const divs =
-        Array.prototype.slice.call(
-          root.querySelectorAll(
-            'div'
-          )
-        ) as HTMLElement[];
-
-      divs
-        .reverse()
-        .forEach(
-          (
-            div:
-              HTMLElement
-          ) => {
-
-            const text =
-              (
-                div.textContent ||
-                ''
-              ).trim();
-
-            const hasImage =
-              !!div.querySelector(
-                'img'
-              );
-
-            const hasUsefulElement =
-              !!div.querySelector(
-                'p,h1,h2,h3,h4,h5,h6,ul,ol,table,blockquote,a'
-              );
-
-            if (
-              !text &&
-              !hasImage &&
-              !hasUsefulElement
-            ) {
-              if (
-                div.parentNode
-              ) {
-                div.parentNode
-                  .removeChild(
-                    div
-                  );
-              }
-            }
-          }
-        );
-
-
-      return root.innerHTML;
-
-    } catch (error) {
-
-      console.error(
-        'Unable to parse SharePoint story content:',
-        error
-      );
-
-      return '';
-    }
-  }
-
-
-  private _renderSharePointBody(
-    story: IKqCompanyNewsItem
-  ): React.ReactNode {
-
-    if (!story.contentHtml) {
-
-      return (
-        <div
-          className={
-            styles.emptyContent
-          }
-        >
-          <h2>
-            Story content unavailable
-          </h2>
-
-          <p>
-            No article body was found
-            for this story.
+    return (
+      <main style={{
+        minHeight: '100%', padding: '28px clamp(16px, 5vw, 72px)',
+        background: dark ? '#171b22' : '#fff', color: foreground,
+        fontFamily: 'Montserrat, Arial, sans-serif', boxSizing: 'border-box'
+      }}>
+        <button type="button" onClick={this.props.onBack} style={{
+          cursor: 'pointer', background: 'transparent', color: foreground,
+          border: '1px solid currentColor', borderRadius: 20,
+          padding: '9px 18px', marginBottom: 24
+        }}>← Back to news</button>
+        <article style={{ maxWidth: isPride ? 1150 : 1000, margin: '0 auto' }}>
+          <p style={{ color: muted, fontSize: 13, textTransform: 'uppercase' }}>
+            {item.category || item.type}
           </p>
-        </div>
-      );
-    }
-
-
-    const preparedContent =
-      this._prepareSharePointContent(
-        story.contentHtml
-      );
-
-
-    if (!preparedContent) {
-
-      return (
-        <div
-          className={
-            styles.emptyContent
-          }
-        >
-          <h2>
-            Story content unavailable
-          </h2>
-
-          <p>
-            The page was found, but it
-            does not contain content that
-            can currently be displayed
-            in the KQ World reader.
-          </p>
-        </div>
-      );
-    }
-
-
-    return (
-      <div
-        className={
-          styles.sharePointContent
-        }
-        dangerouslySetInnerHTML={{
-          __html:
-            preparedContent
-        }}
-      />
-    );
-  }
-
-
-  private _renderBlogBody(
-    story: IKqCompanyNewsItem
-  ): React.ReactNode {
-
-    return (
-      <div
-        className={
-          styles.blogNotice
-        }
-      >
-        <h2>
-          Continue reading
-        </h2>
-
-        <p>
-          This blog is currently
-          published on the Kenya Airways
-          corporate website. Its full
-          article body has not yet been
-          moved into the KQ World CMS.
-        </p>
-
-        {
-          story.itemUrl && (
-            <a
-              href={
-                story.itemUrl
-              }
-              target="_blank"
-              rel="noopener noreferrer"
-              className={
-                styles.sourceButton
-              }
-            >
-              Read current article
-
-              <span
-                aria-hidden="true"
-              >
-                ↗
-              </span>
-            </a>
-          )
-        }
-      </div>
-    );
-  }
-
-
-  public render():
-    React.ReactElement<
-      IKqStoryViewerProps
-    > {
-
-    const {
-      isDarkMode,
-      onBack
-    } = this.props;
-
-    const {
-      story,
-      isLoading,
-      errorMessage
-    } = this.state;
-
-
-    const rootClassName =
-      [
-        styles.storyViewer,
-        isDarkMode
-          ? styles.darkMode
-          : ''
-      ]
-        .filter(Boolean)
-        .join(' ');
-
-
-    if (isLoading) {
-
-      return (
-        <main
-          className={
-            rootClassName
-          }
-        >
-          <div
-            className={
-              styles.storyContainer
-            }
-          >
-            <div
-              className={
-                styles.loadingState
-              }
-            >
-              <div
-                className={
-                  styles.loadingSpinner
-                }
-              />
-
-              <span>
-                Loading story...
-              </span>
-            </div>
-          </div>
-        </main>
-      );
-    }
-
-
-    if (
-      errorMessage ||
-      !story
-    ) {
-
-      return (
-        <main
-          className={
-            rootClassName
-          }
-        >
-          <div
-            className={
-              styles.storyContainer
-            }
-          >
-            <button
-              type="button"
-              className={
-                styles.backButton
-              }
-              onClick={
-                onBack
-              }
-            >
-              <span
-                aria-hidden="true"
-              >
-                ←
-              </span>
-
-              Back
-            </button>
-
-            <div
-              className={
-                styles.errorState
-              }
-            >
-              {
-                errorMessage ||
-                'Story not found.'
-              }
-            </div>
-          </div>
-        </main>
-      );
-    }
-
-
-    return (
-      <main
-        className={
-          rootClassName
-        }
-      >
-        <article
-          className={
-            styles.storyContainer
-          }
-        >
-
-          <button
-            type="button"
-            className={
-              styles.backButton
-            }
-            onClick={
-              onBack
-            }
-          >
-            <span
-              aria-hidden="true"
-            >
-              ←
-            </span>
-
-            Back to {
-              this._getTypeName()
-            }
-          </button>
-
-
-          <header
-            className={
-              styles.storyHeader
-            }
-          >
-
-            <div
-              className={
-                styles.storyCategory
-              }
-            >
-              {
-                story.category ||
-                this._getTypeName()
-              }
-            </div>
-
-
-            <h1
-              className={
-                styles.storyTitle
-              }
-            >
-              {story.title}
-            </h1>
-
-
-            {
-              story.moreInfo && (
-                <p
-                  className={
-                    styles.storyIntro
-                  }
-                >
-                  {story.moreInfo}
-                </p>
-              )
-            }
-
-
-            <div
-              className={
-                styles.storyMeta
-              }
-            >
-
-              {
-                story.authorName && (
-                  <span>
-                    {
-                      story.authorName
-                    }
-                  </span>
-                )
-              }
-
-              <span>
-                {
-                  this._formatDate(
-                    story.publishedDate
-                  )
-                }
-              </span>
-
-              {
-                story.readTimeMinutes && (
-                  <span>
-                    {
-                      story
-                        .readTimeMinutes
-                    } min read
-                  </span>
-                )
-              }
-
-            </div>
-
-          </header>
-
-
-          {
-            story.imageUrl && (
-              <div
-                className={
-                  styles.hero
-                }
-              >
-                <img
-                  src={
-                    story.imageUrl
-                  }
-                  alt=""
-                />
+          <h1 style={{ fontSize: 'clamp(24px, 3vw, 40px)', lineHeight: 1.25 }}>
+            {item.title}
+          </h1>
+          {this.state.loading && <p style={{ color: muted }}>Loading full story...</p>}
+          {this.state.error && <p role="alert" style={{ color: '#e57373' }}>{this.state.error}</p>}
+          {!this.state.loading && !this.state.error && pdfUrl && (
+            <div ref={this._pdfContainerRef} style={{
+              background: dark ? '#171b22' : '#fff',
+              padding: this.state.isFullscreen ? 12 : 0,
+              display: 'flex', flexDirection: 'column',
+              height: this.state.isFullscreen ? '100vh' : 'auto',
+              boxSizing: 'border-box'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>
+                <button type="button" onClick={() => { void this._toggleFullscreen(); }}
+                  style={{ cursor: 'pointer', padding: '10px 16px', borderRadius: 6,
+                    border: '1px solid currentColor', background: 'transparent', color: foreground }}>
+                  {this.state.isFullscreen ? 'Exit fullscreen' : 'Fullscreen magazine'}
+                </button>
               </div>
-            )
-          }
-
-
-          <div
-            className={
-              styles.storyBody
-            }
-          >
-            {
-              story.type ===
-                'blog'
-                ? this
-                    ._renderBlogBody(
-                      story
-                    )
-                : this
-                    ._renderSharePointBody(
-                      story
-                    )
-            }
-          </div>
-
+              <iframe
+                title={`${item.title} magazine`}
+                src={pdfUrl}
+                style={{ width: '100%', height: this.state.isFullscreen ? '100%' : 'min(80vh, 1100px)',
+                  minHeight: this.state.isFullscreen ? 0 : 550, flex: this.state.isFullscreen ? 1 : undefined,
+                  border: '1px solid #777', borderRadius: 8, background: '#fff' }}
+              />
+              <p style={{ color: muted, fontSize: 13 }}>
+                If the PDF does not appear,{' '}
+                <a href={pdfUrl} target="_blank" rel="noopener noreferrer"
+                  style={{ color: dark ? '#fff' : '#e30613' }}>
+                  open the magazine PDF directly
+                </a>.
+              </p>
+            </div>
+          )}
+          {!this.state.loading && !this.state.error && !pdfUrl && html && (
+            <div className="kqStoryBody" style={{ lineHeight: 1.75, overflowWrap: 'anywhere' }}
+              dangerouslySetInnerHTML={{ __html: html }} />
+          )}
+          {!this.state.loading && !this.state.error && !pdfUrl && !html && (
+            <p style={{ color: muted }}>
+              {item.type === 'blog'
+                ? 'Blog articles are hosted on the Kenya Airways corporate website.'
+                : 'No supported article body was found in this SharePoint page.'}
+            </p>
+          )}
+          {!this.state.loading && !this.state.error && isPride && !pdfUrl && item.itemUrl && (
+            <p><a href={item.itemUrl} target="_blank" rel="noopener noreferrer"
+              style={{ color: dark ? '#fff' : '#e30613' }}>
+              Open the original magazine page
+            </a></p>
+          )}
+          {!this.state.loading && !this.state.error && !isPride && !html && item.itemUrl && (
+            <a href={item.itemUrl} target="_blank" rel="noopener noreferrer"
+              style={{ color: dark ? '#fff' : '#e30613' }}>
+              Open original article
+            </a>
+          )}
         </article>
       </main>
     );

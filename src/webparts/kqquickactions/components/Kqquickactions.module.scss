@@ -14,48 +14,14 @@
 
 .kqquickactions *,
 .kqquickactions *::before,
-.kqquickactions *::after {
-  box-sizing: border-box;
-}
+.kqquickactions *::after { box-sizing: border-box; }
 
-.welcomeSection {
-  width: 100%;
-  margin: 0 0 24px;
-  padding: 0;
-}
-
-.welcomeTop {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.welcomeLabel {
-  color: #1d1d1d;
-  font-size: 12px;
-  line-height: 1.4;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-}
-
-.welcomeDivider {
-  width: 1px;
-  height: 20px;
-  flex-shrink: 0;
-  background: #333333;
-}
-
-.kqLogo {
-  display: block;
-  width: 72px;
-  height: auto;
-  object-fit: contain;
-}
-
-.greeting,
-.heroTitle {
+.welcomeSection { width: 100%; margin: 0 0 24px; padding: 0; }
+.welcomeTop { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+.welcomeLabel { color: #1d1d1d; font-size: 12px; line-height: 1.4; font-weight: 600; letter-spacing: .03em; }
+.welcomeDivider { width: 1px; height: 20px; flex-shrink: 0; background: #333333; }
+.kqLogo { display: block; width: 72px; height: auto; object-fit: contain; }
+.greeting, .heroTitle {
   margin: 0 0 20px;
   font-family: "Lucida Sans", "Lucida Grande", sans-serif;
   font-size: 22px;
@@ -64,18 +30,8 @@
   line-height: 1.2;
   letter-spacing: 0;
 }
-
-.greeting {
-  color: #ed1111;
-}
-
-.welcomeText {
-  margin: 12px 0 0;
-  color: #777777;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
+.greeting { color: #ed1111; }
+.welcomeText { margin: 12px 0 0; color: #777777; font-size: 14px; line-height: 1.5; }
 .quickActionsHero {
   position: relative;
   width: 100%;
@@ -87,285 +43,115 @@
   border-radius: 12px;
   background: #d8ecf5;
 }
-
 .quickActionsHero::before {
   content: "";
   position: absolute;
   inset: -24px;
-  background:
-    url("../assets/quick-actions-bg.svg")
-    center / cover no-repeat;
+  background: url("../assets/quick-actions-bg.svg") center / cover no-repeat;
   pointer-events: none;
 }
-
-.heroContent {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  min-width: 0;
-}
-
-.sectionLabel {
-  margin: 0 0 8px;
-  color: #171717;
-  font-size: 12px;
-  line-height: 1.4;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
-.heroTitle {
-  color: #111111;
-}
-
-.quickActionsGrid {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 10px;
-  width: 100%;
-  min-width: 0;
-  margin-top: 20px;
-}
-
+.heroContent { position: relative; z-index: 1; width: 100%; min-width: 0; }
+.sectionLabel { margin: 0 0 8px; color: #171717; font-size: 12px; line-height: 1.4; font-weight: 700; letter-spacing: .04em; }
+.heroTitle { color: #111111; }
+.quickActionsGrid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; width: 100%; min-width: 0; margin-top: 20px; }
 .quickActionCard {
   --action-accent: #21c26a;
-
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: 14px;
-
   width: 100%;
   min-width: 0;
   min-height: 135px;
   margin: 0;
   padding: 10px;
-
   color: #292929;
   font-family: inherit;
   text-align: left;
   text-decoration: none;
-
   background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.13);
+  border: 1px solid rgba(0, 0, 0, .13);
   border-radius: 10px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.11);
-
+  box-shadow: 0 3px 8px rgba(0, 0, 0, .11);
   cursor: pointer;
-
-  transition:
-    background-color 180ms ease,
-    border-color 180ms ease,
-    color 180ms ease,
-    transform 180ms ease;
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease;
 }
-
-.quickActionCard:hover,
-.quickActionCard:focus-visible {
+.quickActionCard:hover, .quickActionCard:focus-visible {
   color: #ffffff;
   background: var(--action-accent);
   border-color: var(--action-accent);
   text-decoration: none;
   transform: translateY(-2px);
 }
+.quickActionCard:focus-visible { outline: 3px solid #171717; outline-offset: 3px; }
+.cardTop { min-width: 0; }
+.iconCircle { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; margin-bottom: 10px; flex-shrink: 0; border-radius: 50%; background: var(--action-accent); }
+.cardIcon { display: block; width: 16px; height: 16px; color: #ffffff; }
+.quickActionCard:hover .iconCircle, .quickActionCard:focus-visible .iconCircle { background: #ffffff; }
+.quickActionCard:hover .cardIcon, .quickActionCard:focus-visible .cardIcon { color: var(--action-accent); }
+.cardTitle { color: inherit; font-size: 12px; line-height: 1.35; font-weight: 400; white-space: normal; overflow-wrap: break-word; }
+.cardFooter { display: flex; align-items: center; justify-content: space-between; gap: 6px; width: 100%; min-width: 0; color: var(--action-accent); font-size: 11px; line-height: 1.4; font-weight: 500; }
+.quickActionCard:hover .cardFooter, .quickActionCard:focus-visible .cardFooter { color: #ffffff; }
+.arrowIcon { display: block; width: 14px; height: 14px; flex-shrink: 0; }
+.accentCalendar { --action-accent: #21c26a; }
+.accentAirplane { --action-accent: #e76825; }
+.accentTicket { --action-accent: #9d174d; }
+.accentExpense { --action-accent: #b99a5f; }
+.accentPayslip { --action-accent: #2f80ed; }
+.accentSafety { --action-accent: #6b4eff; }
+.statusMessage, .errorMessage { margin-top: 24px; padding: 14px 16px; border-radius: 8px; font-size: 14px; line-height: 1.5; }
+.statusMessage { color: #333333; background: rgba(255, 255, 255, .7); }
+.errorMessage { color: #b42318; background: rgba(255, 255, 255, .85); }
 
-.quickActionCard:focus-visible {
-  outline: 3px solid #171717;
-  outline-offset: 3px;
-}
-
-.cardTop {
-  min-width: 0;
-}
-
-.iconCircle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 32px;
-  height: 32px;
-  margin-bottom: 10px;
-  flex-shrink: 0;
-
-  border-radius: 50%;
-  background: var(--action-accent);
-}
-
-.cardIcon {
-  display: block;
-  width: 16px;
-  height: 16px;
-  color: #ffffff;
-}
-
-.quickActionCard:hover .iconCircle,
-.quickActionCard:focus-visible .iconCircle {
-  background: #ffffff;
-}
-
-.quickActionCard:hover .cardIcon,
-.quickActionCard:focus-visible .cardIcon {
-  color: var(--action-accent);
-}
-
-.cardTitle {
-  color: inherit;
-  font-size: 12px;
-  line-height: 1.35;
-  font-weight: 400;
-  white-space: normal;
-  overflow-wrap: break-word;
-}
-
-.cardFooter {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-
-  width: 100%;
-  min-width: 0;
-
-  color: var(--action-accent);
-  font-size: 11px;
-  line-height: 1.4;
-  font-weight: 500;
-}
-
-.quickActionCard:hover .cardFooter,
-.quickActionCard:focus-visible .cardFooter {
-  color: #ffffff;
-}
-
-.arrowIcon {
-  display: block;
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
-}
-
-.accentCalendar {
-  --action-accent: #21c26a;
-}
-
-.accentAirplane {
-  --action-accent: #e76825;
-}
-
-.accentTicket {
-  --action-accent: #9d174d;
-}
-
-.accentExpense {
-  --action-accent: #b99a5f;
-}
-
-.accentPayslip {
-  --action-accent: #2f80ed;
-}
-
-.accentSafety {
-  --action-accent: #6b4eff;
-}
-
-.statusMessage,
-.errorMessage {
-  margin-top: 24px;
-  padding: 14px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.statusMessage {
-  color: #333333;
-  background: rgba(255, 255, 255, 0.7);
-}
-
-.errorMessage {
-  color: #b42318;
-  background: rgba(255, 255, 255, 0.85);
-}
-
+/* Dark theme: every text element remains readable, including cards and hero. */
+.darkMode { color: #ffffff; }
 .darkMode .welcomeLabel,
-.darkMode .greeting {
-  color: #ffffff;
-}
-
-.darkMode .welcomeDivider {
-  background: rgba(255, 255, 255, 0.65);
-}
-
-.darkMode .kqLogo {
-  filter: brightness(0) invert(1);
-}
-
-.darkMode .welcomeText {
-  color: #c7ccd4;
-}
-
-.darkMode .quickActionCard {
-  color: #ffffff;
-  background: #262f3d;
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-.darkMode .cardFooter {
-  color: #ffffff;
-}
-
+.darkMode .greeting,
+.darkMode .welcomeText,
+.darkMode .sectionLabel,
+.darkMode .heroTitle { color: #ffffff; }
+.darkMode .welcomeDivider { background: rgba(255, 255, 255, .65); }
+.darkMode .kqLogo { filter: brightness(0) invert(1); }
+.darkMode .quickActionsHero { background: #262f3d; }
+.darkMode .quickActionsHero::before { opacity: .18; }
+.darkMode .quickActionCard { color: #ffffff; background: #262f3d; border-color: rgba(255, 255, 255, .12); }
+.darkMode .cardTitle,
+.darkMode .cardFooter { color: #ffffff; }
 .darkMode .quickActionCard:hover,
-.darkMode .quickActionCard:focus-visible {
-  color: #ffffff;
-  background: var(--action-accent);
-  border-color: var(--action-accent);
-}
-
-.darkMode .quickActionCard:focus-visible {
-  outline-color: #ffffff;
-}
-
-.darkMode .statusMessage {
-  color: #ffffff;
-  background: rgba(38, 47, 61, 0.9);
-}
+.darkMode .quickActionCard:focus-visible { color: #ffffff; background: var(--action-accent); border-color: var(--action-accent); }
+.darkMode .quickActionCard:focus-visible { outline-color: #ffffff; }
+.darkMode .quickActionCard:hover .cardTitle,
+.darkMode .quickActionCard:focus-visible .cardTitle,
+.darkMode .quickActionCard:hover .cardFooter,
+.darkMode .quickActionCard:focus-visible .cardFooter { color: #ffffff; }
+.darkMode .statusMessage,
+.darkMode .errorMessage { color: #ffffff; background: rgba(38, 47, 61, .94); }
 
 @container (max-width: 699px) {
-  .quickActionsGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+  .quickActionsGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
-
 @container (max-width: 560px) {
-  .greeting,
-  .heroTitle {
-    font-size: 20px;
-  }
-
-  .quickActionsHero {
-    padding: 24px 16px;
-  }
-
-  .quickActionsGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
+  .greeting, .heroTitle { font-size: 20px; }
+  .quickActionsHero { padding: 24px 16px; }
+  .quickActionsGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 }
-
 @container (max-width: 300px) {
-  .quickActionsGrid {
-    grid-template-columns: 1fr;
-  }
+  .quickActionsGrid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .quickActionCard { transition: none; }
+  .quickActionCard:hover, .quickActionCard:focus-visible { transform: none; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .quickActionCard {
-    transition: none;
+/* The existing all-mode instance keeps its greeting on desktop only. */
+@media (max-width: 1100px) {
+  .kqquickactions[data-kq-quick-mode="all"] .welcomeSection {
+    display: none;
   }
-
-  .quickActionCard:hover,
-  .quickActionCard:focus-visible {
-    transform: none;
+}
+/* A second welcome-only web part is mobile-only. */
+@media (min-width: 1101px) {
+  :global(.ControlZone):has([data-kq-quick-mode="welcome"]) {
+    display: none !important;
   }
 }

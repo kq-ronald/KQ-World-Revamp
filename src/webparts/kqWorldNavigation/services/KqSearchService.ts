@@ -50,12 +50,16 @@ const CATEGORY_BY_PATH: Array<[string, string]> = [
 ];
 
 // Fill these in when known. Empty = skipped (no dead links).
-const IPRIDE_URL = '';   // leave / expenses / payslip
+const IPRIDE_URL = 'https://i-pride.kenya-airways.com/OA_HTML/AppsLocalLogin.jsp';   // leave / expenses / payslip
 const ISAFARI_URL = '';  // staff travel
 const ISR_URL = 'https://kenyaairwaysplc.sharepoint.com/sites/isr/workflows/Pages/request.aspx';
 const URL_OVERRIDES: Record<string, string> = {
   'it-support': ISR_URL,
-  'annual-leave': IPRIDE_URL
+  'annual-leave': IPRIDE_URL,
+  'brand-portal': 'https://kenyaairwaysplc.sharepoint.com/Quicklinks/KQ%20Brand%20Documents/Forms/AllItems.aspx',
+  'kq-brand-documents': 'https://kenyaairwaysplc.sharepoint.com/Quicklinks/KQ%20Brand%20Documents/Forms/AllItems.aspx',
+  'policy-statements': 'https://kenyaairwaysplc.sharepoint.com/sites/kqdocshares/omnidocs/Pages/homev2.aspx',
+  'the-pride': 'https://kenyaairwaysplc.sharepoint.com/sites/KQWorldhome?kqView=news&type=take3'
 };
 
 // The engine types category as a fixed union; display labels like "Staff Notices" need a cast.
@@ -127,8 +131,11 @@ export class KqSearchService {
   private engine: ReturnType<typeof createKqSearch> | null = null;
   private processes: IKqSearchItem[] = [];
   private processesPromise: Promise<void> | null = null;
+  private readonly remoteCache = new Map<string, { at: number; results: IKqSearchResult[] }>();
+  private readonly inFlight = new Map<string, Promise<IKqSearchResult[]>>();
+  private static readonly CACHE_MS = 120000;
 
-  constructor(private context: WebPartContext) {}
+  constructor(private context: WebPartContext) { }
 
   private get origin(): string {
     return this.context.pageContext.web.absoluteUrl.split('/').slice(0, 3).join('/');
@@ -152,7 +159,7 @@ export class KqSearchService {
     kqSearchItems.forEach(item => {
       const key = normalize(item.title);
       const nav = navByTitle.get(key);
-      const url = (nav && nav.url) || URL_OVERRIDES[item.id] || item.url;
+      const url = URL_OVERRIDES[item.id] || (nav && nav.url) || item.url;
       if (!url || url.charAt(0) === '#') {
         console.warn(`[KqSearch] "${item.title}" skipped: no URL yet.`);
         return;
@@ -195,7 +202,7 @@ export class KqSearchService {
         `?$select=Id,Title,Content_x0020_Link,ProcessType&$orderby=Title%20asc&$top=500`;
       this.processesPromise = this.context.spHttpClient
         .get(url, SPHttpClient.configurations.v1, { headers: { Accept: 'application/json;odata=nometadata' } })
-        .then(res => (res.ok ? res.json() : { value: [] }))
+        .then(res => { if (!res.ok) throw new Error(`Online Processes HTTP ${res.status}`); return res.json(); })
         .then((json: { value?: Array<{ Id: number; Title: string; Content_x0020_Link?: string | { Url: string }; ProcessType?: string }> }) => {
           this.processes = (json.value || [])
             .map(row => {
@@ -212,7 +219,7 @@ export class KqSearchService {
           this.entries = null; // rebuild with processes included
           this.engine = null;
         })
-        .catch(err => { console.warn('[KqSearch] Online Processes unavailable:', err); });
+        .catch(err => { this.processesPromise = null; console.warn('[KqSearch] Online Processes unavailable:', err); });
     }
     return this.processesPromise;
   }
@@ -269,74 +276,93 @@ export class KqSearchService {
     return scored.sort((a, b) => b.w - a.w).slice(0, 3).map(x => x.text);
   }
 
-  /* ---------- SharePoint content search ---------- */
-  public async searchSharePoint(query: string, limit: number): Promise<IKqSearchResult[]> {
-    const terms = tokenize(query).map(t => t.replace(/["*()]/g, '')).filter(Boolean);
-    if (!terms.length) return [];
-
-    const kql = `(${terms.map(t => `${t}*`).join(' ')}) AND (${SEARCH_SCOPES.map(p => `path:"${this.origin}${p}"`).join(' OR ')})`;
-    const body = {
-      request: {
-        Querytext: kql,
-        RowLimit: limit + 4,
-        TrimDuplicates: true,
-        ClientType: 'KQWorldNavigation',
-        SelectProperties: ['Title', 'Path', 'HitHighlightedSummary', 'FileExtension', 'ContentType', 'LastModifiedTime']
-      }
-    };
-
-    const res = await this.context.spHttpClient.post(
-      `${this.origin}/homepage/_api/search/postquery`,
-      SPHttpClient.configurations.v1,
-      {
-        headers: { Accept: 'application/json;odata=nometadata', 'Content-Type': 'application/json;odata=nometadata' },
-        body: JSON.stringify(body)
-      }
-    );
-    if (!res.ok) throw new Error(`SharePoint search failed (${res.status})`);
-
-    const json = await res.json();
-    const table = json && json.PrimaryQueryResult && json.PrimaryQueryResult.RelevantResults
-      ? json.PrimaryQueryResult.RelevantResults.Table : undefined;
-    const rows: any[] = table ? (table.Rows && table.Rows.results) || table.Rows || [] : [];
-
-    const out: IKqSearchResult[] = [];
-    rows.forEach((row, index) => {
-      const cells: Array<{ Key: string; Value: string }> = (row.Cells && row.Cells.results) || row.Cells || [];
-      const get = (key: string): string => {
-        const c = cells.filter(x => x.Key === key)[0];
-        return c && c.Value ? c.Value : '';
-      };
-      const path = get('Path');
-      const lower = path.toLowerCase();
-      if (!path || lower.indexOf('/_catalogs/') >= 0 || lower.indexOf('/_layouts/') >= 0) return;
-      const ext = get('FileExtension').toUpperCase();
-      const summary = get('HitHighlightedSummary').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
-      out.push({
-        id: `sp-${index}-${canonicalUrl(path)}`,
-        title: get('Title') || decodeURIComponent(path.split('/').pop() || path),
-        description: summary || undefined,
-        url: path,
-        category: categoryFromPath(path),
-        typeLabel: ext || 'Page',
-        openInNewTab: true,
-        score: 0,
-        source: 'content'
-      });
-    });
-    return out;
+  /** Exact employee actions. Never guess on ambiguous queries such as "leave policy". */
+  public resolveShortcut(input: string): IKqSearchResult | undefined {
+    const q = normalize(input);
+    const shortcuts: Array<{ phrases: string[]; title: string; url: string; category: string }> = [
+      { phrases: ['request annual leave', 'apply for leave', 'book leave', 'leave application', 'i want to go on leave', 'take time off', 'request leave'], title: 'Request Annual Leave', url: IPRIDE_URL, category: 'HR' },
+      { phrases: ['reset my password', 'change my password', 'forgot password', 'password reset', 'password change', 'unlock my account'], title: 'Change or Reset Password', url: ISR_URL, category: 'IT Support' },
+      { phrases: ['kq logo and brand guidelines', 'kq logo', 'brand guidelines', 'download kq logo', 'brand assets', 'brand documents'], title: 'KQ Logo and Brand Guidelines', url: URL_OVERRIDES['brand-portal'], category: 'Brand Portal' },
+      { phrases: ['find a policy', 'company policies', 'policy statements', 'search policies', 'find policy'], title: 'Find a Policy', url: URL_OVERRIDES['policy-statements'], category: 'Knowledge Hub' },
+      { phrases: ['latest pride newsletter', 'latest pride', 'the pride newsletter', 'pride newsletter'], title: 'Latest Pride Newsletter', url: URL_OVERRIDES['the-pride'], category: 'Corporate News' }
+    ];
+    const match = shortcuts.find(item => item.phrases.some(phrase => normalize(phrase) === q));
+    return match ? { id: `intent-${normalize(match.title)}`, title: match.title, url: match.url, category: match.category, openInNewTab: true, score: 9999, source: 'quick-link' } : undefined;
   }
 
-  /** Quick links first (engine order), then SharePoint content. Deduped by URL. */
-  public merge(local: IKqSearchResult[], remote: IKqSearchResult[], limit: number): IKqSearchResult[] {
+  /* ---------- SharePoint content search ---------- */
+  public searchSharePoint(query: string, limit: number): Promise<IKqSearchResult[]> {
+    const terms = tokenize(query).filter(t => t.length >= 2).slice(0, 6);
+    if (!terms.length || normalize(query).length < 3) return Promise.resolve([]);
+    const key = `${normalize(query)}|${limit}`;
+    const cached = this.remoteCache.get(key);
+    if (cached && Date.now() - cached.at < KqSearchService.CACHE_MS) return Promise.resolve(cached.results);
+    const pending = this.inFlight.get(key);
+    if (pending) return pending;
+
+    const escapeKql = (value: string): string => value.replace(/["\\]/g, ' ').trim();
+    const termClause = terms.map(escapeKql).filter(Boolean).join(' ');
+    const scopes = SEARCH_SCOPES.map(path => `Path:"${this.origin}${path}*"`).join(' OR ');
+    const body = {
+      request: {
+        Querytext: `(${termClause}) AND (${scopes})`,
+        RowLimit: Math.min(50, limit + 10),
+        TrimDuplicates: true,
+        SelectProperties: [
+          'Title',
+          'Path',
+          'HitHighlightedSummary',
+          'FileExtension',
+          'LastModifiedTime'
+        ]
+      }
+    };
+    const task = (async (): Promise<IKqSearchResult[]> => {
+      const res = await this.context.spHttpClient.post(
+        `${this.origin}/homepage/_api/search/postquery`,
+        SPHttpClient.configurations.v1,
+        { headers: { Accept: 'application/json;odata=nometadata', 'Content-Type': 'application/json;odata=nometadata' }, body: JSON.stringify(body) }
+      );
+      if (!res.ok) {
+        const detail = (await res.text()).slice(0, 600);
+        throw new Error(`SharePoint search HTTP ${res.status}: ${detail}`);
+      }
+      const json = await res.json();
+      const relevant = json?.PrimaryQueryResult?.RelevantResults || json?.d?.postquery?.PrimaryQueryResult?.RelevantResults;
+      const rows: any[] = relevant?.Table?.Rows?.results || relevant?.Table?.Rows || [];
+      const out: IKqSearchResult[] = [];
+      rows.forEach((row, index) => {
+        const cells: Array<{ Key: string; Value: string }> = row?.Cells?.results || row?.Cells || [];
+        const cellMap = new Map(cells.map(c => [c.Key, c.Value]));
+        const get = (name: string): string => cellMap.get(name) || '';
+        const path = get('Path');
+        if (!/^https?:\/\//i.test(path) || /\/_(catalogs|layouts)\//i.test(path)) return;
+        const ext = get('FileExtension').toUpperCase();
+        const summary = get('HitHighlightedSummary').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+        out.push({
+          id: `sp-${index}-${canonicalUrl(path)}`, title: get('Title') || path.split('/').pop() || path,
+          description: summary || undefined, url: path, category: categoryFromPath(path), typeLabel: ext || 'Page',
+          openInNewTab: true, score: 0, source: 'content'
+        });
+      });
+      this.remoteCache.set(key, { at: Date.now(), results: out });
+      if (this.remoteCache.size > 80) this.remoteCache.delete(this.remoteCache.keys().next().value as string);
+      return out;
+    })();
+    this.inFlight.set(key, task);
+    return task.finally(() => { this.inFlight.delete(key); });
+  }
+
+  /** Blend high-confidence quick links with content results, deduplicated by URL. */
+  public merge(local: IKqSearchResult[], remote: IKqSearchResult[], limit: number, query = ''): IKqSearchResult[] {
+    const shortcut = this.resolveShortcut(query);
+    const items = shortcut ? [shortcut, ...local, ...remote] : [...local, ...remote];
     const seen = new Set<string>();
-    return local.concat(remote)
-      .filter(r => {
-        const key = canonicalUrl(r.url);
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      })
-      .slice(0, limit);
+    return items.filter(item => {
+      const key = canonicalUrl(item.url);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).slice(0, limit);
   }
 }

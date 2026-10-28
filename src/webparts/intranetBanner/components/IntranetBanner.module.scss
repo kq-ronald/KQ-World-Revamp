@@ -1,4 +1,4 @@
-/* Scoped to this web part: does not alter SharePoint or sticky navigation. */
+/* KQ World Intranet Banner: styles scoped to this SPFx web part. */
 .intranetBanner {
   width: 100%;
   max-width: 100%;
@@ -10,21 +10,45 @@
   font-size: 14px;
   line-height: 1.5;
 }
+
 .intranetBanner *,
 .intranetBanner *::before,
-.intranetBanner *::after { box-sizing: border-box; }
-.intranetBanner button { font-family: inherit; }
-.intranetBanner h1 { font-size: 28px; }
-.intranetBanner h2 { font-size: 22px; }
-.intranetBanner h3 { font-size: 18px; }
+.intranetBanner *::after {
+  box-sizing: border-box;
+}
+
+.intranetBanner button {
+  font-family: inherit;
+}
+
+.intranetBanner h1 {
+  font-size: 28px;
+}
+
+.intranetBanner h2 {
+  font-size: 22px;
+}
+
+.intranetBanner h3 {
+  font-size: 18px;
+}
+
 .intranetBanner h1,
 .intranetBanner h2,
 .intranetBanner h3 {
   font-family: "Lucida Sans", "Lucida Grande", sans-serif;
   line-height: 1.25;
 }
-.lightMode { background: transparent; color: #171717; }
-.darkMode { background: #171b21; color: #ffffff; }
+
+.lightMode {
+  background: transparent;
+  color: #171717;
+}
+
+.darkMode {
+  background: #171b21;
+  color: #ffffff;
+}
 
 .bannerFrame {
   position: relative;
@@ -34,6 +58,7 @@
   border-radius: 12px;
   overflow: hidden;
 }
+
 .bannerImage {
   display: block;
   width: 100% !important;
@@ -45,6 +70,7 @@
   object-position: center;
   border: 0;
 }
+
 .bannerState {
   display: flex;
   align-items: center;
@@ -53,6 +79,7 @@
   padding: 24px;
   text-align: center;
 }
+
 .bannerToolbar {
   position: absolute;
   z-index: 2;
@@ -64,6 +91,7 @@
   align-items: center;
   gap: 12px;
 }
+
 .bannerCta {
   display: inline-flex;
   align-items: center;
@@ -80,7 +108,13 @@
   line-height: 1.4;
   cursor: pointer;
 }
-.bannerCtaText { min-width: 0; overflow-wrap: anywhere; text-align: left; }
+
+.bannerCtaText {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+
 .bannerCtaIcon {
   width: 24px;
   height: 24px;
@@ -94,6 +128,7 @@
   font-size: 18px;
   font-weight: 600;
 }
+
 .bannerControls {
   margin-left: auto;
   display: flex;
@@ -101,7 +136,13 @@
   gap: 8px;
   min-width: 0;
 }
-.bannerIndicators { display: flex; align-items: center; gap: 4px; }
+
+.bannerIndicators {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .bannerIndicator {
   display: flex;
   align-items: center;
@@ -112,6 +153,7 @@
   background: transparent;
   cursor: pointer;
 }
+
 .bannerIndicator::after {
   content: "";
   width: 100%;
@@ -119,7 +161,11 @@
   border-radius: 999px;
   background: #666666;
 }
-.activeIndicator::after { background: #e30613; }
+
+.activeIndicator::after {
+  background: #e30613;
+}
+
 .bannerArrow {
   width: 44px;
   height: 44px;
@@ -132,11 +178,17 @@
   padding: 0;
   background: #e30613;
   color: #ffffff;
-  font-size: 28px; /* Icon, not body text. */
+  font-size: 28px;
   line-height: 1;
   cursor: pointer;
 }
-.slideCount { display: none; font-size: 12px; white-space: nowrap; }
+
+.slideCount {
+  display: none;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
 .bannerArrow svg {
   display: block;
   width: 20px;
@@ -147,26 +199,110 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
 .intranetBanner button:focus-visible {
   outline: 3px solid #ffffff;
   outline-offset: 2px;
   box-shadow: 0 0 0 5px #171717;
 }
-/* On narrower screens, controls move below the image. */
-@media (max-width: 1100px) {
+
+/* Tablet and narrow desktop: controls below the image. */
+@media (min-width: 601px) and (max-width: 1100px) {
   .bannerToolbar {
     position: static;
     padding: 12px;
     background: #f4f4f4;
     color: #171717;
   }
-  .darkMode .bannerToolbar { background: #262f3d; color: #ffffff; }
-  .bannerIndicators { display: none; }
-  .slideCount { display: inline; }
+
+  .darkMode .bannerToolbar {
+    background: #262f3d;
+    color: #ffffff;
+  }
+
+  .bannerIndicators {
+    display: none;
+  }
+
+  .slideCount {
+    display: inline;
+  }
+}
+
+/* Mobile: compact controls without changing the image or desktop layout. */
+@media (max-width: 600px) {
+  .intranetBanner h1 {
+    font-size: 24px;
+  }
+
+  .intranetBanner h2 {
+    font-size: 20px;
+  }
+
+  .bannerToolbar {
+    position: static;
+    margin: 0;
+    padding: 6px 10px;
+    gap: 6px;
+    min-height: 0;
+    background: #f4f4f4;
+    color: #171717;
+  }
+
+  .darkMode .bannerToolbar {
+    background: #262f3d;
+    color: #ffffff;
+  }
+
+  .bannerCta {
+    min-height: 28px;
+    padding: 3px 4px 3px 10px;
+    font-size: 12px;
+  }
+
+  .bannerCtaIcon {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+  }
+
+  .bannerControls {
+    gap: 6px;
+  }
+
+  .bannerIndicators {
+    display: none;
+  }
+
+  .slideCount {
+    display: inline;
+    font-size: 11px;
+  }
+
+  .bannerArrow {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    font-size: 22px;
+  }
+
+  .bannerArrow svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+/* Reduce SharePoint web part spacing on mobile only */
+@media (max-width: 600px) {
+  :global(.ControlZone.ControlZone--clean):has([data-kq-banner="true"]) {
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
 }
 @media (max-width: 600px) {
-  .intranetBanner h1 { font-size: 24px; }
-  .intranetBanner h2 { font-size: 20px; }
-  .bannerToolbar { gap: 8px; }
-  .bannerCta { font-size: 12px; }
+  :global(.Canvas.Canvas--withLayout > div[class*="l_HsFT9"]) {
+    row-gap: 0 !important;
+    gap: 0 !important;
+  }
 }

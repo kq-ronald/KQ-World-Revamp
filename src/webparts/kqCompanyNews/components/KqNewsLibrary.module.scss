@@ -1,719 +1,458 @@
 .newsLibrary {
-    width: 100%;
-    min-height: 100%;
-
-    box-sizing: border-box;
-
-    background: #ffffff;
-    color: #171717;
-
-    font-family:
-        "Montserrat",
-        "Segoe UI",
-        Arial,
-        Helvetica,
-        sans-serif;
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+  background: #ffffff;
+  color: #171717;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
 }
 
 .newsLibrary *,
 .newsLibrary *::before,
 .newsLibrary *::after {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 .pageContainer {
-    width: min(1380px, calc(100% - 64px));
-
-    margin: 0 auto;
-
-    padding: 38px 0 70px;
+  width: 100%;
+  margin: 0;
+  padding: 28px 110px 64px;
 }
 
-
-/* ============================================================
-   BACK
-============================================================ */
-
 .backButton {
-    display: inline-flex;
-
-    align-items: center;
-
-    gap: 9px;
-
-    margin: 0 0 34px;
-
-    padding: 9px 15px;
-
-    border: 1px solid #dedede;
-    border-radius: 999px;
-
-    background: #ffffff;
-
-    color: #171717;
-
-    cursor: pointer;
-
-    font-family: inherit;
-
-    font-size: 13px;
-    font-weight: 500;
-
-    transition:
-        border-color 160ms ease,
-        color 160ms ease,
-        background-color 160ms ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 24px;
+  padding: 8px 14px;
+  border: 1px solid #dedede;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #171717;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  transition: border-color 160ms ease, color 160ms ease;
 }
 
 .backButton:hover {
-    border-color: #ff1616;
-
-    color: #ff1616;
+  border-color: #d71920;
+  color: #d71920;
 }
 
-
-/* ============================================================
-   HEADER
-============================================================ */
-
 .pageHeader {
-    max-width: 750px;
-
-    margin-bottom: 34px;
+  max-width: 720px;
+  margin-bottom: 26px;
 }
 
 .eyebrow {
-    margin: 0 0 9px;
-
-    color: #171717;
-
-    font-size: 12px;
-    font-weight: 500;
-
-    letter-spacing: 0.04em;
+  margin: 0 0 6px;
+  color: #171717;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
 }
 
 .pageTitle {
-    margin: 0;
-
-    color: #ff1616;
-
-    font-family:
-        "Lucida Sans",
-        "Lucida Grande",
-        sans-serif;
-
-    font-size: 34px;
-    line-height: 1.15;
-
-    font-style: italic;
-    font-weight: 600;
+  margin: 0;
+  color: #d71920;
+  font-family: "Lucida Sans", "Lucida Grande", sans-serif;
+  font-size: 30px;
+  line-height: 1.2;
+  font-style: italic;
+  font-weight: 600;
 }
 
 .pageDescription {
-    max-width: 650px;
-
-    margin: 14px 0 0;
-
-    color: #686868;
-
-    font-size: 14px;
-    line-height: 1.6;
+  max-width: 620px;
+  margin: 10px 0 0;
+  color: #686868;
+  font-size: 13px;
+  line-height: 1.55;
 }
 
-
-/* ============================================================
-   CONTROLS
-============================================================ */
-
 .controls {
-    display: flex;
-
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 24px;
-
-    margin-bottom: 36px;
-
-    flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
 }
 
 .tabBar {
-    display: flex;
-
-    align-items: center;
-
-    gap: 3px;
-
-    padding: 4px;
-
-    border: 1px solid #d8d8d8;
-    border-radius: 999px;
-
-    background: #ffffff;
-
-    box-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid #d8d8d8;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.06);
 }
 
 .tab,
 .tabActive {
-    min-width: 110px;
-
-    padding: 9px 16px;
-
-    border: 0;
-    border-radius: 999px;
-
-    cursor: pointer;
-
-    font-family: inherit;
-
-    font-size: 12px;
-    font-weight: 500;
-
-    transition:
-        background-color 160ms ease,
-        color 160ms ease;
+  min-width: 100px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  transition: background-color 160ms ease, color 160ms ease;
 }
 
 .tab {
-    background: transparent;
-
-    color: #171717;
+  background: transparent;
+  color: #171717;
 }
 
 .tab:hover {
-    background: #f2f2f2;
+  background: #f2f2f2;
 }
 
 .tabActive {
-    background: #ff1616;
-
-    color: #ffffff;
+  background: #d71920;
+  color: #ffffff;
 }
 
-
-/* ============================================================
-   SEARCH / SORT
-============================================================ */
-
 .filterBar {
-    display: flex;
-
-    align-items: center;
-
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .searchBox {
-    width: 290px;
-
-    height: 42px;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 8px;
-
-    padding: 0 14px;
-
-    border: 1px solid #dedede;
-    border-radius: 999px;
-
-    background: #ffffff;
+  width: 270px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 13px;
+  border: 1px solid #dedede;
+  border-radius: 999px;
+  background: #ffffff;
 }
 
 .searchIcon {
-    color: #777777;
-
-    font-size: 18px;
+  color: #777777;
+  font-size: 17px;
 }
 
 .searchBox input {
-    width: 100%;
-
-    min-width: 0;
-
-    border: 0;
-    outline: 0;
-
-    background: transparent;
-
-    color: #171717;
-
-    font-family: inherit;
-
-    font-size: 13px;
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #171717;
+  font-family: inherit;
+  font-size: 12px;
 }
 
 .searchBox input::placeholder {
-    color: #999999;
+  color: #999999;
 }
 
 .sortSelect {
-    height: 42px;
-
-    min-width: 120px;
-
-    padding: 0 36px 0 15px;
-
-    border: 1px solid #dedede;
-    border-radius: 999px;
-
-    background: #ffffff;
-
-    color: #171717;
-
-    cursor: pointer;
-
-    font-family: inherit;
-
-    font-size: 13px;
+  height: 40px;
+  min-width: 115px;
+  padding: 0 34px 0 14px;
+  border: 1px solid #dedede;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #171717;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
 }
 
-
-/* ============================================================
-   RESULT HEADER
-============================================================ */
-
 .resultHeader {
-    display: flex;
-
-    align-items: flex-end;
-    justify-content: space-between;
-
-    gap: 20px;
-
-    margin-bottom: 18px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 16px;
 }
 
 .resultHeader h2 {
-    margin: 0;
-
-    color: #171717;
-
-    font-family:
-        "Lucida Sans",
-        "Lucida Grande",
-        sans-serif;
-
-    font-size: 20px;
-    font-weight: 600;
+  margin: 0;
+  color: #171717;
+  font-family: "Lucida Sans", "Lucida Grande", sans-serif;
+  font-size: 19px;
+  font-weight: 600;
 }
 
 .resultHeader span {
-    color: #858585;
-
-    font-size: 12px;
+  color: #858585;
+  font-size: 11px;
 }
-
-
-/* ============================================================
-   GRID
-============================================================ */
 
 .newsGrid {
-    display: grid;
-
-    grid-template-columns:
-        repeat(3, minmax(0, 1fr));
-
-    gap: 24px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
 }
 
-
-/* ============================================================
-   CARD
-============================================================ */
-
 .newsCard {
-    min-width: 0;
-
-    overflow: hidden;
-
-    border: 1px solid #dedede;
-    border-radius: 14px;
-
-    background: #ffffff;
-
-    box-shadow:
-        0 3px 12px rgba(0, 0, 0, 0.08);
-
-    transition:
-        transform 160ms ease,
-        box-shadow 160ms ease,
-        border-color 160ms ease;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #dedede;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.07);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
 }
 
 .newsCard:hover {
-    transform: translateY(-3px);
-
-    border-color: #d71920;
-
-    box-shadow:
-        0 10px 26px rgba(0, 0, 0, 0.12);
+  transform: translateY(-3px);
+  border-color: #d71920;
+  box-shadow: 0 9px 22px rgba(0, 0, 0, 0.11);
 }
 
 .cardButton {
-    width: 100%;
-    height: 100%;
-
-    display: flex;
-
-    flex-direction: column;
-
-    padding: 0;
-
-    border: 0;
-
-    background: transparent;
-
-    color: inherit;
-
-    cursor: pointer;
-
-    text-align: left;
-
-    font-family: inherit;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
 }
 
 .cardImage {
-    width: 100%;
-    height: 205px;
-
-    overflow: hidden;
-
-    flex-shrink: 0;
-
-    background:
-        linear-gradient(135deg,
-            #3496d3,
-            #5168c7);
+  width: 100%;
+  height: 190px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #3496d3, #5168c7);
 }
 
 .cardImageElement {
-    display: block;
-
-    width: 100%;
-    height: 100%;
-
-    object-fit: cover;
-
-    transition:
-        transform 240ms ease;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 240ms ease;
 }
 
 .newsCard:hover .cardImageElement {
-    transform: scale(1.025);
+  transform: scale(1.025);
 }
 
 .imageFallback {
-    width: 100%;
-    height: 100%;
-
-    display: flex;
-
-    align-items: flex-end;
-
-    padding: 20px;
-
-    background:
-        linear-gradient(135deg,
-            #b5121b,
-            #761019);
-
-    color: #ffffff;
-
-    font-size: 15px;
-    font-weight: 600;
-
-    letter-spacing: 0.05em;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  padding: 18px;
+  background: linear-gradient(135deg, #b5121b, #761019);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
 }
 
 .cardBody {
-    min-height: 210px;
-
-    display: flex;
-
-    flex: 1;
-    flex-direction: column;
-
-    padding: 18px;
+  min-height: 185px;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 16px;
 }
 
 .cardLabel {
-    margin-bottom: 9px;
-
-    color: #ff1616;
-
-    font-size: 11px;
-    font-weight: 600;
-
-    letter-spacing: 0.05em;
+  margin-bottom: 7px;
+  color: #d71920;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
 }
 
 .cardTitle {
-    margin: 0;
-
-    color: #171717;
-
-    font-size: 16px;
-    line-height: 1.35;
-
-    font-weight: 600;
+  margin: 0;
+  color: #171717;
+  font-family: "Montserrat", Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 600;
 }
 
 .cardDescription {
-    margin: 9px 0 0;
-
-    display: -webkit-box;
-
-    overflow: hidden;
-
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-
-    color: #747474;
-
-    font-size: 13px;
-    line-height: 1.5;
+  margin: 8px 0 0;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  color: #747474;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .cardFooter {
-    width: 100%;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 12px;
-
-    margin-top: auto;
-
-    padding-top: 18px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 14px;
 }
 
 .cardMeta {
-    color: #8a8a8a;
-
-    font-size: 12px;
+  color: #8a8a8a;
+  font-size: 11px;
 }
 
 .readStory {
-    display: inline-flex;
-
-    align-items: center;
-
-    gap: 7px;
-
-    color: #ff1616;
-
-    font-size: 12px;
-    font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #d71920;
+  font-size: 11px;
+  font-weight: 600;
 }
 
-
-/* ============================================================
-   EMPTY
-============================================================ */
-
 .emptyState {
-    min-height: 260px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-
-    padding: 30px;
-
-    border: 1px solid #dedede;
-    border-radius: 14px;
-
-    background: #ffffff;
-
-    text-align: center;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 26px;
+  border: 1px solid #dedede;
+  border-radius: 12px;
+  background: #ffffff;
+  text-align: center;
 }
 
 .emptyState h3 {
-    margin: 0 0 8px;
-
-    color: #171717;
-
-    font-size: 17px;
+  margin: 0 0 7px;
+  color: #171717;
+  font-size: 16px;
 }
 
 .emptyState p {
-    margin: 0;
-
-    color: #747474;
-
-    font-size: 13px;
+  margin: 0;
+  color: #747474;
+  font-size: 12px;
 }
 
-
-/* ============================================================
-   DARK MODE
-============================================================ */
-
 .darkMode {
-    background: #171B21;
-
-    color: #ffffff;
+  background: #171b21;
+  color: #ffffff;
 }
 
 .darkMode .eyebrow,
 .darkMode .pageTitle,
 .darkMode .resultHeader h2 {
-    color: #ffffff;
+  color: #ffffff;
 }
 
 .darkMode .pageDescription {
-    color:
-        rgba(255, 255, 255, 0.72);
+  color: rgba(255, 255, 255, 0.72);
 }
 
 .darkMode .backButton {
-    border-color:
-        rgba(255, 255, 255, 0.4);
-
-    background: #262F3D;
-
-    color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.4);
+  background: #262f3d;
+  color: #ffffff;
 }
 
 .darkMode .backButton:hover {
-    border-color: #ffffff;
-
-    background: #ffffff;
-
-    color: #171B21;
+  border-color: #ffffff;
+  background: #ffffff;
+  color: #171b21;
 }
-
-/*
- * Cards deliberately stay white.
- * This matches the current KQ Company News
- * dark-mode design.
- */
 
 .darkMode .newsCard,
 .darkMode .emptyState {
-    background: #ffffff;
+  background: #ffffff;
 }
-
-
-/* ============================================================
-   FOCUS
-============================================================ */
 
 .newsLibrary button:focus-visible,
 .newsLibrary input:focus-visible,
 .newsLibrary select:focus-visible {
-    outline: 2px solid #d71920;
-
-    outline-offset: 3px;
+  outline: 2px solid #d71920;
+  outline-offset: 3px;
 }
 
+@media screen and (max-width: 1100px) {
+  .pageContainer {
+    padding: 26px 24px 56px;
+  }
 
-/* ============================================================
-   TABLET
-============================================================ */
+  .newsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 
-@media screen and (max-width: 1000px) {
-
-    .pageContainer {
-        width:
-            min(100% - 40px,
-                1380px);
-    }
-
-    .newsGrid {
-        grid-template-columns:
-            repeat(2,
-                minmax(0, 1fr));
-    }
-
-    .controls {
-        align-items: flex-start;
-
-        flex-direction: column;
-    }
-
+  .controls {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
-
-
-/* ============================================================
-   MOBILE
-============================================================ */
 
 @media screen and (max-width: 600px) {
+  .pageContainer {
+    padding: 20px 16px 42px;
+  }
 
-    .pageContainer {
-        width:
-            calc(100% - 28px);
+  .backButton {
+    margin-bottom: 20px;
+  }
 
-        padding:
-            24px 0 45px;
-    }
+  .pageHeader {
+    margin-bottom: 22px;
+  }
 
-    .backButton {
-        margin-bottom: 25px;
-    }
+  .pageTitle {
+    font-size: 26px;
+  }
 
-    .pageTitle {
-        font-size: 25px;
-    }
+  .controls {
+    gap: 15px;
+    margin-bottom: 24px;
+  }
 
-    .controls {
-        gap: 17px;
+  .tabBar {
+    width: 100%;
+  }
 
-        margin-bottom: 28px;
-    }
+  .tab,
+  .tabActive {
+    min-width: 0;
+    flex: 1;
+    padding: 8px 7px;
+  }
 
-    .tabBar {
-        width: 100%;
-    }
+  .filterBar {
+    width: 100%;
+    align-items: stretch;
+    flex-direction: column;
+  }
 
-    .tab,
-    .tabActive {
-        min-width: 0;
+  .searchBox,
+  .sortSelect {
+    width: 100%;
+  }
 
-        flex: 1;
+  .newsGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 
-        padding:
-            9px 8px;
-    }
-
-    .filterBar {
-        width: 100%;
-
-        align-items: stretch;
-
-        flex-direction: column;
-    }
-
-    .searchBox {
-        width: 100%;
-    }
-
-    .sortSelect {
-        width: 100%;
-    }
-
-    .newsGrid {
-        grid-template-columns: 1fr;
-
-        gap: 18px;
-    }
-
-    .cardImage {
-        height: 190px;
-    }
-
+  .cardImage {
+    height: 185px;
+  }
 }

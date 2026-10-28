@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
@@ -11,6 +12,11 @@ export default class UpcomingeventsWebPart
   extends BaseClientSideWebPart<IUpcomingeventsWebPartProps> {
 
   public render(): void {
+    console.log(
+      '[KQ Upcoming Events] Web part render called',
+      performance.now()
+    );
+
     const element: React.ReactElement<IUpcomingeventsProps> =
       React.createElement(
         Upcomingevents,

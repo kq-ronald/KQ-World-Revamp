@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { getKqDataConfig } from '../../../config/environment';
 
 import {
   ArrowUpRight20Regular
@@ -40,11 +41,11 @@ interface ISharePointQuickAction {
   Title?: string;
 
   NavigationUrl?:
-    | string
-    | {
-        Url?: string;
-        Description?: string;
-      };
+  | string
+  | {
+    Url?: string;
+    Description?: string;
+  };
 
   Icon?: string;
   DisplayOrder?: number;
@@ -165,8 +166,8 @@ export default class Kqquickactions
     const currentTheme =
       typeof document !== 'undefined'
         ? document.documentElement.getAttribute(
-            'data-kq-theme'
-          )
+          'data-kq-theme'
+        )
         : 'light';
 
     this.state = {
@@ -197,9 +198,11 @@ export default class Kqquickactions
         currentTheme === 'dark'
     });
 
-    this.loadQuickActions().catch((error: unknown) => {
-      console.error('Quick Actions initialization failed:', error);
-    });
+    if (this.props.displayMode !== 'welcome') {
+      this.loadQuickActions().catch((error: unknown) => {
+        console.error('Quick Actions initialization failed:', error);
+      });
+    }
   }
 
   public componentWillUnmount(): void {
@@ -253,11 +256,13 @@ export default class Kqquickactions
           context
         } = this.props;
 
-        const webUrl =
-          context.pageContext.web.absoluteUrl;
+        const config = getKqDataConfig(
+          context.pageContext.web.absoluteUrl
+        );
 
-        const listName =
-          'KQ Quick Actions Dev';
+        const webUrl = config.siteUrl;
+
+        const listName = config.quickActionsList;
 
         const endpoint =
           `${webUrl}/_api/web/lists/getbytitle(` +
@@ -343,6 +348,10 @@ export default class Kqquickactions
       userDisplayName
     } = this.props;
 
+    const displayMode = this.props.displayMode || 'all';
+    const showWelcome = displayMode !== 'actions';
+    const showActions = displayMode !== 'welcome';
+
     const {
       isDarkMode,
       quickActions,
@@ -364,7 +373,8 @@ export default class Kqquickactions
         : styles.kqquickactions;
 
     return (
-      <section className={rootClassName} data-kq-quick-actions="true">
+      <section className={rootClassName} data-kq-quick-actions="true" data-kq-quick-mode={displayMode}>
+        {showWelcome && (
         <div className={styles.welcomeSection}>
           <div className={styles.welcomeTop}>
             <span className={styles.welcomeLabel}>
@@ -389,7 +399,9 @@ export default class Kqquickactions
             from the flight line to the front office.
           </p>
         </div>
+        )}
 
+        {showActions && (
         <div className={styles.quickActionsHero}>
           <div className={styles.heroContent}>
             <p className={styles.sectionLabel}>
@@ -428,7 +440,7 @@ export default class Kqquickactions
                   {quickActions.map((action) => {
                     const Icon =
                       QUICK_ACTION_ICONS[
-                        action.icon
+                      action.icon
                       ];
 
                     const accentClass =
@@ -475,6 +487,7 @@ export default class Kqquickactions
               )}
           </div>
         </div>
+        )}
       </section>
     );
   }

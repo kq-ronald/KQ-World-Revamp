@@ -437,6 +437,7 @@ export default class KqVivaExchange
     return (
 
       <section
+        id="kq-viva-engage"
         data-kq-viva="true"
         className={[
           styles.kqVivaExchange,

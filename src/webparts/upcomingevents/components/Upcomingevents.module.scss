@@ -45,15 +45,15 @@
 }
 
 .title {
-  flex-shrink: 0;
-  margin: 0 0 16px;
-  color: var(--event-text);
-  font-family: "Montserrat", sans-serif;
-  font-size: 18px;
-  font-weight: 400;
-  font-style: normal;
-  line-height: 100%;
-  letter-spacing: 0;
+    flex-shrink: 0;
+    margin: 0 0 16px;
+    color: var(--event-text);
+    font-family: "Montserrat", sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    font-style: normal;
+    line-height: 100%;
+    letter-spacing: 0;
 }
 
 .filters {
@@ -224,8 +224,7 @@
         display: grid !important;
 
         grid-template-columns:
-            minmax(0, 3fr)
-            minmax(260px, 1fr) !important;
+            minmax(0, 3fr) minmax(260px, 1fr) !important;
 
         gap: 20px !important;
 
@@ -253,7 +252,7 @@
 @media (max-width: 600px) {
     .upcomingevents {
         min-height: 510px;
+        height: auto;
         padding: 20px 16px;
-        height: 510px;
     }
 }

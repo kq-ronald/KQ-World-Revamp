@@ -5,6 +5,7 @@ import {
   SPHttpClientResponse
 } from '@microsoft/sp-http';
 import { IIntranetBannerProps } from './IIntranetBannerProps';
+import { getKqDataConfig } from '../../../config/environment';
 interface ISharePointBanner {
   Id: number;
   Title?: string;
@@ -93,10 +94,11 @@ const IntranetBanner: React.FC<IIntranetBannerProps> = ({
         try {
           setIsLoading(true);
           setHasError(false);
-          const webUrl =
-            context.pageContext.web.absoluteUrl;
-          const libraryName =
-            'KQ Intranet Banners Dev';
+          const config = getKqDataConfig(
+            context.pageContext.web.absoluteUrl
+          );
+          const webUrl = config.siteUrl;
+          const libraryName = config.bannersLibrary.replace(/'/g, "''");
           const endpoint =
             `${webUrl}/_api/web/lists/getbytitle('${libraryName}')/items` +
             `?$select=Id,Title,IsPublished,DisplayOrder,StartDate,EndDate,CTAText,CTAUrl,File/Name,File/ServerRelativeUrl` +

@@ -1,6 +1,7 @@
 import { SPHttpClient } from '@microsoft/sp-http';
 import { WebPartContext } from '@microsoft/sp-webpart-base';
 import { IKqNotification } from '../models/IKqNotification';
+import { getKqDataConfig } from '../../../config/environment';
 
 type UrlField = string | { Url?: string } | undefined;
 interface IItem {
@@ -60,17 +61,42 @@ export class KqNotificationService {
   public getWarnings(): string[] { return this.warnings.slice(); }
 
   public async getNotifications(): Promise<IKqNotification[]> {
-    const web = this.context.pageContext.web.absoluteUrl.replace(/\/$/, '');
+    const config = getKqDataConfig(
+      this.context.pageContext.web.absoluteUrl
+    );
+    const web = config.siteUrl.replace(/\/$/, '');
     const home = new URL('/homepage', web).href;
     const sources: ISource[] = [
-      { key: 'banner', label: 'Intranet Banner', web, list: 'KQ Intranet Banners Dev', fields: 'IsPublished,StartDate,EndDate,CTAUrl,File/Name,File/ServerRelativeUrl', expand: 'File' },
+      {
+  key: 'banner',
+  label: 'Intranet Banner',
+  web,
+  list: config.bannersLibrary,
+  fields: 'IsPublished,StartDate,EndDate,CTAUrl,File/Name,File/ServerRelativeUrl',
+  expand: 'File'
+},
       { key: 'calendar', label: 'Calendar', web, list: 'Events', fields: 'EventDate,EndDate' },
       { key: 'moments', label: 'KQ Moments', web: home, list: 'Events', fields: 'EventUrl,Poster' },
       { key: 'processes', label: 'Online Processes', web: home, list: 'Online Processes', fields: 'Content_x0020_Link' },
-      { key: 'quick', label: 'Quick Actions', web, list: 'KQ Quick Actions Dev', fields: 'IsPublished,NavigationUrl' },
+      {
+  key: 'quick',
+  label: 'Quick Actions',
+  web,
+  list: config.quickActionsList,
+  fields: 'IsPublished,NavigationUrl'
+},
       { key: 'video', label: 'Corporate Stories', web, list: 'KQ Videos Dev', fields: 'IsPublished,VideoUrl,Category' },
       { key: 'news', label: 'Company News', web: home, list: 'Site Pages', fields: 'FileLeafRef,FileRef,File/Level', expand: 'File' },
-      { key: 'manual', label: 'Announcements', web, list: 'KQ World Notifications', fields: 'Message,Link,NotificationType,PublishDate,IsActive', optional: true }
+      {
+  key: 'manual',
+  label: 'Announcements',
+  web,
+  list: config.environment === 'PROD'
+    ? config.notificationsList
+    : 'KQ World Notifications',
+  fields: 'Message,Link,NotificationType,PublishDate,IsActive',
+  optional: true
+}
     ];
     const now = Date.now();
     const cutoff = now - this.days * 86400000;

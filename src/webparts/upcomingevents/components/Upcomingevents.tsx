@@ -174,7 +174,13 @@ const Upcomingevents: React.FC<IUpcomingeventsProps> = ({
   };
   const rootRef = React.useRef<HTMLElement>(null);
   React.useEffect(() => {
-    const root = rootRef.current;
+  // TEMPORARY TEST: Disable canvas layout manipulation on mobile
+  if (window.innerWidth <= 1100) {
+    console.log('[KQ Upcoming Events] Canvas layout effect skipped on mobile');
+    return;
+  }
+
+  const root = rootRef.current;
     if (!root) return;
     const canvas = root.closest<HTMLElement>('[data-automation-id="CanvasLayout"]');
     let frame = 0;

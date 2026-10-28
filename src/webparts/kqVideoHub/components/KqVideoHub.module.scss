@@ -1,3 +1,4 @@
+
 .kqVideoHub {
   width: 100%;
   max-width: 100%;
@@ -33,14 +34,12 @@
 
 .sectionTitle {
   margin: 0 0 20px;
-
   font-family: "Lucida Sans", "Lucida Grande", sans-serif;
   font-size: 22px;
   font-weight: 600;
   font-style: italic;
   line-height: 100%;
   letter-spacing: 0;
-
   vertical-align: middle;
   color: #ff1616;
 }
@@ -55,6 +54,7 @@
   color: #e30613;
   text-decoration: none;
   font-size: 12px;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .libraryLink:hover {
@@ -62,7 +62,6 @@
   color: #ffffff;
   text-decoration: none;
 }
-
 
 .videoHubCard {
   display: grid;
@@ -72,7 +71,7 @@
   border-radius: 12px;
   overflow: hidden;
   background: #fff;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, .08);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
 }
 
 .playerColumn,
@@ -98,9 +97,9 @@
 }
 
 .nowPlaying {
+  margin-bottom: 4px;
   font-size: 12px;
   color: #ccc;
-  margin-bottom: 4px;
 }
 
 .playerTitle {
@@ -247,8 +246,12 @@
   outline-offset: 2px;
 }
 
+/* ==========================================
+   DARK MODE
+   ========================================== */
+
 .darkMode {
-  color: #fff;
+  color: #ffffff;
 }
 
 .darkMode .videoHubCard {
@@ -256,21 +259,69 @@
   border-color: #3a4555;
 }
 
-.darkMode .videoItem,
-.darkMode .tab,
-.darkMode .eyebrow {
-  color: #fff;
+.darkMode .sectionTitle {
+  color: #ffffff;
+}
+
+.darkMode .eyebrow,
+.darkMode .nowPlaying {
+  color: #c7ccd4;
+}
+
+.darkMode .libraryLink {
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+.darkMode .libraryLink:hover {
+  background: #ffffff;
+  color: #171717;
+}
+
+.darkMode .tabBar {
+  border-color: #3a4555;
+}
+
+.darkMode .tab {
+  color: #ffffff;
+}
+
+.darkMode .tabActive {
+  background: #e30613;
+  color: #ffffff;
+}
+
+.darkMode .videoItem {
+  color: #ffffff;
 }
 
 .darkMode .videoItemSelected {
   background: #394353;
 }
 
+.darkMode .videoItemTitle,
+.darkMode .videoItemTitleSelected {
+  color: #ffffff;
+}
+
 .darkMode .videoItemMeta {
   color: #c7ccd4;
 }
 
-/* Only a standalone video section receives page-level gutter styling. */
+.darkMode .playerTitle {
+  color: #ffffff;
+}
+
+.darkMode .thumbnailPlayButton {
+  background: #e30613;
+  color: #ffffff;
+}
+
+/* ==========================================
+   SHAREPOINT LAYOUT
+   ========================================== */
+
+
 :global([data-kq-video-zone]) {
   width: 100% !important;
   max-width: none !important;
@@ -300,14 +351,18 @@
   margin: 0;
 }
 
+/* ==========================================
+   TABLET
+   ========================================== */
+
 @media (max-width: 1100px) {
   .kqVideoHub {
     width: 100%;
   }
 
   :global([data-kq-video-zone]) {
-    padding-left: 24px !important;
-    padding-right: 24px !important;
+    padding-left: 24px;
+    padding-right: 24px;
   }
 
   .videoHubCard {
@@ -315,14 +370,18 @@
   }
 }
 
+/* ==========================================
+   MOBILE
+   ========================================== */
+
 @media (max-width: 600px) {
   .kqVideoHub {
     width: 100%;
   }
 
   :global([data-kq-video-zone]) {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
   .sectionTitle {
@@ -334,7 +393,10 @@
   }
 }
 
-/* Match the outer edges of the banner/calendar and news rows. */
+/* ==========================================
+   DESKTOP
+   ========================================== */
+
 @media (min-width: 1101px) {
   :global([data-kq-video-zone]) {
     padding-left: 4.5% !important;

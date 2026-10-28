@@ -66,7 +66,7 @@ export default class KqCalendar
       this.layoutFrame = window.requestAnimationFrame(this.syncBannerLayout);
     }
   };
-    private mobileMarked: HTMLElement[] = [];
+  private mobileMarked: HTMLElement[] = [];
   private applyMobileOrder = (): void => {
     this.mobileMarked.forEach((el) => {
       el.removeAttribute('data-kq-flat');
@@ -77,7 +77,7 @@ export default class KqCalendar
     this.mobileMarked = [];
     const root = this.calendarRef.current;
     const zone = root?.closest<HTMLElement>('[data-automation-id="CanvasZone"]');
-        // Climb to the element that contains every section on the page.
+    // Climb to the element that contains every section on the page.
     const allZones = Array.from(
       document.querySelectorAll<HTMLElement>('[data-automation-id="CanvasZone"]')
     );
@@ -88,11 +88,11 @@ export default class KqCalendar
     if (!root || !zone || !stack || window.innerWidth > 1100) return;
     const order: Array<[string, string]> = [
       ['[class*="intranetBanner_"]', '1'],
-      ['[class*="kqCalendar_"]', '2'],
-      ['[class*="upcomingevents_"]', '3'],
-      ['[class*="onlineProcesses_"]', '4'],
+      ['[class*="kqCalendar_"]', '3'],
+      ['[class*="upcomingevents_"]', '4'],
       ['[class*="kqquickactions_"]', '5'],
-      ['[class*="kqCompanyNews_"]', '6']
+      ['[class*="onlineProcesses_"]', '6'],
+      ['[class*="kqCompanyNews_"]', '7']
     ];
     stack.setAttribute('data-kq-stack', 'true');
     this.mobileMarked.push(stack);
@@ -100,8 +100,41 @@ export default class KqCalendar
       const controlZone = control.closest<HTMLElement>('[data-automation-id="CanvasZone"]');
       // Leave the navigation zone alone; it stays first.
       if (controlZone?.querySelector('.kqWorldNavigationHost')) return;
-      const match = order.find(([selector]) => control.querySelector(selector));
-      control.setAttribute('data-kq-o', match ? match[1] : '9');
+      // Placeholder IDs exist before SPFx renders a web part.
+      const webPartIds = Array.from(control.querySelectorAll<HTMLElement>('[id]'))
+        .map((element) => element.id.toLowerCase()).join(' ');
+      const metadataElements = [control, ...Array.from(
+        control.querySelectorAll<HTMLElement>('[data-sp-webpartdata]')
+      )];
+      const metadata = metadataElements
+        .map((element) => element.getAttribute('data-sp-webpartdata') || '')
+        .join(' ').toLowerCase();
+      const renderedWelcome = control.querySelector('[data-kq-quick-mode="welcome"]') !== null;
+      const configuredWelcome = metadata.includes('"displaymode":"welcome"') ||
+        metadata.includes('&quot;displaymode&quot;:&quot;welcome&quot;');
+      let assignedOrder = '9';
+      if (webPartIds.includes('intranetbannerwebpart')) assignedOrder = '1';
+      else if (webPartIds.includes('kqcalendarwebpart')) assignedOrder = '3';
+      else if (webPartIds.includes('upcomingeventswebpart')) assignedOrder = '4';
+      else if (webPartIds.includes('onlineprocesseswebpart')) assignedOrder = '6';
+      else if (webPartIds.includes('kqcompanynewswebpart')) assignedOrder = '7';
+      else if (webPartIds.includes('kqquickactionswebpart')) {
+        assignedOrder = (configuredWelcome || renderedWelcome) ? '2' : '5';
+      } else {
+        const match = order.find(([selector]) => control.querySelector(selector));
+        if (match) assignedOrder = match[1];
+      }
+      // Identify the Welcome Back-only web part before SharePoint renders it.
+      const welcomeBackInstanceId =
+        'f8194541-7651-4728-b366-cab7ca373341';
+
+      const isWelcomeBackInstance =
+        webPartIds.includes(welcomeBackInstanceId);
+
+      if (isWelcomeBackInstance) {
+        assignedOrder = '2';
+      }
+      control.setAttribute('data-kq-o', assignedOrder);
       this.mobileMarked.push(control);
       let wrapper = control.parentElement;
       while (wrapper && wrapper !== stack) {
@@ -261,7 +294,7 @@ export default class KqCalendar
     window.removeEventListener('focus', this.refreshOutlookEvents);
     this.disposed = true;
     this.clearPairLayout();
-        this.mobileMarked.forEach((el) => {
+    this.mobileMarked.forEach((el) => {
       el.removeAttribute('data-kq-flat');
       el.removeAttribute('data-kq-o');
       el.removeAttribute('data-kq-stack');
@@ -832,33 +865,33 @@ export default class KqCalendar
             )}
         </div>
         {drawerOpen && ReactDOM.createPortal(
-  <>
-    <div
-      onClick={this.closeDrawer}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,0.45)',
-        zIndex: 100000
-      }}
-    />
-    <aside
-      style={{
-        position: 'fixed',
-        top: 0,
-        right: 0,
-        bottom: 0,
-        width: 'min(420px, 92vw)',
-        background: cardBackground,
-        color: primaryText,
-        zIndex: 100001,
-        boxShadow: '-8px 0 30px rgba(0,0,0,0.22)',
-        padding: '28px 24px',
-        boxSizing: 'border-box',
-        overflowY: 'auto',
-        fontFamily: "'Montserrat', Arial, sans-serif"
-      }}
-    >
+          <>
+            <div
+              onClick={this.closeDrawer}
+              style={{
+                position: 'fixed',
+                inset: 0,
+                background: 'rgba(0,0,0,0.45)',
+                zIndex: 100000
+              }}
+            />
+            <aside
+              style={{
+                position: 'fixed',
+                top: 0,
+                right: 0,
+                bottom: 0,
+                width: 'min(420px, 92vw)',
+                background: cardBackground,
+                color: primaryText,
+                zIndex: 100001,
+                boxShadow: '-8px 0 30px rgba(0,0,0,0.22)',
+                padding: '28px 24px',
+                boxSizing: 'border-box',
+                overflowY: 'auto',
+                fontFamily: "'Montserrat', Arial, sans-serif"
+              }}
+            >
               <div
                 style={{
                   display: 'flex',
@@ -1000,7 +1033,7 @@ export default class KqCalendar
               )}
             </aside>
           </>,
-         document.body
+          document.body
         )}
       </section>
     );

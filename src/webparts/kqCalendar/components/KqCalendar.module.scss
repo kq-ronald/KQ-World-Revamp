@@ -99,6 +99,20 @@
   :global([data-kq-flat]) {
     display: contents !important;
   }
+  /* Reduce spacing beneath mobile Welcome Back */
+:global([data-kq-o="2"]) {
+  order: 2;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+  min-height: 0 !important;
+}
+
+/* Bring Calendar closer to Welcome Back */
+:global([data-kq-o="3"]) {
+  order: 3;
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
 
   /* Keep lower-priority SharePoint sections as actual flex items. */
   :global([data-kq-stack] > [data-kq-tail]) {
@@ -116,11 +130,13 @@
     padding-right: 16px;
   }
 
-  :global([data-kq-o="1"]) { order: 1; } /* Intranet banner */
-  :global([data-kq-o="2"]) { order: 2; } /* Calendar */
-  :global([data-kq-o="3"]) { order: 3; } /* Upcoming events */
-  :global([data-kq-o="4"]) { order: 4; } /* Online processes */
-  :global([data-kq-o="5"]) { order: 5; } /* Quick actions */
-  :global([data-kq-o="6"]) { order: 6; } /* Company news */
-  :global([data-kq-o="9"]) { order: 9; } /* Anything else */
+ /* Replace the existing data-kq-o ordering lines INSIDE your mobile @media block. */
+:global([data-kq-o="1"]) { order: 1; }
+:global([data-kq-o="2"]) { order: 2; }
+:global([data-kq-o="3"]) { order: 3; }
+:global([data-kq-o="4"]) { order: 4; }
+:global([data-kq-o="5"]) { order: 5; }
+:global([data-kq-o="6"]) { order: 6; }
+:global([data-kq-o="7"]) { order: 7; }
+:global([data-kq-o="9"]) { order: 9; }
 }

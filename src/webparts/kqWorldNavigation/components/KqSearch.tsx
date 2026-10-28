@@ -79,17 +79,21 @@ const KqSearch: React.FC<IKqSearchProps> = ({ context, variant, onFocus }) => {
     }
 
     const local = service.searchLocal(q, limit);
+    const direct = service.resolveShortcut(q);
+    if (direct && !local.results.some(item => item.url === direct.url)) local.results.unshift(direct);
     setResults(local.results);
     setRelated(local.related);
     setSuggestions(local.suggestions);
     setWarning('');
-    setStatus('loading');
+    setStatus(direct ? 'ready' : 'loading');
     setActive(-1);
+    // Known employee actions do not need a SharePoint round trip.
+    if (direct) return;
 
     try {
       const remote = await service.searchSharePoint(q, limit);
       if (id !== requestId.current) return; // a newer search replaced this one
-      setResults(service.merge(local.results, remote, limit));
+      setResults(service.merge(local.results, remote, limit, q));
       setStatus('ready');
     } catch (error) {
       if (id !== requestId.current) return;
@@ -112,7 +116,7 @@ const KqSearch: React.FC<IKqSearchProps> = ({ context, variant, onFocus }) => {
     }
     const timer = window.setTimeout(() => {
       runSearch(query, submitted ? SUBMITTED_LIMIT : PREVIEW_LIMIT).catch(() => undefined);
-    }, 250);
+    }, 400);
     return () => window.clearTimeout(timer);
   }, [query, submitted, runSearch]);
 
@@ -128,6 +132,8 @@ const KqSearch: React.FC<IKqSearchProps> = ({ context, variant, onFocus }) => {
   };
 
   const pickPhrase = (phrase: string): void => {
+    const direct = service.resolveShortcut(phrase);
+    if (direct) { openResult(direct); return; }
     setQuery(phrase);
     setSubmitted(false);
     setOpen(true);
@@ -136,9 +142,12 @@ const KqSearch: React.FC<IKqSearchProps> = ({ context, variant, onFocus }) => {
 
   const submit = (): void => {
     if (!query.trim()) return;
+    const direct = service.resolveShortcut(query);
+    if (direct) { openResult(direct); return; }
     setSubmitted(true);
     setOpen(true);
-    runSearch(query, SUBMITTED_LIMIT).catch(() => undefined);
+    // Effect below runs the submitted search once, avoiding duplicate API calls.
+    if (submitted) runSearch(query, SUBMITTED_LIMIT).catch(() => undefined);
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
@@ -285,7 +294,9 @@ const KqSearch: React.FC<IKqSearchProps> = ({ context, variant, onFocus }) => {
         value={query}
         onFocus={() => {
           setOpen(true);
-          service.preload().catch(() => undefined);
+          service.preload().then(() => {
+              if (inputRef.current?.value.trim()) runSearch(inputRef.current.value, submitted ? SUBMITTED_LIMIT : PREVIEW_LIMIT).catch(() => undefined);
+            }).catch(() => undefined);
           if (onFocus) onFocus();
         }}
         onChange={e => {

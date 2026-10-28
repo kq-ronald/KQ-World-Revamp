@@ -13,15 +13,15 @@ export const navigationItems: INavigationItem[] = [
     children: [
       {
         title: 'Dashboard',
-        url: '#'
+        url: '#kq-dashboard'
       },
       {
-        title: 'My Feed',
-        url: '#'
+        title: 'KQ Moments',
+        url: '#kq-moments'
       },
       {
-        title: 'Notifications',
-        url: '#'
+        title: 'Viva Engage',
+        url: '#kq-viva-engage'
       }
     ]
   },
@@ -140,23 +140,25 @@ export const navigationItems: INavigationItem[] = [
     ]
   },
 
+
   {
     title: 'Corporate News',
     children: [
       {
         title: 'The Pride Newsletter',
-        url: 'https://kenyaairwaysplc.sharepoint.com/homepage/SitePages/THE%20PRIDE%20014.aspx'
+        url: '?kqView=news&type=pride'
       },
       {
         title: 'Take 3',
-        url: 'https://kenyaairwaysplc.sharepoint.com/homepage/SitePages/Forms/AllPages.aspx'
+        url: '?kqView=news&type=take3'
       },
       {
         title: 'KQ Blog',
-        url: 'https://corporate.kenya-airways.com/en/press-room/kq-blog/'
+        url: '?kqView=news&type=blog'
       }
     ]
   },
+
 
   {
     title: 'Knowledge Hub',

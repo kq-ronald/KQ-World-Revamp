@@ -276,6 +276,18 @@ export default class KqCompanyNews
           false
       });
 
+      // Render cards immediately, then enhance covers in the background.
+      // The homepage only displays three Take 3 cards at a time.
+      void this._newsService.getTake3CoverImages(result.take3.slice(0, 3))
+        .then(covers => {
+          this.setState(previous => ({
+            take3: previous.take3.map(item =>
+              covers[item.id] ? { ...item, imageUrl: covers[item.id] } : item
+            )
+          }));
+        })
+        .catch(error => console.warn('Take 3 cover loading failed', error));
+
     } catch (error) {
       console.error(
         'KQ Company News error:',
@@ -1110,6 +1122,8 @@ export default class KqCompanyNews
                     item.imageUrl
                   }
                   alt=""
+                  loading="lazy"
+                  decoding="async"
                   className={
                     styles
                       .cardImageElement
@@ -1386,43 +1400,20 @@ export default class KqCompanyNews
           styles.prideCard
         }
       >
-        <div
-          className={
-            styles.prideArtwork
-          }
-        >
-          <div
-            className={
-              styles.prideEyebrow
-            }
-          >
-            QUARTERLY NEWSLETTER
-          </div>
-
-          <div
-            className={
-              styles.prideLogoText
-            }
-          >
-            The
-            <br />
-            Pride
-          </div>
-
-          {
-            item.issueNumber && (
-              <div
-                className={
-                  styles.issueNumber
-                }
-              >
-                Issue No.{' '}
-                {
-                  item.issueNumber
-                }
+        <div className={styles.prideArtwork}>
+          <>
+            <div className={styles.prideEyebrow}>
+              QUARTERLY NEWSLETTER
+            </div>
+            <div className={styles.prideLogoText}>
+              The<br />Pride
+            </div>
+            {item.issueNumber && (
+              <div className={styles.issueNumber}>
+                Issue No. {item.issueNumber}
               </div>
-            )
-          }
+            )}
+          </>
         </div>
 
         <div
